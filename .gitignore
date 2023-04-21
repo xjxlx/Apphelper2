@@ -1,7 +1,6 @@
 /build
 # Project exclude paths
 /.gradle/
-/src/
 /.idea/.gitignore
 /.idea/gradle.xml
 /.idea/misc.xml
