@@ -2,14 +2,15 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
 }
+def configCompile = rootProject.ext.android
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion configCompile.compileSdkVersion
+    buildToolsVersion configCompile.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 29
+        minSdkVersion configCompile.minSdkVersion
+        targetSdkVersion configCompile.targetSdkVersion
 
         consumerProguardFiles "consumer-rules.pro"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
