@@ -55,7 +55,7 @@ class FileUtils : ApplicationCheck() {
         } else {
             val path = getSdTypePublicPath(this, Environment.DIRECTORY_DOCUMENTS)
             if (TextUtils.isEmpty(path)) {
-                rootPath = getRootPath(context, Build.VERSION_CODES.R)
+                rootPath = getRootPath(context)
             }
         }
         return rootPath
