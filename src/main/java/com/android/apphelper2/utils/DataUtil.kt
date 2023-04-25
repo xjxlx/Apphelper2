@@ -5,6 +5,8 @@ import java.util.*
 
 object DataUtil {
 
+    const val YYYY_MM_DD_HH_MM_SS = "yyyy_MM_dd_HH_mm_ss"
+
     /**
      * 例子：yyyy_MM_dd_HH_mm_ss，或者用 {@link Pattern}
      */

@@ -65,7 +65,7 @@ class LogWriteUtil(private val fileName: String) : ApplicationCheck() {
                 }
 
                 // 获取当前的时间
-                val currentDateStr = DataUtil.format(Pattern.YYYY_MM_DD_HH_MM_SS)
+                val currentDateStr = DataUtil.format(DataUtil.YYYY_MM_DD_HH_MM_SS)
                 if (!mIsFirstWrite) {
                     value = "\n-----------------   $currentDateStr 重新开始   -----------------\n"
                     mIsFirstWrite = true

@@ -27,9 +27,9 @@ class NotificationUtil(private val context: Context) {
     private var mCustomListener: CustomViewCallBackListener? = null
     private var mLoopListener: LoopCallBackListener? = null
     private var mScope = CoroutineScope(Dispatchers.IO)
-    private val notificationId = 100
     private var paddingRequestCode = 100
 
+    var notificationId = 100
     var notificationAutoCancel: Boolean = true // 设置是否点击取消，true:自动取消，false：侧滑不会删除
     var paddingActivity: Intent? = null // 点击notification 跳转的页面
     var contentTitle: String = "" // title
