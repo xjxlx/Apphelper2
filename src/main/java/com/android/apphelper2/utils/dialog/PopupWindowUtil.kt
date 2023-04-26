@@ -18,6 +18,7 @@ class PopupWindowUtil {
     var builder: Builder? = null
 
     constructor(builder: Builder) {
+        this.builder = builder
         LogUtil.e("----->###  constructor")
         init(builder)
     }
@@ -202,16 +203,6 @@ class PopupWindowUtil {
                         }
                     }
                 }
-            }
-        }
-    }
-
-    fun show(view: View) {
-        LogUtil.e("----->###  show")
-
-        popupWindow?.let { window ->
-            builder?.let {
-                window.showAtLocation(view, it.gravity, it.offsetX, it.offsetY)
             }
         }
     }
