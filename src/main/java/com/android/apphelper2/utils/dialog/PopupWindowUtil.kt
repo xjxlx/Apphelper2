@@ -14,6 +14,9 @@ import com.android.apphelper2.utils.LogUtil
 
 class PopupWindowUtil {
 
+    private var dismissListener: OnDismissListener? = null
+    private var showListener: OnShowListener? = null
+    private var viewCreatedListener: ViewCreatedListener? = null
     var popupWindow: PopupWindow? = null
     var builder: Builder? = null
 
@@ -131,6 +134,14 @@ class PopupWindowUtil {
             return this
         }
 
+        fun setCloseId(closeId: Int): Builder {
+            rootView?.let {
+                val view = it.findViewById<View>(closeId)
+                listCloseView.add(view)
+            }
+            return this
+        }
+
         fun <T : View> getView(id: Int): T? {
             return rootView?.findViewById(id)
         }
@@ -157,7 +168,7 @@ class PopupWindowUtil {
                     this.isOutsideTouchable = builder.canceledOnTouchOutside
                     // 设置PopupWindow可触摸
                     this.isTouchable = builder.isTouchable
-                    // 设置超出屏幕显示，默认为false,代表可以
+                    // 设置超出屏幕显示，默认为true,代表不可以
                     this.isClippingEnabled = builder.isClippingEnabled
 
                     // 点击外部是否关闭popupWindow
@@ -168,8 +179,8 @@ class PopupWindowUtil {
                     }
 
                     // 设置布局
-                    if (builder.rootView != null) {
-                        this.contentView = builder.rootView
+                    builder.rootView?.let { view ->
+                        this.contentView = view
                     }
                 }
 
@@ -199,6 +210,7 @@ class PopupWindowUtil {
                             if (builder?.rootView != null) {
                                 window.showAtLocation(builder?.rootView!!, it.gravity, it.offsetX, it.offsetY)
                                 showListener?.onShow(window)
+                                viewCreatedListener?.onViewCreated(builder?.rootView!!)
                             }
                         }
                     }
@@ -215,18 +227,22 @@ class PopupWindowUtil {
         fun onDismiss(popupWindow: PopupWindow)
     }
 
-    private var dismissListener: OnDismissListener? = null
-    fun setDismissListener(dismissListener: OnDismissListener) {
-        this.dismissListener = dismissListener
-    }
-
     interface OnShowListener {
         fun onShow(popupWindow: PopupWindow)
     }
 
-    private var showListener: OnShowListener? = null
-    fun setShowListener(listener: OnShowListener) {
-        this.showListener = listener
+    fun setDismissListener(dismissListener: OnDismissListener): PopupWindowUtil {
+        this.dismissListener = dismissListener
+        return this
     }
 
+    fun setShowListener(listener: OnShowListener): PopupWindowUtil {
+        this.showListener = listener
+        return this
+    }
+
+    fun setViewCreatedListener(listener: ViewCreatedListener): PopupWindowUtil {
+        this.viewCreatedListener = listener
+        return this
+    }
 }
