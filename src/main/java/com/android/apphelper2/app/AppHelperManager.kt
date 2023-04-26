@@ -15,6 +15,7 @@ object AppHelperManager {
         return@lazy context.packageName
     }
 
+    @JvmStatic
     fun init(app: Application) {
         context = app
         if (!this::context.isInitialized) {
