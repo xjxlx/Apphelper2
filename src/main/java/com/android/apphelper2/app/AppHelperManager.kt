@@ -15,13 +15,19 @@ object AppHelperManager {
         return@lazy context.packageName
     }
 
+    @JvmOverloads
     @JvmStatic
-    fun init(app: Application) {
+    fun init(app: Application, repeat: Boolean = false) {
         context = app
         if (!this::context.isInitialized) {
             throw java.lang.NullPointerException("context is not initialized !")
         }
-        initLogger()
+
+        // 避免和apphelper 重复初始化
+        if (!repeat) {
+            initLogger()
+        }
+
     }
 
     private fun initLogger() {
