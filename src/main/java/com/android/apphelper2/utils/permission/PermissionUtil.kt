@@ -18,7 +18,6 @@ class PermissionUtil private constructor() {
 
     class PermissionActivity(private val activity: FragmentActivity) {
         private var permission: String = ""
-        private var rationaleCallBackListener: PermissionRationaleCallBackListener? = null
         private var callBackListener: PermissionCallBackListener? = null
         private var multipleCallBackListener: PermissionMultipleCallBackListener? = null
 
@@ -55,7 +54,6 @@ class PermissionUtil private constructor() {
         fun shouldShow(permission: String, listener: PermissionRationaleCallBackListener): Boolean {
             this.permission = permission
             var result = false
-            this.rationaleCallBackListener = listener
             if (!TextUtils.isEmpty(permission)) {
                 result = shouldShowRequestPermissionRationale(activity, permission)
             }
@@ -91,7 +89,6 @@ class PermissionUtil private constructor() {
 
     class PermissionFragment(private val fragment: Fragment) {
         private var permission: String = ""
-        private var rationaleCallBackListener: PermissionRationaleCallBackListener? = null
         private var callBackListener: PermissionCallBackListener? = null
         private var multipleCallBackListener: PermissionMultipleCallBackListener? = null
 
@@ -123,7 +120,6 @@ class PermissionUtil private constructor() {
         fun shouldShow(permission: String, listener: PermissionRationaleCallBackListener): Boolean {
             this.permission = permission
             var result = false
-            this.rationaleCallBackListener = listener
             if (!TextUtils.isEmpty(permission)) {
                 if (fragment.context != null) {
                     if (fragment.activity != null) {
