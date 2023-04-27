@@ -97,11 +97,6 @@ class PermissionUtil private constructor() {
 
         private val registerResult: ActivityResultLauncher<String> =
             fragment.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-                if (isGranted) {
-                    LogUtil.e(TAG, "请求到了 $permission 权限 !")
-                } else {
-                    LogUtil.e(TAG, "没有请求到 $permission 权限 !")
-                }
                 callBackListener?.onCallBack(permission, isGranted)
             }
 
