@@ -15,6 +15,7 @@ object AppHelperManager {
         return@lazy context.packageName
     }
 
+    @JvmOverloads
     @JvmStatic
     fun init(app: Application, repeat: Boolean = false) {
         context = app
