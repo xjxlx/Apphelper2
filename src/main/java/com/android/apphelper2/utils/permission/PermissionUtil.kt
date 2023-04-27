@@ -116,10 +116,8 @@ class PermissionUtil private constructor() {
             this.permission = permission
             var result = false
             if (!TextUtils.isEmpty(permission)) {
-                if (fragment.context != null) {
-                    if (fragment.activity != null) {
-                        result = shouldShowRequestPermissionRationale(fragment.requireActivity(), permission)
-                    }
+                if (fragment.activity != null) {
+                    result = shouldShowRequestPermissionRationale(fragment.requireActivity(), permission)
                 }
             }
             listener.onCallBack(permission, result)
