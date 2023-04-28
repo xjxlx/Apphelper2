@@ -4,9 +4,9 @@ import android.text.TextUtils
 
 object StringUtil {
 
-    fun isEmpty(s: String, block: (String) -> Unit) {
+    fun isEmpty(s: String?, block: (String) -> Unit) {
         if (!TextUtils.isEmpty(s)) {
-            block(s)
+            block(s!!)
         }
     }
 
