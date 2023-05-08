@@ -20,10 +20,8 @@ class ServiceUtil {
         mContext = context
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(intent)
-            LogUtil.e("开启了前台的服务！")
         } else {
             context.startService(intent)
-            LogUtil.e("开启了后台的服务！")
         }
     }
 
