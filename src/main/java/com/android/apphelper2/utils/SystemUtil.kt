@@ -9,6 +9,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
+import android.text.TextUtils
+import android.view.accessibility.AccessibilityManager
 import androidx.annotation.RequiresApi
 import com.android.apphelper2.app.AppHelperManager.packageName
 
@@ -17,7 +19,7 @@ object SystemUtil {
     /**
      * 跳转到应用的设置页面
      */
-    fun jumpApplicationSetting(context: Context) {
+    fun openApplicationSetting(context: Context) {
         try {
             val intent = Intent()
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -84,7 +86,7 @@ object SystemUtil {
     /**
      * 跳转到指定应用的首页
      */
-    fun showActivity(context: Context, packageName: String) {
+    fun openAppHomePage(context: Context, packageName: String) {
         val intent: Intent? = context.packageManager.getLaunchIntentForPackage(packageName)
         if (intent != null) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -95,10 +97,12 @@ object SystemUtil {
     /**
      * 跳转到指定应用的指定页面
      */
-    fun showActivity(context: Context, packageName: String, activityDir: String) {
+    fun openSpecifiedPage(context: Context, packageName: String, activityDir: String) {
         val intent = Intent()
         intent.component = ComponentName(packageName, activityDir)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
     }
+
+
 }
