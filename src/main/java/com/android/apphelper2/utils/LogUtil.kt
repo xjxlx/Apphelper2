@@ -126,6 +126,5 @@ object LogUtil : ApplicationCheck() {
             Logger.xml(value)
         }
     }
-
 }
 

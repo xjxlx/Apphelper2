@@ -13,19 +13,16 @@ import android.widget.RemoteViews
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class NotificationUtil(val context: Context) {
 
     private val mManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     var channelName: String = context.packageName // 渠道名字
     var channelId: String = context.packageName // 需要保持唯一
-    private var mScope = CoroutineScope(Dispatchers.Main)
+    private var mScope = CoroutineScope(Dispatchers.IO)
+    private val mNotificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(context, channelId)// notification builder
 
-    val mNotificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(context, channelId)// notification builder
     var mCustomListener: CustomViewCallBackListener? = null
     var mLoopListener: LoopCallBackListener? = null
     var paddingRequestCode = 100
@@ -57,6 +54,7 @@ class NotificationUtil(val context: Context) {
     var channelImportance: Int = NotificationManager.IMPORTANCE_DEFAULT // 渠道的优先级
     var notification: Notification? = null
     var notificationGroupKey: String = ""
+    private var mServiceSet: HashSet<Service> = hashSetOf()
 
     fun createNotification(): NotificationUtil {
         if (smallIcon == 0) {
@@ -129,6 +127,8 @@ class NotificationUtil(val context: Context) {
 
     @RequiresPermission(anyOf = [Manifest.permission.FOREGROUND_SERVICE])
     fun startForeground(service: Service, loop: Boolean = false, interval: Long = 0) {
+        mServiceSet.add(service)
+
         notification?.let { notification ->
             if (loop) {
                 mScope.launch {
@@ -191,6 +191,23 @@ class NotificationUtil(val context: Context) {
             intent.putExtra("app_uid", context.applicationInfo.uid)
         }
         context.startActivity(intent)
+    }
+
+    fun stopLoop() {
+        mScope.cancel()
+        if (mServiceSet.size > 0) {
+            for (item in mServiceSet) {
+                item.stopForeground(true)
+            }
+        }
+    }
+
+    fun cancelNotification(id: Int) {
+        mManager.cancel(id)
+    }
+
+    fun cancelNotificationAll() {
+        mManager.cancelAll()
     }
 
     /**
