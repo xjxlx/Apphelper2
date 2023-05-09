@@ -193,7 +193,7 @@ class NotificationUtil(val context: Context) {
         context.startActivity(intent)
     }
 
-    fun stopLoop() {
+    fun stopForeground() {
         mScope.cancel()
         if (mServiceSet.size > 0) {
             for (item in mServiceSet) {
