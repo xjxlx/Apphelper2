@@ -1,6 +1,7 @@
 package com.android.apphelper2.utils
 
 import android.Manifest
+import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Context
 import android.content.Intent
@@ -11,9 +12,19 @@ import android.view.accessibility.AccessibilityManager
 import androidx.core.app.ActivityCompat
 
 class AccessibilityUtil(val context: Context) {
+    companion object {
+        const val TAG = "accessibility: "
+    }
 
     private val mManager: AccessibilityManager by lazy {
         return@lazy context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+    }
+    private val mServiceUtil = ServiceUtil()
+    private val mIntent: Intent by lazy {
+        return@lazy Intent(context, AccessibilityService::class.java)
+    }
+    private val mServiceId: String by lazy {
+        return@lazy getAccessibilityServiceId(AccessibilityService::class.java)
     }
 
     /**
@@ -78,7 +89,7 @@ class AccessibilityUtil(val context: Context) {
      * 强制开启 accessibility service
      */
     fun forceEnableAccessibility(serviceId: String): Boolean {
-        var result: Boolean = false
+        var result = false
         try {
             val hasPermission =
                 ActivityCompat.checkSelfPermission(context, Manifest.permission.WRITE_SECURE_SETTINGS) == PackageManager.PERMISSION_GRANTED
@@ -89,9 +100,39 @@ class AccessibilityUtil(val context: Context) {
                 result = true
             }
         } catch (e: IllegalStateException) {
-            LogUtil.e("强制开启失败：" + e.message)
+            LogUtil.e(TAG, "强制开启失败：" + e.message)
         }
         return result
+    }
+
+    fun startAccessibility() {
+        if (!mServiceUtil.isServiceRunning(context, AccessibilityService::class.java)) {
+            mServiceUtil.startService(context, mIntent)
+            LogUtil.e(TAG, "开启无障碍服务")
+        } else {
+            LogUtil.e(TAG, "无障碍服务正在运行中！")
+        }
+
+        val installAccessibility = isInstallAccessibility(mServiceId)
+        LogUtil.e(TAG, "无障碍服务是否安装了: $installAccessibility")
+
+        val accessibilityEnabled = accessibilityEnabled(mServiceId)
+        LogUtil.e(TAG, "无障碍服务是否可用: $accessibilityEnabled")
+
+        if (!accessibilityEnabled) {
+            LogUtil.e(TAG, "无障碍功能不可用，尝试强制开启！ ")
+            val enableAccessibility = forceEnableAccessibility(mServiceId)
+            LogUtil.e(TAG, "强制开启成功：$enableAccessibility")
+            if (!enableAccessibility) {
+                LogUtil.e(TAG,
+                    "强制开启失败，请手动开启，或者使用adb命令开启： adb shell pm grant com.android.accessibility android.permission.WRITE_SECURE_SETTINGS ")
+            }
+        }
+    }
+
+    fun stopAccessibility() {
+        context.stopService(mIntent)
+        LogUtil.e(TAG, "停止了无障碍服务")
     }
 }
 
