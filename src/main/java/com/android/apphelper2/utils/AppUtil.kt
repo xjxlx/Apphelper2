@@ -2,7 +2,7 @@ package com.android.apphelper2.utils
 
 import android.content.Context
 
-class AppUtil {
+object AppUtil {
 
     /**
      * 通过context去获取完整的包名
