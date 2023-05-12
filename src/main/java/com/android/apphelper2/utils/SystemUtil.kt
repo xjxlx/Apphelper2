@@ -1,5 +1,6 @@
 package com.android.apphelper2.utils
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ComponentName
@@ -9,9 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import android.text.TextUtils
-import android.view.accessibility.AccessibilityManager
-import androidx.annotation.RequiresApi
+import androidx.annotation.RequiresPermission
 import com.android.apphelper2.app.AppHelperManager.packageName
 
 object SystemUtil {
@@ -68,18 +67,17 @@ object SystemUtil {
     /**
      * 申请白名单
      */
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    fun requestIgnoreBatteryOptimizations(activity: Activity?) {
-        if (activity != null) {
-            try {
-                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                intent.data = Uri.parse("package:" + activity.packageName)
-                activity.startActivity(intent)
-                activity.startActivityForResult(intent, 100)
-            } catch (e: java.lang.Exception) {
-                e.printStackTrace()
-            }
+    @SuppressLint("BatteryLife")
+    @RequiresPermission(anyOf = [Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS])
+    fun requestIgnoreBatteryOptimizations(activity: Activity) {
+        try {
+            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            intent.data = Uri.parse("package:" + activity.packageName)
+            activity.startActivity(intent)
+            activity.startActivityForResult(intent, 100)
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -103,6 +101,4 @@ object SystemUtil {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
     }
-
-
 }
