@@ -140,7 +140,7 @@ class NotificationUtil(val context: Context) {
                 // 先取消，后开始
                 mJobLoop?.cancel()
                 mJobLoop = mScope.launch {
-                    repeat(Int.MAX_VALUE) {
+                    while (true) {
                         service.startForeground(notificationId, notification)
                         mLoopListener?.onLoop()
                         delay(interval)
@@ -158,7 +158,7 @@ class NotificationUtil(val context: Context) {
             if (loop) {
                 mJobSingle?.cancel()
                 mJobSingle = mScope.launch {
-                    repeat(Int.MAX_VALUE) {
+                    while (true) {
                         mManager.notify(notificationId, notification)
                         mLoopListener?.onLoop()
                         delay(interval)
@@ -208,6 +208,7 @@ class NotificationUtil(val context: Context) {
                 item.stopForeground(true)
             }
         }
+        mManager.cancelAll()
         mJobLoop?.cancel()
         mScope.cancel()
     }
