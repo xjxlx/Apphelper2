@@ -203,24 +203,24 @@ class NotificationUtil(val context: Context) {
     }
 
     fun stopForeground() {
-        mJobLoop?.cancel()
-        mScope.cancel()
         if (mServiceSet.size > 0) {
             for (item in mServiceSet) {
                 item.stopForeground(true)
             }
         }
+        mJobLoop?.cancel()
+        mScope.cancel()
     }
 
     fun cancelNotification(id: Int) {
-        mJobSingle?.cancel()
         mManager.cancel(id)
+        mJobSingle?.cancel()
         mScope.cancel()
     }
 
     fun cancelNotificationAll() {
-        mJobSingle?.cancel()
         mManager.cancelAll()
+        mJobSingle?.cancel()
         mScope.cancel()
     }
 
