@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/dp_10"
+    android:paddingVertical="@dimen/dp_10">
+
+    <ImageView
+        android:id="@+id/iv_icon"
+        android:layout_width="@dimen/dp_20"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|center"
+        android:adjustViewBounds="true"
+        android:src="@mipmap/ic_launcher" />
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="@dimen/dp_10"
+        android:layout_toEndOf="@+id/iv_icon"
+        android:textColor="#000000"
+        android:textSize="@dimen/sp_15"
+        android:textStyle="bold"
+        tools:text="标题" />
+
+    <TextView
+        android:id="@+id/tv_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/tv_title"
+        android:layout_alignBottom="@+id/tv_title"
+        android:layout_gravity="center"
+        android:layout_marginStart="@dimen/dp_10"
+        android:layout_toEndOf="@+id/tv_title"
+        android:gravity="center"
+        android:textSize="@dimen/sp_10"
+        tools:ignore="SmallSp"
+        tools:text="10:32:33" />
+
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/iv_icon"
+        android:layout_alignStart="@+id/tv_title"
+        android:layout_marginTop="@dimen/dp_5"
+        android:gravity="center"
+        android:textSize="@dimen/sp_12"
+        tools:text="内容" />
+
+</RelativeLayout>
