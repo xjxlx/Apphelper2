@@ -17,7 +17,9 @@ import kotlinx.coroutines.*
 
 class NotificationUtil(val context: Context) {
 
-    private val mManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private val mManager by lazy {
+        return@lazy context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    }
     var channelName: String = context.packageName // 渠道名字
     var channelId: String = context.packageName // 需要保持唯一
     private var mScope = CoroutineScope(Dispatchers.IO)
