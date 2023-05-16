@@ -55,6 +55,8 @@ class NotificationUtil(val context: Context) {
     var notification: Notification? = null
     var notificationGroupKey: String = ""
     private var mServiceSet: HashSet<Service> = hashSetOf()
+    private var mJobLoop: Job? = null
+    private var mJobSingle: Job? = null
 
     fun createNotification(): NotificationUtil {
         if (smallIcon == 0) {
@@ -131,7 +133,9 @@ class NotificationUtil(val context: Context) {
 
         notification?.let { notification ->
             if (loop) {
-                mScope.launch {
+                // 先取消，后开始
+                mJobLoop?.cancel()
+                mJobLoop = mScope.launch {
                     repeat(Int.MAX_VALUE) {
                         service.startForeground(notificationId, notification)
                         mLoopListener?.onLoop()
@@ -148,7 +152,8 @@ class NotificationUtil(val context: Context) {
     fun sendNotification(loop: Boolean = false, interval: Long = 0) {
         notification?.let { notification ->
             if (loop) {
-                mScope.launch {
+                mJobSingle?.cancel()
+                mJobSingle = mScope.launch {
                     repeat(Int.MAX_VALUE) {
                         mManager.notify(notificationId, notification)
                         mLoopListener?.onLoop()
