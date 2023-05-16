@@ -10,11 +10,13 @@ import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
 import android.widget.RemoteViews
+import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.*
 
+@RequiresApi(Build.VERSION_CODES.P)
 class NotificationUtil(val context: Context) {
 
     private val mManager by lazy {
