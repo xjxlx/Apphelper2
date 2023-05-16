@@ -203,6 +203,7 @@ class NotificationUtil(val context: Context) {
     }
 
     fun stopForeground() {
+        mJobLoop?.cancel()
         mScope.cancel()
         if (mServiceSet.size > 0) {
             for (item in mServiceSet) {
@@ -212,11 +213,15 @@ class NotificationUtil(val context: Context) {
     }
 
     fun cancelNotification(id: Int) {
+        mJobSingle?.cancel()
         mManager.cancel(id)
+        mScope.cancel()
     }
 
     fun cancelNotificationAll() {
+        mJobSingle?.cancel()
         mManager.cancelAll()
+        mScope.cancel()
     }
 
     /**
