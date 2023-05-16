@@ -141,7 +141,7 @@ class NotificationUtil(val context: Context) {
                 mJobLoop?.cancel()
                 mJobLoop = mScope.launch {
                     while (true) {
-                        LogUtil.e("notification", "notification --- stopForeground")
+                        LogUtil.e("notification", "notification --- startForeground")
                         service.startForeground(notificationId, notification)
                         mLoopListener?.onLoop()
                         delay(interval)
