@@ -2,6 +2,7 @@ package com.android.apphelper2.utils
 
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.annotation.DimenRes
 import androidx.annotation.StringRes
 import com.android.apphelper2.app.AppHelperManager
 
@@ -21,6 +22,19 @@ object ResourcesUtil {
                 return ""
             }
         return ""
+    }
+
+    fun getDimension(context: Context, @DimenRes id: Int): Float {
+        kotlin.runCatching {
+            context.resources.getDimension(id)
+        }
+            .onSuccess {
+                return it
+            }
+            .onFailure {
+                return 0f
+            }
+        return 0f
     }
 
     fun getStringForReflect(context: Context, id: String): String {
