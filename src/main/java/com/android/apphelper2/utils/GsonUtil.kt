@@ -3,7 +3,7 @@ package com.android.apphelper2.utils
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class GsonUtil {
+object GsonUtil {
 
     val mGson: Gson by lazy {
         return@lazy Gson()
