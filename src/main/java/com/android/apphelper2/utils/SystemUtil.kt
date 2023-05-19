@@ -17,7 +17,7 @@ import android.provider.Settings
 import android.text.TextUtils
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
-import com.android.apphelper2.app.AppHelperManager.packageName
+import com.android.apphelper2.app.AppHelperManager.mPackageName
 
 object SystemUtil {
 
@@ -169,7 +169,7 @@ object SystemUtil {
             val intent = Intent()
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             intent.action = "android.settings.APPLICATION_DETAILS_SETTINGS"
-            intent.data = Uri.fromParts("package", packageName, null)
+            intent.data = Uri.fromParts("package", mPackageName, null)
             context.startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()

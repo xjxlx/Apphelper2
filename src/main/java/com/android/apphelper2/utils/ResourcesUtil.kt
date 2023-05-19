@@ -59,7 +59,7 @@ object ResourcesUtil {
     fun getStringMetaData(context: Context, key: String): String {
         var result: String = ""
         try {
-            val metaData = context.packageManager.getApplicationInfo(AppHelperManager.packageName, PackageManager.GET_META_DATA).metaData
+            val metaData = context.packageManager.getApplicationInfo(AppHelperManager.mPackageName, PackageManager.GET_META_DATA).metaData
             if (metaData != null) {
                 val value = metaData.getString(key)
                 result = value ?: ""
