@@ -10,14 +10,18 @@ import android.os.Build
 import android.provider.Settings
 import android.text.TextUtils
 import android.widget.RemoteViews
+import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.*
 
+@RequiresApi(Build.VERSION_CODES.P)
 class NotificationUtil(val context: Context) {
 
-    private val mManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private val mManager by lazy {
+        return@lazy context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    }
     var channelName: String = context.packageName // 渠道名字
     var channelId: String = context.packageName // 需要保持唯一
     private var mScope = CoroutineScope(Dispatchers.IO)
@@ -55,6 +59,8 @@ class NotificationUtil(val context: Context) {
     var notification: Notification? = null
     var notificationGroupKey: String = ""
     private var mServiceSet: HashSet<Service> = hashSetOf()
+    private var mJobLoop: Job? = null
+    private var mJobSingle: Job? = null
 
     fun createNotification(): NotificationUtil {
         if (smallIcon == 0) {
@@ -131,8 +137,11 @@ class NotificationUtil(val context: Context) {
 
         notification?.let { notification ->
             if (loop) {
-                mScope.launch {
-                    repeat(Int.MAX_VALUE) {
+                // 先取消，后开始
+                mJobLoop?.cancel()
+                mJobLoop = mScope.launch {
+                    while (true) {
+                        LogUtil.e("notification", "notification --- startForeground")
                         service.startForeground(notificationId, notification)
                         mLoopListener?.onLoop()
                         delay(interval)
@@ -148,8 +157,10 @@ class NotificationUtil(val context: Context) {
     fun sendNotification(loop: Boolean = false, interval: Long = 0) {
         notification?.let { notification ->
             if (loop) {
-                mScope.launch {
-                    repeat(Int.MAX_VALUE) {
+                mJobSingle?.cancel()
+                mJobSingle = mScope.launch {
+                    while (true) {
+                        LogUtil.e("notification", "notification --- sendNotification")
                         mManager.notify(notificationId, notification)
                         mLoopListener?.onLoop()
                         delay(interval)
@@ -194,20 +205,29 @@ class NotificationUtil(val context: Context) {
     }
 
     fun stopForeground() {
-        mScope.cancel()
+        LogUtil.e("notification", "notification --- stopForeground")
         if (mServiceSet.size > 0) {
             for (item in mServiceSet) {
                 item.stopForeground(true)
             }
         }
+        mManager.cancelAll()
+        mJobLoop?.cancel()
+        mScope.cancel()
     }
 
     fun cancelNotification(id: Int) {
+        LogUtil.e("notification", "notification --- cancelNotification")
         mManager.cancel(id)
+        mJobSingle?.cancel()
+        mScope.cancel()
     }
 
     fun cancelNotificationAll() {
+        LogUtil.e("notification", "notification --- cancelNotificationAll")
         mManager.cancelAll()
+        mJobSingle?.cancel()
+        mScope.cancel()
     }
 
     /**
