@@ -1,30 +1,30 @@
 package com.android.apphelper2.utils
 
+import android.content.Context
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import com.android.apphelper2.app.AppHelperManager
 import java.io.File
 import java.io.FileOutputStream
 import java.io.PrintStream
 
-/**
- * 日志写入工具
- */
-class LogWriteUtil(private val fileName: String) : ApplicationCheck() {
+class LogWriteUtil(private val context: Context, private val fileName: String) {
+
+    private var mNumber = 0
+    private var mIsFirstWrite = false  // is first write
 
     private val mRootPath: String by lazy {
-        return@lazy FileUtils.instance.getRootPath(AppHelperManager.context)
+        val filesDir = context.filesDir
+        return@lazy filesDir.path
     }
-    private val mFileName: String by lazy {
-        return@lazy FileUtils.instance.getFileName(fileName)
+    private val mFile: File? by lazy {
+        return@lazy checkFile()
     }
-    private var mFile: File? = null
-    private var mNumber = 0 // 每一行的编号
-    private var printStream: PrintStream? = null
-    private var mIsFirstWrite = false  // 是否首次写入收据
+    private val mPrintStream: PrintStream? by lazy {
+        return@lazy PrintStream(FileOutputStream(mFile, true)) // 追加文件
+    }
 
     init {
         runCatching {
@@ -44,7 +44,7 @@ class LogWriteUtil(private val fileName: String) : ApplicationCheck() {
             val parentFile = FileUtils.instance.mkdirs(mRootPath, datePath)
             LogUtil.e("create parent file ：$parentFile")
             if (parentFile != null) {
-                result = FileUtils.instance.createFile(parentFile.path, mFileName)
+                result = FileUtils.instance.createFile(parentFile.path, fileName)
             }
         }.onFailure {
             it.printStackTrace()
@@ -56,28 +56,20 @@ class LogWriteUtil(private val fileName: String) : ApplicationCheck() {
     fun write(content: String) {
         var value: String
         runCatching {
-            if (mFile == null) {
-                mFile = checkFile()
-            }
-            if (mFile != null) {
-                if (printStream == null) {
-                    printStream = PrintStream(FileOutputStream(mFile, true)) // 追加文件
-                }
-
-                // 获取当前的时间
+            if (mFile != null && mPrintStream != null) {
                 val currentDateStr = DateUtil.format(DateUtil.YYYY_MM_DD_HH_MM_SS)
                 if (!mIsFirstWrite) {
                     value = "\n-----------------   $currentDateStr 重新开始   -----------------\n"
                     mIsFirstWrite = true
-                    printStream?.println(value)
+                    mPrintStream?.println(value)
                 }
 
                 value = "[ $currentDateStr ]【${++mNumber}】$content"
-                printStream?.println(value)
+                mPrintStream?.println(value)
             }
         }.onFailure {
             it.printStackTrace()
-            printStream?.close() // 关闭打印流
+            mPrintStream?.close()
             mIsFirstWrite = false
         }
     }
@@ -86,8 +78,7 @@ class LogWriteUtil(private val fileName: String) : ApplicationCheck() {
         fragment.lifecycle.addObserver(object : LifecycleEventObserver {
             override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
                 if (event == Lifecycle.Event.ON_DESTROY) {
-                    mFile = null
-                    printStream?.close() // 关闭打印流
+                    mPrintStream?.close()
                 }
             }
         })
@@ -97,12 +88,10 @@ class LogWriteUtil(private val fileName: String) : ApplicationCheck() {
         activity.lifecycle.addObserver(object : LifecycleEventObserver {
             override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
                 if (event == Lifecycle.Event.ON_DESTROY) {
-                    mFile = null
-                    printStream?.close() // 关闭打印流
+                    mPrintStream?.close()
                 }
             }
         })
     }
-
 }
 
