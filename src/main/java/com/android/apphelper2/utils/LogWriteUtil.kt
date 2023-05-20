@@ -10,15 +10,11 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.PrintStream
 
-class LogWriteUtil(private val context: Context, private val fileName: String) {
+class LogWriteUtil(private val fileName: String) {
 
     private var mNumber = 0
     private var mIsFirstWrite = false  // is first write
-
-    private val mRootPath: String by lazy {
-        val filesDir = context.filesDir
-        return@lazy filesDir.path
-    }
+    private var mRootPath: String = ""
     private val mFile: File? by lazy {
         return@lazy checkFile()
     }
@@ -26,8 +22,9 @@ class LogWriteUtil(private val context: Context, private val fileName: String) {
         return@lazy PrintStream(FileOutputStream(mFile, true)) // 追加文件
     }
 
-    init {
+    fun init(context: Context) {
         runCatching {
+            mRootPath = context.filesDir.path
             LogUtil.e("root path: $mRootPath")
             val mkdirsDate = FileUtils.instance.mkdirs(mRootPath)
             LogUtil.e("create root success ：${mkdirsDate != null}")
