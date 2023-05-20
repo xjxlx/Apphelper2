@@ -22,7 +22,7 @@ class LogWriteUtil(private val fileName: String) {
         return@lazy PrintStream(FileOutputStream(mFile, true)) // 追加文件
     }
 
-    fun init(context: Context) {
+    fun initWrite(context: Context) {
         runCatching {
             mRootPath = context.filesDir.path
             LogUtil.e("root path: $mRootPath")
