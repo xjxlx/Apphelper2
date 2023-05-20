@@ -23,11 +23,10 @@ object AppHelperManager {
             throw java.lang.NullPointerException("context is not initialized !")
         }
 
-        // 避免和apphelper 重复初始化
+        // 避免和appHelper 重复初始化
         if (!repeat) {
             initLogger()
         }
-
     }
 
     private fun initLogger() {
