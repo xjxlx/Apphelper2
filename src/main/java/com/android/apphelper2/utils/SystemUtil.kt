@@ -19,6 +19,10 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import com.android.apphelper2.app.AppHelperManager.mPackageName
 
+/**
+ * 使用这个工具类，大多的方法都会用到一个权限：
+ * <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+ */
 object SystemUtil {
 
     private const val TAG = "SystemUtil"
@@ -184,6 +188,22 @@ object SystemUtil {
     }
 
     /**
+     *【可用】
+     * 检测并打开悬浮窗
+     */
+    fun openOverlayWindowPermission(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(context)) {
+                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.packageName))
+                context.startActivity(intent)
+            } else {
+                // 已经获取了悬浮窗权限，可以在此进行操作了
+                LogUtil.e("已经拥有了悬浮窗的权限！")
+            }
+        }
+    }
+
+    /**
      * 跳转到指定应用的首页
      */
     fun openAppHomePage(context: Context, packageName: String) {
@@ -210,11 +230,9 @@ object SystemUtil {
     private fun toggleNotificationListenerService(context: Context, cls: Class<Service>) {
         val pm = context.packageManager
         // 先关闭，在打开
-        pm.setComponentEnabledSetting(ComponentName(context, cls), PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-            PackageManager.DONT_KILL_APP)
+        pm.setComponentEnabledSetting(ComponentName(context, cls), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
         LogUtil.e("强制关闭！")
-        pm.setComponentEnabledSetting(ComponentName(context, cls), PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-            PackageManager.DONT_KILL_APP)
+        pm.setComponentEnabledSetting(ComponentName(context, cls), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
         LogUtil.e("强制打开！")
     }
 
