@@ -152,6 +152,7 @@ object SystemUtil {
                 val intent = Intent(Intent.ACTION_MAIN)
                 intent.addCategory(Intent.CATEGORY_LAUNCHER)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
                 val cn = ComponentName(packageName, className)
                 intent.component = cn
                 context.startActivity(intent)
@@ -162,6 +163,7 @@ object SystemUtil {
     }
 
     /**
+     *【可用】
      * 跳转到应用的设置页面
      */
     fun openApplicationSetting(context: Context) {
