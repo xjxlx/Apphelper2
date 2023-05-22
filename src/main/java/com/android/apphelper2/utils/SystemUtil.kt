@@ -18,6 +18,10 @@ import android.text.TextUtils
 import androidx.annotation.RequiresPermission
 import com.android.apphelper2.app.AppHelperManager.mPackageName
 
+/**
+ * 使用这个工具类，大多的方法都会用到一个权限：
+ * <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+ */
 object SystemUtil {
 
     private const val TAG = "SystemUtil"
@@ -140,6 +144,14 @@ object SystemUtil {
     /**
      *【可用】
      * 打开指定的应用
+     * 注意：
+     *      有些应用无法被直接打开，例如：华为的平板
+     *      可以通过两个方式打开指定的应用
+     *      1：先打开自己的应用，只要自己的应用活着，别的应用就可以被打开，但是只限于activity的页面，后台和广播无法打开
+     *      2：打开设置
+     *          【设置】---> 【应用和服务】--->【应用启动管理】---> 【自己的应用】--->
+     *           ---> 切换为【自动管理】为【手动管理】
+     *           --->【允许自动启动】、【允许后台活动】、【允许管理启动】
      */
     @SuppressLint("QueryPermissionsNeeded")
     fun openApplication(context: Context, packageName: String) {
@@ -157,6 +169,7 @@ object SystemUtil {
                 val intent = Intent(Intent.ACTION_MAIN)
                 intent.addCategory(Intent.CATEGORY_LAUNCHER)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
                 val cn = ComponentName(packageName, className)
                 intent.component = cn
                 context.startActivity(intent)
@@ -167,6 +180,7 @@ object SystemUtil {
     }
 
     /**
+     *【可用】
      * 跳转到应用的设置页面
      */
     fun openApplicationSetting(context: Context) {
@@ -183,6 +197,22 @@ object SystemUtil {
             context.startActivity(intent)
         } catch (e: java.lang.Exception) {
             LogUtil.e("跳转应用设置页面失败：" + e.message)
+        }
+    }
+
+    /**
+     *【可用】
+     * 检测并打开悬浮窗
+     */
+    fun openOverlayWindowPermission(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(context)) {
+                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.packageName))
+                context.startActivity(intent)
+            } else {
+                // 已经获取了悬浮窗权限，可以在此进行操作了
+                LogUtil.e("已经拥有了悬浮窗的权限！")
+            }
         }
     }
 
@@ -213,11 +243,9 @@ object SystemUtil {
     private fun toggleNotificationListenerService(context: Context, cls: Class<Service>) {
         val pm = context.packageManager
         // 先关闭，在打开
-        pm.setComponentEnabledSetting(ComponentName(context, cls), PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-            PackageManager.DONT_KILL_APP)
+        pm.setComponentEnabledSetting(ComponentName(context, cls), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
         LogUtil.e("强制关闭！")
-        pm.setComponentEnabledSetting(ComponentName(context, cls), PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-            PackageManager.DONT_KILL_APP)
+        pm.setComponentEnabledSetting(ComponentName(context, cls), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
         LogUtil.e("强制打开！")
     }
 

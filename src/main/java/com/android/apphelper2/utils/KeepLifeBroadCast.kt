@@ -51,6 +51,13 @@ object KeepLifeBroadCast {
         }
     }
 
+    fun sendAppKeepLifeReceiver(context: Context,packageName: String){
+        this.mPackageName = packageName
+        mKeepLifeIntent.putExtra("type", "life")
+        LogUtil.e("发出一个保活App的广播！")
+        context.sendBroadcast(mKeepLifeIntent)
+    }
+
     /**
      * 关闭监听
      */
