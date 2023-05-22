@@ -15,7 +15,6 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils
-import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import com.android.apphelper2.app.AppHelperManager.mPackageName
 
@@ -27,10 +26,16 @@ object SystemUtil {
      * 【可用】
      * @param packageName 指定的包名
      * 已安装时返回 true,不存在时返回 false
+     *
+     * 如果要使用这个方法，需要权限
+     * 1：{@link #Manifest.permission.QUERY_ALL_PACKAGES}
+     * 2：或者在清单文件中增加：
+     * <queries>
+     *      <!-- 如果想要与其他的应用进行AIDL通信的话，需要在这里注册包名的信息 -->
+     *      <package android:name="com.android.app.free.debug" />
+     *      <package android:name="com.android.poc" />
+     * </queries>
      */
-    @SuppressLint("QueryPermissionsNeeded")
-    @RequiresPermission(anyOf = [Manifest.permission.QUERY_ALL_PACKAGES])
-    @RequiresApi(Build.VERSION_CODES.N)
     fun appInstallApp(context: Context, packageName: String): Boolean {
         if (!TextUtils.isEmpty(packageName)) {
             val packageManager = context.packageManager
