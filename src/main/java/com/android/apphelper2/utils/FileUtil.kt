@@ -7,12 +7,12 @@ import android.text.TextUtils
 import java.io.File
 import java.util.*
 
-class FileUtils : ApplicationCheck() {
+class FileUtil : ApplicationCheck() {
 
     companion object {
-        private val TAG = FileUtils::class.java.simpleName
-        val instance: FileUtils by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
-            return@lazy FileUtils()
+        private val TAG = FileUtil::class.java.simpleName
+        val instance: FileUtil by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
+            return@lazy FileUtil()
         }
     }
 
@@ -31,7 +31,7 @@ class FileUtils : ApplicationCheck() {
      * [Environment.DIRECTORY_DOCUMENTS].
      * @return 获取SD卡下，指定公共目录的路径，该路径在android 11及以后，只能通过IO流的形式使用，直接读写不可用
      */
-    fun getSdTypePublicPath(fileUtils: FileUtils, type: String): String {
+    fun getSdTypePublicPath(fileUtils: FileUtil, type: String): String {
         var path = ""
         if (!TextUtils.isEmpty(type) && fileUtils.checkSdStatus()) {
             val publicDirectory = Environment.getExternalStoragePublicDirectory(type)
@@ -173,5 +173,23 @@ class FileUtils : ApplicationCheck() {
 
     private fun checkSdStatus(): Boolean {
         return Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
+    }
+
+    /**
+     * 获取文件的完整路径，例如：在poc目录下的keepfile文件下建立文件：KeepLifeReceiver，则返回： com.android.poc.keeplife.KeepLifeReceiver
+     */
+    fun getCanonicalNamePath(cls: Class<*>): String {
+        val canonicalName = cls.canonicalName
+        LogUtil.e("canonicalName: $canonicalName")
+        return canonicalName ?: ""
+    }
+
+    /**
+     * 获取文件的监督路径，例如：在poc目录下的keepfile文件下建立文件：KeepLifeReceiver，则返回：KeepLifeReceiver
+     */
+    fun getSimpleNamePath(cls: Class<*>): String {
+        val simpleName = cls.simpleName
+        LogUtil.e("simpleName: $simpleName")
+        return simpleName
     }
 }

@@ -26,7 +26,7 @@ class LogWriteUtil(private val fileName: String) {
         runCatching {
             mRootPath = context.filesDir.path
             LogUtil.e("root path: $mRootPath")
-            val mkdirsDate = FileUtils.instance.mkdirs(mRootPath)
+            val mkdirsDate = FileUtil.instance.mkdirs(mRootPath)
             LogUtil.e("create root success ：${mkdirsDate != null}")
         }.onFailure {
             it.printStackTrace()
@@ -37,11 +37,11 @@ class LogWriteUtil(private val fileName: String) {
     private fun checkFile(): File? {
         var result: File? = null
         runCatching {
-            val datePath = FileUtils.instance.getPathForCalendar()
-            val parentFile = FileUtils.instance.mkdirs(mRootPath, datePath)
+            val datePath = FileUtil.instance.getPathForCalendar()
+            val parentFile = FileUtil.instance.mkdirs(mRootPath, datePath)
             LogUtil.e("create parent file ：$parentFile")
             if (parentFile != null) {
-                result = FileUtils.instance.createFile(parentFile.path, fileName)
+                result = FileUtil.instance.createFile(parentFile.path, fileName)
             }
         }.onFailure {
             it.printStackTrace()
