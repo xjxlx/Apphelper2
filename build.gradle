@@ -52,4 +52,8 @@ dependencies {
 
     // gson
     implementation 'com.google.code.gson:gson:2.10.1'
+
+    // fragment / activity coroutines
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+
 }
