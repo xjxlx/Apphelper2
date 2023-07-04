@@ -10,7 +10,7 @@ import android.text.TextUtils
 import com.android.apphelper2.app.AppHelperManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.net.Inet4Address
@@ -33,9 +33,7 @@ class NetworkUtil private constructor() {
     private val mScope: CoroutineScope by lazy {
         return@lazy CoroutineScope(Dispatchers.IO)
     }
-    private val mStateFlow: MutableStateFlow<String> by lazy {
-        return@lazy MutableStateFlow("")
-    }
+    private val mStateFlow: MutableSharedFlow<String> = MutableSharedFlow()
     private val mConnectivityManager: ConnectivityManager by lazy {
         return@lazy AppHelperManager.context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
@@ -76,9 +74,12 @@ class NetworkUtil private constructor() {
                                     if (hostAddress != null) {
                                         if ((!TextUtils.equals(hostAddress, "0.0.0.0")) && (!(hostAddress.contains(":")))) {
                                             LogUtil.e(TAG, "hostAddress: wifi: $hostAddress")
-                                            mScope.launch {
-                                                mStateFlow.emit(hostAddress)
-                                                mIpAddress = hostAddress
+                                            if (!TextUtils.equals(mIpAddress, hostAddress)) {
+                                                mScope.launch {
+                                                    LogUtil.e(TAG, "send: wifi: $hostAddress")
+                                                    mStateFlow.emit(hostAddress)
+                                                    mIpAddress = hostAddress
+                                                }
                                             }
                                             return
                                         }
@@ -99,13 +100,16 @@ class NetworkUtil private constructor() {
                             val address = inetAddresses.nextElement()
                             if (!address.isLoopbackAddress && address is Inet4Address) {
                                 val hostAddress = address.getHostAddress()
-                                if (hostAddress != null) {
-                                    mScope.launch {
-                                        mStateFlow.emit(hostAddress)
-                                        mIpAddress = hostAddress
-                                    }
+                                if (!TextUtils.isEmpty(hostAddress)) {
                                     LogUtil.e(TAG, "hostAddress: mobile: $hostAddress")
-                                    return
+                                    if (!TextUtils.equals(hostAddress, mIpAddress)) {
+                                        mScope.launch {
+                                            LogUtil.e(TAG, "send : mobile: $hostAddress")
+                                            mStateFlow.emit(hostAddress!!)
+                                            mIpAddress = hostAddress
+                                        }
+                                        return
+                                    }
                                 }
                             }
                         }
@@ -193,6 +197,7 @@ class NetworkUtil private constructor() {
 
     fun register(): NetworkUtil {
         LogUtil.e(TAG, "register network !")
+        mIpAddress = ""
         mConnectivityManager.requestNetwork(mRequest, mCallBack)
         return this
     }
@@ -200,5 +205,6 @@ class NetworkUtil private constructor() {
     fun unregister() {
         LogUtil.e(TAG, "unregister network !")
         mConnectivityManager.unregisterNetworkCallback(mCallBack)
+        mIpAddress = ""
     }
 }
