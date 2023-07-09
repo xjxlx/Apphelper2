@@ -235,8 +235,13 @@ class SocketUtil {
 
             mJob = mScope.launch(Dispatchers.IO) {
                 runCatching {
-                    mSocket = Socket(ip, PORT)
-                    mClientSend += "client create socket!\n"
+                    try {
+                        mClientSend += "client create socket!\n"
+                        mSocket = Socket(ip, PORT)
+                    } catch (e: Exception) {
+                        val msg = "client create socket error:${e.message}!\n"
+                        mClientSend += msg
+                    }
                     mClientSend += "client ip：$ip\n"
                     mClientSend += "client port: $PORT \n\n"
                     mClientListener?.callBack(mClientSend, mClientResult)
