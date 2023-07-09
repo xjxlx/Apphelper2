@@ -257,7 +257,7 @@ class SocketUtil {
                         mSocket?.close()
                         mSocket = null
                     }
-                    mClientSend += "client error: ${it.message} ${"\n\n"}"
+                    mClientSend += "${"\n\n"}client error: ${it.message} ${"\n\n"}"
                     log(mClientSend)
                     mClientListener?.callBack(mClientSend, mClientResult)
                 }
