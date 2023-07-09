@@ -55,5 +55,6 @@ dependencies {
 
     // fragment / activity coroutines
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+    implementation 'org.zeromq:jeromq:0.5.3'
 
 }
