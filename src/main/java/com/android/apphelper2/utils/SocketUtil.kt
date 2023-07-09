@@ -236,10 +236,10 @@ class SocketUtil {
             mJob = mScope.launch(Dispatchers.IO) {
                 runCatching {
                     try {
-                        mClientSend += "client create socket!\n"
+                        mClientSend += "client create socket ...\n\n"
                         mSocket = Socket(ip, PORT)
                     } catch (e: Exception) {
-                        val msg = "client create socket error:${e.message}!\n"
+                        val msg = "client create socket error:${e.message}!\n\n"
                         mClientSend += msg
                     }
                     mClientSend += "client ip：$ip\n"
