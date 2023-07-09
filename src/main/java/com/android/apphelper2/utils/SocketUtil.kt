@@ -168,13 +168,11 @@ class SocketUtil {
                     log("server -- 发送流关闭异常！")
                 }
                 runCatching {
-                    mSocket?.shutdownInput()
-                    mSocket?.shutdownOutput()
+                    mSocket?.close()
                     mSocket = null
                 }.onFailure {
                     log("server -- socket关闭异常！")
                 }
-
                 runCatching {
                     mServerSocket?.close()
                     mServerSocket = null
@@ -183,6 +181,8 @@ class SocketUtil {
                 }
                 mJob?.cancel()
                 log("释放了 server!")
+                mServerSend += "释放了 server!\n\n"
+                mServiceListener?.callBack(mServerSend, mServerResult)
             }.onFailure {
                 log("释放了 server error: ${it.message}")
             }
