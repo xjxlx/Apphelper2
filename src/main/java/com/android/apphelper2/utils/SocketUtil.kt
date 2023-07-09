@@ -65,8 +65,8 @@ class SocketUtil {
                                 val address = mSocket?.inetAddress
                                 if (address != null) {
                                     mServerSend += "client connect success! client host address：${address.hostAddress} client host name：${address.hostName}\n\n"
-                                    mServerSend += "client host address：${address.hostAddress} \n\n"
-                                    mServerSend += "client host name：${address.hostName}\n\n"
+                                    mServerSend += "client address：${address.hostAddress} \n\n"
+                                    mServerSend += "client name：${address.hostName}\n\n"
                                     log(mServerSend)
                                     // when the binding is successful ,send a message to the client ,telling it that link was successful
                                     mWrite?.println(CLIENT_BIND_CLIENT + address.hostAddress)
