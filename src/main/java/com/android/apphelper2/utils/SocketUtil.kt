@@ -58,10 +58,16 @@ class SocketUtil {
                             mSocket = server.accept()
                             if (mSocket != null) {
                                 mClientConnectFlag = true
+                                mRead = BufferedReader(InputStreamReader(mSocket?.getInputStream(), ENCODING))
+                                mWrite = PrintStream(mSocket?.getOutputStream(), true, ENCODING)
+
                                 val address = mSocket!!.inetAddress
                                 if (address != null) {
                                     mServerSend += "客户端链接成功，客户端地址：${address.hostAddress} 客户端名字：${address.hostName}\n\n"
                                     log(mServerSend)
+
+                                    // 绑定成功的时候，给客户端发送一条信息，告诉客户端已经链接成功了
+                                    mWrite?.println("client:bind:" + address.hostAddress)
                                 }
 
                                 mScope.launch(Dispatchers.IO) {
@@ -71,8 +77,6 @@ class SocketUtil {
                                     mServiceListener?.callBack(mServerSend, mServerResult)
 
                                     if (connected) {
-                                        mRead = BufferedReader(InputStreamReader(mSocket!!.getInputStream(), ENCODING))
-
                                         try {
                                             while (mRead?.readLine()
                                                     .also {
@@ -132,9 +136,6 @@ class SocketUtil {
                         mServerSend = "socket is connect: $connected\n\n"
                         mServiceListener?.callBack(mServerSend, mServerResult)
                         if (connected) {
-                            if (mWrite == null) {
-                                mWrite = PrintStream(it.getOutputStream(), true, ENCODING)
-                            }
                             mWrite?.println(content)
                             mServerSend = content
                             mServiceListener?.callBack(mServerSend, mServerResult)
