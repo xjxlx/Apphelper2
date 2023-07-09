@@ -72,8 +72,12 @@ class SocketUtil {
                                         mRead = BufferedReader(InputStreamReader(mSocket!!.getInputStream(), ENCODING))
 
                                         try {
-                                            while (mRead!!.readLine()
-                                                    .also { mServerResult = it } != null) {
+                                            while (mRead?.readLine()
+                                                    .also {
+                                                        if (it != null) {
+                                                            mServerResult = it
+                                                        }
+                                                    } != null) {
                                                 mServiceListener?.callBack(mServerSend, mServerResult)
                                             }
                                             mServerSend += "客户端断开了链接！\n\n"
@@ -230,8 +234,12 @@ class SocketUtil {
                             mClientListener?.callBack(mClientSend, mClientResult)
                             log(mClientSend)
 
-                            while (mRead!!.readLine()
-                                    .also { mClientResult = it } != null) {
+                            while (mRead?.readLine()
+                                    .also {
+                                        if (it != null) {
+                                            mClientResult = it
+                                        }
+                                    } != null) {
                                 mClientListener?.callBack(mClientSend, mClientResult)
                                 log("client read data: $mClientResult")
                             }
