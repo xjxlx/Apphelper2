@@ -98,6 +98,9 @@ class SocketUtil {
                         mPrintStream?.println(content)
                         mServerSend = content
                         mServiceListener?.callBack(mServerSend, mServerResult)
+                    } else {
+                        mServerSend += "server is not connect ! ${"\n\n"}"
+                        mServiceListener?.callBack(mServerSend, mServerResult)
                     }
                 }
             } catch (e: Exception) {
@@ -129,15 +132,17 @@ class SocketUtil {
         private var mClientPrintStream: PrintStream? = null
 
         fun initClientSocket(ip: String) {
+            mClientSend = ""
+            mClientResult = ""
             mScope.launch {
                 runCatching {
                     mSocket = Socket(ip, PORT)
-                    mClientSend += "client 创建 socket: ip：$ip port: $PORT\r\n"
+                    mClientSend += "client 创建 socket: ip：$ip port: $PORT ${"\n\n"}"
                     mClientListener?.callBack(mClientSend, mClientResult)
                     log(mClientSend)
                     mSocket?.let { socket ->
                         val connected = socket.isConnected
-                        mClientSend += "client connect: $connected\r\n"
+                        mClientSend += "client connect: $connected ${"\n\n"}"
                         log(mClientSend)
                         mClientListener?.callBack(mClientSend, mClientResult)
 
@@ -148,6 +153,9 @@ class SocketUtil {
                                     .also { mClientResult = it } != null) {
                                 mClientListener?.callBack(mClientSend, mClientResult)
                             }
+                        } else {
+                            mClientSend += "client is not connected! ${"\n\n"}"
+                            mClientListener?.callBack(mClientSend, mClientResult)
                         }
                     }
                 }.onFailure {
@@ -159,7 +167,7 @@ class SocketUtil {
                         mSocket?.close()
                         mSocket = null
                     }
-                    mClientSend += "client error: ${it.message} " + "\r\n"
+                    mClientSend += "client error: ${it.message} ${"\n\n"}"
                     log(mClientSend)
                     mClientListener?.callBack(mClientSend, mClientResult)
                 }
@@ -179,12 +187,14 @@ class SocketUtil {
                         mClientResult = content
                         mClientListener?.callBack(mClientSend, mClientResult)
                     } else {
-                        mClientSend = "socket is not connected!" + "\r\n"
+                        mClientSend += "socket is not connected! ${"\n\n"}"
                         mClientListener?.callBack(mClientSend, mClientResult)
+                        log(mClientSend)
                     }
                 }
             }.onFailure {
-                mClientSend = "socket snd error: ${it.message}" + "\r\n"
+                mClientSend += "socket snd error: ${it.message} ${"\n\n"}"
+                log(mClientSend)
                 mClientListener?.callBack(mClientSend, mClientResult)
             }
         }
