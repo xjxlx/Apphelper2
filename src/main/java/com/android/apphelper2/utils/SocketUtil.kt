@@ -176,39 +176,41 @@ class SocketUtil {
         }
 
         fun stop() {
-            runCatching {
-                isStop.set(true)
-                mLoopFlag.set(false)
+            mScope.launch(Dispatchers.IO) {
                 runCatching {
-                    mRead?.close()
-                    mRead = null
+                    isStop.set(true)
+                    mLoopFlag.set(false)
+                    runCatching {
+                        mRead?.close()
+                        mRead = null
+                    }.onFailure {
+                        log("server -- close reading steam failure！")
+                    }
+                    runCatching {
+                        mWrite?.close()
+                        mWrite = null
+                    }.onFailure {
+                        log("server -- close send steam failure ！")
+                    }
+                    runCatching {
+                        mSocket?.close()
+                        mSocket = null
+                    }.onFailure {
+                        log("server -- socket close failure！")
+                    }
+                    runCatching {
+                        mServerSocket?.close()
+                        mServerSocket = null
+                    }.onFailure {
+                        log("server -- close failure！")
+                    }
+                    mJob?.cancel()
+                    log("release server!")
+                    mServerSend += "release server!\n\n"
+                    mServiceListener?.callBack(mServerSend, mServerResult)
                 }.onFailure {
-                    log("server -- close reading steam failure！")
+                    log("release server error: ${it.message}")
                 }
-                runCatching {
-                    mWrite?.close()
-                    mWrite = null
-                }.onFailure {
-                    log("server -- close send steam failure ！")
-                }
-                runCatching {
-                    mSocket?.close()
-                    mSocket = null
-                }.onFailure {
-                    log("server -- socket close failure！")
-                }
-                runCatching {
-                    mServerSocket?.close()
-                    mServerSocket = null
-                }.onFailure {
-                    log("server -- close failure！")
-                }
-                mJob?.cancel()
-                log("release server!")
-                mServerSend += "release server!\n\n"
-                mServiceListener?.callBack(mServerSend, mServerResult)
-            }.onFailure {
-                log("release server error: ${it.message}")
             }
         }
     }
@@ -351,36 +353,38 @@ class SocketUtil {
         }
 
         fun stop() {
-            runCatching {
-                isStop = true
-
+            mScope.launch(Dispatchers.IO) {
                 runCatching {
-                    mSocket?.close()
-                    mSocket = null
-                }.onFailure {
-                    log("server -- socket close failure!")
-                }
+                    isStop = true
 
-                runCatching {
-                    mRead?.close()
-                    mRead = null
-                }.onFailure {
-                    log("client -- read steam close failure!")
-                }
-                runCatching {
-                    mWrite?.close()
-                    mWrite = null
-                }.onFailure {
-                    log("client -- send steam close failure!")
-                }
+                    runCatching {
+                        mSocket?.close()
+                        mSocket = null
+                    }.onFailure {
+                        log("server -- socket close failure!")
+                    }
 
-                mJob?.cancel()
-                log("release client!")
+                    runCatching {
+                        mRead?.close()
+                        mRead = null
+                    }.onFailure {
+                        log("client -- read steam close failure!")
+                    }
+                    runCatching {
+                        mWrite?.close()
+                        mWrite = null
+                    }.onFailure {
+                        log("client -- send steam close failure!")
+                    }
 
-                mClientSend += "release server!\n\n"
-                mClientListener?.callBack(mClientSend, mClientResult)
-            }.onFailure {
-                log("release client error: ${it.message}")
+                    mJob?.cancel()
+                    log("release client!")
+
+                    mClientSend += "release server!\n\n"
+                    mClientListener?.callBack(mClientSend, mClientResult)
+                }.onFailure {
+                    log("release client error: ${it.message}")
+                }
             }
         }
     }
