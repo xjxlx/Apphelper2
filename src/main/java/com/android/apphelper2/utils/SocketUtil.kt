@@ -122,6 +122,7 @@ class SocketUtil {
         private var mClientSend = ""
         private var mClientResult = ""
         private var mPrintStream: PrintStream? = null
+        private var mClientPrintStream: PrintStream? = null
 
         fun initClientSocket(ip: String) {
             mScope.launch {
@@ -161,6 +162,26 @@ class SocketUtil {
         }
 
         fun sendClientData(content: String) {
+            runCatching {
+                mSocket?.let {
+                    val connected = it.isConnected
+                    if (connected) {
+                        if (mClientPrintStream == null) {
+                            mClientPrintStream = PrintStream(it.getOutputStream(), true, ENCODING)
+                        }
+                        // send client data
+                        mClientPrintStream?.println(content)
+                        mClientResult = content
+                        mClientListener?.callBack(mClientSend, mClientResult)
+                    } else {
+                        mClientSend = "socket is not connected!"
+                        mClientListener?.callBack(mClientSend, mClientResult)
+                    }
+                }
+            }.onFailure {
+                mClientSend = "socket snd error: ${it.message}"
+                mClientListener?.callBack(mClientSend, mClientResult)
+            }
         }
 
         interface ClientCallBackListener {
