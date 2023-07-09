@@ -17,7 +17,7 @@ class SocketUtil {
         private const val PORT = 6666
         private const val TAG = "Socket-Util"
         private const val ENCODING = "UTF-8"
-        private const val BIND_CLIENT = "client:bind:"
+        private const val CLIENT_BIND_CLIENT = "client:bind:"
         fun log(content: String) {
             LogUtil.e(TAG, content)
         }
@@ -64,16 +64,15 @@ class SocketUtil {
 
                                 val address = mSocket?.inetAddress
                                 if (address != null) {
-                                    mServerSend += "客户端链接成功，客户端地址：${address.hostAddress} 客户端名字：${address.hostName}\n\n"
+                                    mServerSend += "client connect success, client host address：${address.hostAddress} client host name：${address.hostName}\n\n"
                                     log(mServerSend)
-
-                                    // 绑定成功的时候，给客户端发送一条信息，告诉客户端已经链接成功了
-                                    mWrite?.println(BIND_CLIENT + address.hostAddress)
+                                    // when the binding is successful ,send a message to the client ,telling it that link was successful
+                                    mWrite?.println(CLIENT_BIND_CLIENT + address.hostAddress)
                                 }
 
                                 mScope.launch(Dispatchers.IO) {
                                     val connected = mSocket!!.isConnected
-                                    mServerSend += "客户端链接成功：$connected\n\n"
+                                    mServerSend += "loop wait client send the message ...：\n\n"
                                     log(mServerSend)
                                     mServiceListener?.callBack(mServerSend, mServerResult)
 
@@ -85,18 +84,18 @@ class SocketUtil {
                                                             mServerResult = it
                                                         } else {
                                                             mClientConnectFlag = false
+                                                            mServerSend += "client disconnect the link ！\n\n"
+                                                            mServiceListener?.callBack(mServerSend, mServerResult)
                                                         }
                                                     } != null) {
                                                 mServiceListener?.callBack(mServerSend, mServerResult)
                                             }
-                                            mServerSend += "客户端断开了链接！\n\n"
-                                            mServiceListener?.callBack(mServerSend, mServerResult)
                                         } catch (e: IOException) {
-                                            mServerSend += "客户端读取数据异常！\n\n"
+                                            mServerSend += "loop reading the client message abnormal！\n\n"
                                             mServiceListener?.callBack(mServerSend, mServerResult)
                                         }
                                     } else {
-                                        mServerSend += "客户端链接失败！\n\n"
+                                        mServerSend += "the client link failure！\n\n"
                                         mServiceListener?.callBack(mServerSend, mServerResult)
                                     }
                                 }
@@ -119,7 +118,7 @@ class SocketUtil {
         fun sendServerData(content: String): Boolean {
             try {
                 if (isStop) {
-                    mServerSend += "socket is stop! \n\n"
+                    mServerSend += "socket is stop , do not send data ! \n\n"
                     mServiceListener?.callBack(mServerSend, mServerResult)
                     return false
                 }
@@ -129,7 +128,6 @@ class SocketUtil {
                     mServiceListener?.callBack(mServerSend, mServerResult)
                     return false
                 }
-
 
                 if (mSocket != null) {
                     mSocket?.let {
@@ -151,7 +149,7 @@ class SocketUtil {
                     mServiceListener?.callBack(mServerSend, mServerResult)
                 }
             } catch (e: Exception) {
-                mServerSend = "server 发送失败：${e.message}\n\n"
+                mServerSend = "server send data failure：${e.message}\n\n"
                 mServiceListener?.callBack(mServerSend, mServerResult)
                 mWrite?.close()
                 mWrite = null
@@ -253,9 +251,9 @@ class SocketUtil {
                                         if (it != null) {
                                             mBindServerFlag = true
                                             mClientResult = it
-                                            if (it.contains(BIND_CLIENT)) {
-                                                mClientSend += "server bind client success! ${"\n\n"}"
-                                                mClientSend += "server bind client address:${it} ${"\n\n"}"
+                                            if (it.contains(CLIENT_BIND_CLIENT)) {
+                                                val split = it.split(CLIENT_BIND_CLIENT)
+                                                mClientSend += "server bind client success, address:${split[1]} ${"\n\n"}"
                                                 mClientListener?.callBack(mClientSend, mClientResult)
                                             }
                                         } else {
