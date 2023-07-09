@@ -35,6 +35,7 @@ class SocketUtil {
         private var mLoopFlag = true
         private var isStop = false
         private var mJob: Job? = null
+        private var mClientConnectFlag = false;
 
         fun initSocketService() {
             mServerSend = ""
@@ -56,6 +57,7 @@ class SocketUtil {
                             // block thread ,wait client connect
                             mSocket = server.accept()
                             if (mSocket != null) {
+                                mClientConnectFlag = true
                                 val address = mSocket!!.inetAddress
                                 if (address != null) {
                                     mServerSend += "客户端链接成功，客户端地址：${address.hostAddress} 客户端名字：${address.hostName}\n\n"
@@ -76,6 +78,8 @@ class SocketUtil {
                                                     .also {
                                                         if (it != null) {
                                                             mServerResult = it
+                                                        } else {
+                                                            mClientConnectFlag = false
                                                         }
                                                     } != null) {
                                                 mServiceListener?.callBack(mServerSend, mServerResult)
@@ -114,6 +118,13 @@ class SocketUtil {
                     mServiceListener?.callBack(mServerSend, mServerResult)
                     return false
                 }
+
+                if (!mClientConnectFlag) {
+                    mServerSend += "client connect is lost ! \n\n"
+                    mServiceListener?.callBack(mServerSend, mServerResult)
+                    return false
+                }
+
 
                 if (mSocket != null) {
                     mSocket?.let {
