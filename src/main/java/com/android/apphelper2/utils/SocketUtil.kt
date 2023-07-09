@@ -230,7 +230,9 @@ class SocketUtil {
             mJob = mScope.launch(Dispatchers.IO) {
                 runCatching {
                     mSocket = Socket(ip, PORT)
-                    mClientSend += "client 创建 socket: ip：$ip port: $PORT ${"\n\n"}"
+                    mClientSend += "client create socket!\n"
+                    mClientSend += "client ip：$ip\n"
+                    mClientSend += "client port: $PORT \n\n"
                     mClientListener?.callBack(mClientSend, mClientResult)
                     log(mClientSend)
 
@@ -242,9 +244,9 @@ class SocketUtil {
 
                         if (connected) {
                             mRead = BufferedReader(InputStreamReader(socket.getInputStream(), ENCODING))
-                            // read data
 
-                            mClientSend += "client wait ...${"\n\n"}"
+                            // read data
+                            mClientSend += "loop wait server send message ...${"\n\n"}"
                             mClientListener?.callBack(mClientSend, mClientResult)
                             log(mClientSend)
 
@@ -255,17 +257,18 @@ class SocketUtil {
                                             mClientResult = it
                                             if (it.contains(CLIENT_BIND_CLIENT)) {
                                                 val split = it.split(CLIENT_BIND_CLIENT)
-                                                mClientSend += "server bind client success, address:${split[1]} ${"\n\n"}"
+                                                mClientSend += "server bind client success! \n"
+                                                mClientSend += "bind address:${split[1]} ${"\n\n"}"
                                                 mClientListener?.callBack(mClientSend, mClientResult)
                                             }
                                         } else {
                                             mBindServerFlag = false
-                                            mClientSend += "server disconnect the client ! ${"\n\n"}"
+                                            mClientSend += "server disconnect the link ! ${"\n\n"}"
                                             mClientListener?.callBack(mClientSend, mClientResult)
                                         }
                                     } != null) {
                                 mClientListener?.callBack(mClientSend, mClientResult)
-                                log("client read data: $mClientResult")
+                                log("client read server data: $mClientResult")
                             }
                         } else {
                             mClientSend += "client is not connected! ${"\n\n"}"
@@ -281,7 +284,7 @@ class SocketUtil {
                         mSocket?.close()
                         mSocket = null
                     }
-                    mClientSend += "${"\n\n"}client error: ${it.message} ${"\n\n"}"
+                    mClientSend += "${"\n\n"}client link error: ${it.message} ${"\n\n"}"
                     log(mClientSend)
                     mClientListener?.callBack(mClientSend, mClientResult)
                 }
@@ -294,7 +297,14 @@ class SocketUtil {
         fun sendClientData(content: String): Boolean {
             runCatching {
                 if (isStop) {
-                    mClientSend += "the socket has been stopped \n ! ${"\n\n"}"
+                    mClientSend += "the socket have stopped, do not send message !${"\n\n"}"
+                    mClientListener?.callBack(mClientSend, mClientResult)
+                    log(mClientSend)
+                    return false
+                }
+
+                if (!mBindServerFlag) {
+                    mClientSend += "the server have stopped, do not send message !${"\n\n"}"
                     mClientListener?.callBack(mClientSend, mClientResult)
                     log(mClientSend)
                     return false
@@ -344,29 +354,29 @@ class SocketUtil {
                     mSocket?.close()
                     mSocket = null
                 }.onFailure {
-                    log("server -- socket关闭异常！")
+                    log("server -- socket close failure!")
                 }
 
                 runCatching {
                     mRead?.close()
                     mRead = null
                 }.onFailure {
-                    log("client -- 读取流关闭异常！")
+                    log("client -- read steam close failure!")
                 }
                 runCatching {
                     mWrite?.close()
                     mWrite = null
                 }.onFailure {
-                    log("client -- 发送流关闭异常！")
+                    log("client -- send steam close failure!")
                 }
 
                 mJob?.cancel()
-                log("释放了 client!")
+                log("release client!")
 
-                mClientSend += "释放了 server!\n\n"
+                mClientSend += "release server!\n\n"
                 mClientListener?.callBack(mClientSend, mClientResult)
             }.onFailure {
-                log("释放了 client error: ${it.message}")
+                log("release client error: ${it.message}")
             }
         }
     }
