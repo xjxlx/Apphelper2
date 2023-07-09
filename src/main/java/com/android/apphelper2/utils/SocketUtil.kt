@@ -62,7 +62,7 @@ class SocketUtil {
                                 mRead = BufferedReader(InputStreamReader(mSocket?.getInputStream(), ENCODING))
                                 mWrite = PrintStream(mSocket?.getOutputStream(), true, ENCODING)
 
-                                val address = mSocket!!.inetAddress
+                                val address = mSocket?.inetAddress
                                 if (address != null) {
                                     mServerSend += "客户端链接成功，客户端地址：${address.hostAddress} 客户端名字：${address.hostName}\n\n"
                                     log(mServerSend)
