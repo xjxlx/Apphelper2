@@ -2,6 +2,7 @@ package com.android.apphelper2.utils
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.IOException
@@ -31,12 +32,17 @@ class SocketUtil {
         private var mWrite: PrintStream? = null
         private var mServerSend = ""
         private var mServerResult = ""
+        private var mLoopFlag = true
+        private var isStop = false
+        private var mJob: Job? = null
 
         fun initSocketService() {
             mServerSend = ""
             mServerResult = ""
+            isStop = false
+            mLoopFlag = true
 
-            mScope.launch {
+            mJob = mScope.launch {
                 runCatching {
                     mServerSend += "server create server socket !\n\n"
                     mServiceListener?.callBack(mServerSend, mServerResult)
@@ -46,7 +52,7 @@ class SocketUtil {
                         mServerSend += "server wait client connect !\n\n"
                         mServiceListener?.callBack(mServerSend, mServerResult)
 
-                        while (true) {
+                        while (mLoopFlag) {
                             // block thread ,wait client connect
                             mSocket = server.accept()
                             if (mSocket != null) {
@@ -97,23 +103,35 @@ class SocketUtil {
             }
         }
 
-        fun sendServerData(content: String) {
+        fun sendServerData(content: String): Boolean {
             try {
-                mSocket?.let {
-                    val connected = it.isConnected
-                    mServerSend = "socket is connect: $connected\n\n"
+                if (isStop) {
+                    mServerSend += "socket is stop! \n\n"
                     mServiceListener?.callBack(mServerSend, mServerResult)
-                    if (connected) {
-                        if (mWrite == null) {
-                            mWrite = PrintStream(it.getOutputStream(), true, ENCODING)
+                    return false
+                }
+
+                if (mSocket != null) {
+                    mSocket?.let {
+                        val connected = it.isConnected
+                        mServerSend = "socket is connect: $connected\n\n"
+                        mServiceListener?.callBack(mServerSend, mServerResult)
+                        if (connected) {
+                            if (mWrite == null) {
+                                mWrite = PrintStream(it.getOutputStream(), true, ENCODING)
+                            }
+                            mWrite?.println(content)
+                            mServerSend = content
+                            mServiceListener?.callBack(mServerSend, mServerResult)
+                            return true
+                        } else {
+                            mServerSend += "server is not connect ! ${"\n\n"}"
+                            mServiceListener?.callBack(mServerSend, mServerResult)
                         }
-                        mWrite?.println(content)
-                        mServerSend = content
-                        mServiceListener?.callBack(mServerSend, mServerResult)
-                    } else {
-                        mServerSend += "server is not connect ! ${"\n\n"}"
-                        mServiceListener?.callBack(mServerSend, mServerResult)
                     }
+                } else {
+                    mServerSend += "please wait socket connect ! ${"\n\n"}"
+                    mServiceListener?.callBack(mServerSend, mServerResult)
                 }
             } catch (e: Exception) {
                 mServerSend = "server 发送失败：${e.message}\n\n"
@@ -121,6 +139,7 @@ class SocketUtil {
                 mWrite?.close()
                 mWrite = null
             }
+            return false
         }
 
         interface ServerCallBackListener {
@@ -134,10 +153,35 @@ class SocketUtil {
 
         fun stop() {
             runCatching {
-                mRead?.close()
-                mWrite?.close()
-                mSocket?.close()
-                mServerSocket?.close()
+                isStop = true
+                mLoopFlag = false
+                runCatching {
+                    mRead?.close()
+                    mRead = null
+                }.onFailure {
+                    log("server -- 读取流关闭异常！")
+                }
+                runCatching {
+                    mWrite?.close()
+                    mWrite = null
+                }.onFailure {
+                    log("server -- 发送流关闭异常！")
+                }
+                runCatching {
+                    mSocket?.shutdownInput()
+                    mSocket?.shutdownOutput()
+                    mSocket = null
+                }.onFailure {
+                    log("server -- socket关闭异常！")
+                }
+
+                runCatching {
+                    mServerSocket?.close()
+                    mServerSocket = null
+                }.onFailure {
+                    log("server -- 关闭异常！")
+                }
+                mJob?.cancel()
                 log("释放了 server!")
             }.onFailure {
                 log("释放了 server error: ${it.message}")
