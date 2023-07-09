@@ -218,6 +218,7 @@ class SocketUtil {
         private var mClientResult = ""
         private var isStop = false
         private var mJob: Job? = null
+        private var mBindServerFlag = false;
 
         fun initClientSocket(ip: String) {
             mClientSend = ""
@@ -248,7 +249,12 @@ class SocketUtil {
                             while (mRead?.readLine()
                                     .also {
                                         if (it != null) {
+                                            mBindServerFlag = true
                                             mClientResult = it
+                                        } else {
+                                            mBindServerFlag = false
+                                            mClientSend += "server disconnect the client ! ${"\n\n"}"
+                                            mClientListener?.callBack(mClientSend, mClientResult)
                                         }
                                     } != null) {
                                 mClientListener?.callBack(mClientSend, mClientResult)
