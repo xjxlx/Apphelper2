@@ -155,18 +155,7 @@ class SocketUtil {
             runCatching {
                 isStop = true
                 mLoopFlag = false
-                runCatching {
-                    mRead?.close()
-                    mRead = null
-                }.onFailure {
-                    log("server -- 读取流关闭异常！")
-                }
-                runCatching {
-                    mWrite?.close()
-                    mWrite = null
-                }.onFailure {
-                    log("server -- 发送流关闭异常！")
-                }
+
                 runCatching {
                     mSocket?.close()
                     mSocket = null
@@ -179,6 +168,20 @@ class SocketUtil {
                 }.onFailure {
                     log("server -- 关闭异常！")
                 }
+
+                runCatching {
+                    mRead?.close()
+                    mRead = null
+                }.onFailure {
+                    log("server -- 读取流关闭异常！")
+                }
+                runCatching {
+                    mWrite?.close()
+                    mWrite = null
+                }.onFailure {
+                    log("server -- 发送流关闭异常！")
+                }
+
                 mJob?.cancel()
                 log("释放了 server!")
                 mServerSend += "释放了 server!\n\n"
@@ -198,11 +201,15 @@ class SocketUtil {
         private var mWrite: PrintStream? = null
         private var mClientSend = ""
         private var mClientResult = ""
+        private var isStop = false
+        private var mJob: Job? = null
 
         fun initClientSocket(ip: String) {
             mClientSend = ""
             mClientResult = ""
-            mScope.launch(Dispatchers.IO) {
+            isStop = false
+
+            mJob = mScope.launch(Dispatchers.IO) {
                 runCatching {
                     mSocket = Socket(ip, PORT)
                     mClientSend += "client 创建 socket: ip：$ip port: $PORT ${"\n\n"}"
@@ -252,8 +259,15 @@ class SocketUtil {
         /**
          * 发送数据的时候，必须是在异步线程中
          */
-        fun sendClientData(content: String) {
+        fun sendClientData(content: String): Boolean {
             runCatching {
+                if (isStop) {
+                    mClientSend += "the socket has been stopped \n ! ${"\n\n"}"
+                    mClientListener?.callBack(mClientSend, mClientResult)
+                    log(mClientSend)
+                    return false
+                }
+
                 mSocket?.let {
                     val connected = it.isConnected
                     if (connected) {
@@ -266,6 +280,7 @@ class SocketUtil {
 
                         mClientSend = content
                         mClientListener?.callBack(mClientSend, mClientResult)
+                        return true
                     } else {
                         mClientSend += "socket is not connected! ${"\n\n"}"
                         mClientListener?.callBack(mClientSend, mClientResult)
@@ -277,6 +292,7 @@ class SocketUtil {
                 log(mClientSend)
                 mClientListener?.callBack(mClientSend, mClientResult)
             }
+            return false
         }
 
         interface ClientCallBackListener {
@@ -284,16 +300,39 @@ class SocketUtil {
         }
 
         private var mClientListener: ClientCallBackListener? = null
-        public fun setServiceCallBackListener(clientListener: ClientCallBackListener) {
+        fun setServiceCallBackListener(clientListener: ClientCallBackListener) {
             mClientListener = clientListener
         }
 
         fun stop() {
             runCatching {
-                mRead?.close()
-                mWrite?.close()
-                mSocket?.close()
+                isStop = true
+
+                runCatching {
+                    mSocket?.close()
+                    mSocket = null
+                }.onFailure {
+                    log("server -- socket关闭异常！")
+                }
+
+                runCatching {
+                    mRead?.close()
+                    mRead = null
+                }.onFailure {
+                    log("client -- 读取流关闭异常！")
+                }
+                runCatching {
+                    mWrite?.close()
+                    mWrite = null
+                }.onFailure {
+                    log("client -- 发送流关闭异常！")
+                }
+
+                mJob?.cancel()
                 log("释放了 client!")
+
+                mClientSend += "释放了 server!\n\n"
+                mClientListener?.callBack(mClientSend, mClientResult)
             }.onFailure {
                 log("释放了 client error: ${it.message}")
             }
