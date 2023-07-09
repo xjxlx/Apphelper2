@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
+import java.io.IOException
 import java.io.InputStreamReader
 import java.io.PrintStream
 import java.net.ServerSocket
@@ -63,12 +64,18 @@ class SocketUtil {
 
                                     if (connected) {
                                         mRead = BufferedReader(InputStreamReader(mSocket!!.getInputStream(), ENCODING))
-                                        while (mRead!!.readLine()
-                                                .also { mServerResult = it } != null) {
+
+                                        try {
+                                            while (mRead!!.readLine()
+                                                    .also { mServerResult = it } != null) {
+                                                mServiceListener?.callBack(mServerSend, mServerResult)
+                                            }
+                                            mServerSend += "客户端断开了链接！\n\n"
+                                            mServiceListener?.callBack(mServerSend, mServerResult)
+                                        } catch (e: IOException) {
+                                            mServerSend += "客户端读取数据异常！\n\n"
                                             mServiceListener?.callBack(mServerSend, mServerResult)
                                         }
-                                        mServerSend += "客户端断开了链接！\n\n"
-                                        mServiceListener?.callBack(mServerSend, mServerResult)
                                     } else {
                                         mServerSend += "客户端链接失败！\n\n"
                                         mServiceListener?.callBack(mServerSend, mServerResult)
