@@ -36,7 +36,6 @@ class SocketUtil {
             mServerResult = ""
 
             mScope.launch {
-
                 runCatching {
                     mServerSend += "server create server socket !\n\n"
                     mServiceListener?.callBack(mServerSend, mServerResult)
@@ -49,7 +48,6 @@ class SocketUtil {
                         while (true) {
                             // block thread ,wait client connect
                             mSocket = server.accept()
-
                             if (mSocket != null) {
                                 val address = mSocket!!.inetAddress
                                 if (address != null) {
