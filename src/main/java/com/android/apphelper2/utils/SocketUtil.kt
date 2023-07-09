@@ -39,6 +39,9 @@ class SocketUtil {
                 runCatching {
                     mServerSocket = ServerSocket(PORT)
                     mServerSocket?.let { server ->
+                        mServerSend += "server create server socket !\n\n"
+                        mServiceListener?.callBack(mServerSend, mServerResult)
+
                         while (true) {
                             // block thread ,wait client connect
                             mSocket = server.accept()
@@ -46,13 +49,13 @@ class SocketUtil {
                             if (mSocket != null) {
                                 val address = mSocket!!.inetAddress
                                 if (address != null) {
-                                    mServerSend += "客户端链接成功，客户端地址：${address.hostAddress} 客户端名字：${address.hostName}"
+                                    mServerSend += "客户端链接成功，客户端地址：${address.hostAddress} 客户端名字：${address.hostName}\n\n"
                                     log(mServerSend)
                                 }
 
                                 mScope.launch(Dispatchers.IO) {
                                     val connected = mSocket!!.isConnected
-                                    mServerSend += "客户端链接成功：$connected"
+                                    mServerSend += "客户端链接成功：$connected\n\n"
                                     log(mServerSend)
                                     mServiceListener?.callBack(mServerSend, mServerResult)
 
@@ -62,7 +65,7 @@ class SocketUtil {
                                                 .also { mServerResult = it } != null) {
                                             mServiceListener?.callBack(mServerSend, mServerResult)
                                         }
-                                        mServerSend += "客户端断开了链接！"
+                                        mServerSend += "客户端断开了链接！\n\n"
                                         mServiceListener?.callBack(mServerSend, mServerResult)
                                     }
                                 }
@@ -74,7 +77,10 @@ class SocketUtil {
                         mBufferedReader?.close()
                         mBufferedReader = null
                     }
-                    log("server socket error: " + it.message)
+                    val msg = "server socket error: " + it.message + "\r\n"
+                    log(msg)
+                    mServerSend += msg
+                    mServiceListener?.callBack(mServerSend, mServerResult)
                 }
             }
         }
@@ -83,7 +89,7 @@ class SocketUtil {
             try {
                 mSocket?.let {
                     val connected = it.isConnected
-                    mServerSend = "socket is connect: $connected"
+                    mServerSend = "socket is connect: $connected\n\n"
                     mServiceListener?.callBack(mServerSend, mServerResult)
                     if (connected) {
                         if (mPrintStream == null) {
@@ -95,7 +101,7 @@ class SocketUtil {
                     }
                 }
             } catch (e: Exception) {
-                mServerSend = "server 发送失败：${e.message}"
+                mServerSend += "server 发送失败：${e.message}\n\n"
                 mServiceListener?.callBack(mServerSend, mServerResult)
                 mPrintStream?.close()
                 mPrintStream = null
@@ -103,8 +109,7 @@ class SocketUtil {
         }
 
         interface ServerCallBackListener {
-            fun callBack(send: String, result: String) {
-            }
+            fun callBack(send: String, result: String)
         }
 
         private var mServiceListener: ServerCallBackListener? = null
@@ -121,18 +126,18 @@ class SocketUtil {
         private var mBufferedReader: BufferedReader? = null
         private var mClientSend = ""
         private var mClientResult = ""
-        private var mPrintStream: PrintStream? = null
         private var mClientPrintStream: PrintStream? = null
 
         fun initClientSocket(ip: String) {
             mScope.launch {
                 runCatching {
                     mSocket = Socket(ip, PORT)
-                    mClientSend += "client 创建 socket: ip：$ip port: $PORT"
+                    mClientSend += "client 创建 socket: ip：$ip port: $PORT\r\n"
+                    mClientListener?.callBack(mClientSend, mClientResult)
                     log(mClientSend)
                     mSocket?.let { socket ->
                         val connected = socket.isConnected
-                        mClientSend += "client connect: $connected"
+                        mClientSend += "client connect: $connected\r\n"
                         log(mClientSend)
                         mClientListener?.callBack(mClientSend, mClientResult)
 
@@ -154,7 +159,7 @@ class SocketUtil {
                         mSocket?.close()
                         mSocket = null
                     }
-                    mClientSend += "client error: ${it.message}"
+                    mClientSend += "client error: ${it.message} " + "\r\n"
                     log(mClientSend)
                     mClientListener?.callBack(mClientSend, mClientResult)
                 }
@@ -174,19 +179,18 @@ class SocketUtil {
                         mClientResult = content
                         mClientListener?.callBack(mClientSend, mClientResult)
                     } else {
-                        mClientSend = "socket is not connected!"
+                        mClientSend = "socket is not connected!" + "\r\n"
                         mClientListener?.callBack(mClientSend, mClientResult)
                     }
                 }
             }.onFailure {
-                mClientSend = "socket snd error: ${it.message}"
+                mClientSend = "socket snd error: ${it.message}" + "\r\n"
                 mClientListener?.callBack(mClientSend, mClientResult)
             }
         }
 
         interface ClientCallBackListener {
-            fun callBack(send: String, result: String) {
-            }
+            fun callBack(send: String, result: String)
         }
 
         private var mClientListener: ClientCallBackListener? = null
