@@ -126,7 +126,7 @@ class SocketUtil {
 
         fun sendServerData(content: String): Boolean {
             try {
-                if (!isStop.get()) {
+                if (isStop.get()) {
                     mServerSend += "socket is stop , do not send data ! \n\n"
                     mServiceListener?.callBack(mServerSend, mServerResult)
                     return false
