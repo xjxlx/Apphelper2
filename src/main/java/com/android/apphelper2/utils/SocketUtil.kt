@@ -156,6 +156,7 @@ class SocketUtil {
                 } else {
                     mServerSend += "please wait socket connect ! ${"\n\n"}"
                     mServiceListener?.callBack(mServerSend, mServerResult)
+                    return false
                 }
             } catch (e: Exception) {
                 mServerSend = "server send data failure：${e.message}\n\n"
