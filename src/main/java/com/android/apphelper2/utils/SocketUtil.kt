@@ -10,6 +10,7 @@ import java.io.InputStreamReader
 import java.io.PrintStream
 import java.net.ServerSocket
 import java.net.Socket
+import java.util.concurrent.atomic.AtomicBoolean
 
 class SocketUtil {
 
@@ -33,28 +34,34 @@ class SocketUtil {
         private var mWrite: PrintStream? = null
         private var mServerSend = ""
         private var mServerResult = ""
-        private var mLoopFlag = true
-        private var isStop = false
+        private var mLoopFlag: AtomicBoolean = AtomicBoolean()
+        private var isStop: AtomicBoolean = AtomicBoolean()
         private var mJob: Job? = null
         private var mClientConnectFlag = false;
 
         fun initSocketService() {
             mServerSend = ""
             mServerResult = ""
-            isStop = false
-            mLoopFlag = true
+            isStop.set(false)
+            mLoopFlag.set(true)
 
-            mJob = mScope.launch {
+            mJob = mScope.launch(Dispatchers.IO) {
                 runCatching {
-                    mServerSend += "server create server socket !\n\n"
+                    mServerSend += "server create server socket ... !\n\n"
                     mServiceListener?.callBack(mServerSend, mServerResult)
-                    mServerSocket = ServerSocket(PORT)
+
+                    runCatching {
+                        mServerSocket = ServerSocket(PORT)
+                    }.onFailure {
+                        mServerSend += "server create server failure:${it.message} !\n\n"
+                        mServiceListener?.callBack(mServerSend, mServerResult)
+                    }
 
                     mServerSocket?.let { server ->
                         mServerSend += "server wait client connect !\n\n"
                         mServiceListener?.callBack(mServerSend, mServerResult)
 
-                        while (mLoopFlag) {
+                        while (mLoopFlag.get()) {
                             // block thread ,wait client connect
                             mSocket = server.accept()
                             if (mSocket != null) {
@@ -119,7 +126,7 @@ class SocketUtil {
 
         fun sendServerData(content: String): Boolean {
             try {
-                if (isStop) {
+                if (!isStop.get()) {
                     mServerSend += "socket is stop , do not send data ! \n\n"
                     mServiceListener?.callBack(mServerSend, mServerResult)
                     return false
@@ -170,22 +177,8 @@ class SocketUtil {
 
         fun stop() {
             runCatching {
-                isStop = true
-                mLoopFlag = false
-
-                runCatching {
-                    mSocket?.close()
-                    mSocket = null
-                }.onFailure {
-                    log("server -- socket close failure！")
-                }
-                runCatching {
-                    mServerSocket?.close()
-                    mServerSocket = null
-                }.onFailure {
-                    log("server -- close failure！")
-                }
-
+                isStop.set(true)
+                mLoopFlag.set(false)
                 runCatching {
                     mRead?.close()
                     mRead = null
@@ -198,7 +191,18 @@ class SocketUtil {
                 }.onFailure {
                     log("server -- close send steam failure ！")
                 }
-
+                runCatching {
+                    mSocket?.close()
+                    mSocket = null
+                }.onFailure {
+                    log("server -- socket close failure！")
+                }
+                runCatching {
+                    mServerSocket?.close()
+                    mServerSocket = null
+                }.onFailure {
+                    log("server -- close failure！")
+                }
                 mJob?.cancel()
                 log("release server!")
                 mServerSend += "release server!\n\n"
