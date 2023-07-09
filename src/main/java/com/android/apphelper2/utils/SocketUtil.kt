@@ -26,20 +26,24 @@ class SocketUtil {
         }
         private var mServerSocket: ServerSocket? = null
         private var mSocket: Socket? = null
-        private var mBufferedReader: BufferedReader? = null
+        private var mRead: BufferedReader? = null
+        private var mWrite: PrintStream? = null
         private var mServerSend = ""
         private var mServerResult = ""
-        private var mPrintStream: PrintStream? = null
 
         fun initSocketService() {
+            mServerSend = ""
+            mServerResult = ""
+
             mScope.launch {
-                mServerSend = ""
-                mServerResult = ""
 
                 runCatching {
+                    mServerSend += "server create server socket !\n\n"
+                    mServiceListener?.callBack(mServerSend, mServerResult)
                     mServerSocket = ServerSocket(PORT)
+
                     mServerSocket?.let { server ->
-                        mServerSend += "server create server socket !\n\n"
+                        mServerSend += "server wait client connect !\n\n"
                         mServiceListener?.callBack(mServerSend, mServerResult)
 
                         while (true) {
@@ -60,12 +64,15 @@ class SocketUtil {
                                     mServiceListener?.callBack(mServerSend, mServerResult)
 
                                     if (connected) {
-                                        mBufferedReader = BufferedReader(InputStreamReader(mSocket!!.getInputStream(), ENCODING))
-                                        while (mBufferedReader!!.readLine()
+                                        mRead = BufferedReader(InputStreamReader(mSocket!!.getInputStream(), ENCODING))
+                                        while (mRead!!.readLine()
                                                 .also { mServerResult = it } != null) {
                                             mServiceListener?.callBack(mServerSend, mServerResult)
                                         }
                                         mServerSend += "客户端断开了链接！\n\n"
+                                        mServiceListener?.callBack(mServerSend, mServerResult)
+                                    } else {
+                                        mServerSend += "客户端链接失败！\n\n"
                                         mServiceListener?.callBack(mServerSend, mServerResult)
                                     }
                                 }
@@ -74,8 +81,8 @@ class SocketUtil {
                     }
                 }.onFailure {
                     runCatching {
-                        mBufferedReader?.close()
-                        mBufferedReader = null
+                        mRead?.close()
+                        mRead = null
                     }
                     val msg = "server socket error: " + it.message + "\r\n"
                     log(msg)
@@ -92,10 +99,10 @@ class SocketUtil {
                     mServerSend = "socket is connect: $connected\n\n"
                     mServiceListener?.callBack(mServerSend, mServerResult)
                     if (connected) {
-                        if (mPrintStream == null) {
-                            mPrintStream = PrintStream(it.getOutputStream(), true, ENCODING)
+                        if (mWrite == null) {
+                            mWrite = PrintStream(it.getOutputStream(), true, ENCODING)
                         }
-                        mPrintStream?.println(content)
+                        mWrite?.println(content)
                         mServerSend = content
                         mServiceListener?.callBack(mServerSend, mServerResult)
                     } else {
@@ -104,10 +111,10 @@ class SocketUtil {
                     }
                 }
             } catch (e: Exception) {
-                mServerSend += "server 发送失败：${e.message}\n\n"
+                mServerSend = "server 发送失败：${e.message}\n\n"
                 mServiceListener?.callBack(mServerSend, mServerResult)
-                mPrintStream?.close()
-                mPrintStream = null
+                mWrite?.close()
+                mWrite = null
             }
         }
 
@@ -116,8 +123,20 @@ class SocketUtil {
         }
 
         private var mServiceListener: ServerCallBackListener? = null
-        public fun setServiceCallBackListener(serviceListener: ServerCallBackListener) {
+        fun setServiceCallBackListener(serviceListener: ServerCallBackListener) {
             mServiceListener = serviceListener
+        }
+
+        fun stop() {
+            runCatching {
+                mRead?.close()
+                mWrite?.close()
+                mSocket?.close()
+                mServerSocket?.close()
+                log("释放了 server!")
+            }.onFailure {
+                log("释放了 server error: ${it.message}")
+            }
         }
     }
 
@@ -126,20 +145,21 @@ class SocketUtil {
             return@lazy CoroutineScope(Dispatchers.IO)
         }
         private var mSocket: Socket? = null
-        private var mBufferedReader: BufferedReader? = null
+        private var mRead: BufferedReader? = null
+        private var mWrite: PrintStream? = null
         private var mClientSend = ""
         private var mClientResult = ""
-        private var mClientPrintStream: PrintStream? = null
 
         fun initClientSocket(ip: String) {
             mClientSend = ""
             mClientResult = ""
-            mScope.launch {
+            mScope.launch(Dispatchers.IO) {
                 runCatching {
                     mSocket = Socket(ip, PORT)
                     mClientSend += "client 创建 socket: ip：$ip port: $PORT ${"\n\n"}"
                     mClientListener?.callBack(mClientSend, mClientResult)
                     log(mClientSend)
+
                     mSocket?.let { socket ->
                         val connected = socket.isConnected
                         mClientSend += "client connect: $connected ${"\n\n"}"
@@ -147,11 +167,17 @@ class SocketUtil {
                         mClientListener?.callBack(mClientSend, mClientResult)
 
                         if (connected) {
-                            mBufferedReader = BufferedReader(InputStreamReader(socket.getInputStream(), ENCODING))
+                            mRead = BufferedReader(InputStreamReader(socket.getInputStream(), ENCODING))
+                            // read data
 
-                            while (mBufferedReader!!.readLine()
+                            mClientSend += "client wait ...${"\n\n"}"
+                            mClientListener?.callBack(mClientSend, mClientResult)
+                            log(mClientSend)
+
+                            while (mRead!!.readLine()
                                     .also { mClientResult = it } != null) {
                                 mClientListener?.callBack(mClientSend, mClientResult)
+                                log("client read data: $mClientResult")
                             }
                         } else {
                             mClientSend += "client is not connected! ${"\n\n"}"
@@ -160,8 +186,8 @@ class SocketUtil {
                     }
                 }.onFailure {
                     runCatching {
-                        mBufferedReader?.close()
-                        mBufferedReader = null
+                        mRead?.close()
+                        mRead = null
                     }
                     runCatching {
                         mSocket?.close()
@@ -174,17 +200,22 @@ class SocketUtil {
             }
         }
 
+        /**
+         * 发送数据的时候，必须是在异步线程中
+         */
         fun sendClientData(content: String) {
             runCatching {
                 mSocket?.let {
                     val connected = it.isConnected
                     if (connected) {
-                        if (mClientPrintStream == null) {
-                            mClientPrintStream = PrintStream(it.getOutputStream(), true, ENCODING)
+                        if (mWrite == null) {
+                            mWrite = PrintStream(it.getOutputStream(), true, ENCODING)
                         }
-                        // send client data
-                        mClientPrintStream?.println(content)
-                        mClientResult = content
+
+                        // send data
+                        mWrite?.println(content)
+
+                        mClientSend = content
                         mClientListener?.callBack(mClientSend, mClientResult)
                     } else {
                         mClientSend += "socket is not connected! ${"\n\n"}"
@@ -193,7 +224,7 @@ class SocketUtil {
                     }
                 }
             }.onFailure {
-                mClientSend += "socket snd error: ${it.message} ${"\n\n"}"
+                mClientSend = "socket snd error: ${it.message} ${"\n\n"}"
                 log(mClientSend)
                 mClientListener?.callBack(mClientSend, mClientResult)
             }
@@ -206,6 +237,17 @@ class SocketUtil {
         private var mClientListener: ClientCallBackListener? = null
         public fun setServiceCallBackListener(clientListener: ClientCallBackListener) {
             mClientListener = clientListener
+        }
+
+        fun stop() {
+            runCatching {
+                mRead?.close()
+                mWrite?.close()
+                mSocket?.close()
+                log("释放了 client!")
+            }.onFailure {
+                log("释放了 client error: ${it.message}")
+            }
         }
     }
 }
