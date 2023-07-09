@@ -175,34 +175,34 @@ class SocketUtil {
                     mSocket?.close()
                     mSocket = null
                 }.onFailure {
-                    log("server -- socket关闭异常！")
+                    log("server -- socket close failure！")
                 }
                 runCatching {
                     mServerSocket?.close()
                     mServerSocket = null
                 }.onFailure {
-                    log("server -- 关闭异常！")
+                    log("server -- close failure！")
                 }
 
                 runCatching {
                     mRead?.close()
                     mRead = null
                 }.onFailure {
-                    log("server -- 读取流关闭异常！")
+                    log("server -- close reading steam failure！")
                 }
                 runCatching {
                     mWrite?.close()
                     mWrite = null
                 }.onFailure {
-                    log("server -- 发送流关闭异常！")
+                    log("server -- close send steam failure ！")
                 }
 
                 mJob?.cancel()
-                log("释放了 server!")
-                mServerSend += "释放了 server!\n\n"
+                log("release server!")
+                mServerSend += "release server!\n\n"
                 mServiceListener?.callBack(mServerSend, mServerResult)
             }.onFailure {
-                log("释放了 server error: ${it.message}")
+                log("release server error: ${it.message}")
             }
         }
     }
