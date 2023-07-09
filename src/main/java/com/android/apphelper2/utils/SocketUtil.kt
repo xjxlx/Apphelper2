@@ -17,6 +17,7 @@ class SocketUtil {
         private const val PORT = 6666
         private const val TAG = "Socket-Util"
         private const val ENCODING = "UTF-8"
+        private const val BIND_CLIENT = "client:bind:"
         fun log(content: String) {
             LogUtil.e(TAG, content)
         }
@@ -67,7 +68,7 @@ class SocketUtil {
                                     log(mServerSend)
 
                                     // 绑定成功的时候，给客户端发送一条信息，告诉客户端已经链接成功了
-                                    mWrite?.println("client:bind:" + address.hostAddress)
+                                    mWrite?.println(BIND_CLIENT + address.hostAddress)
                                 }
 
                                 mScope.launch(Dispatchers.IO) {
@@ -252,6 +253,11 @@ class SocketUtil {
                                         if (it != null) {
                                             mBindServerFlag = true
                                             mClientResult = it
+                                            if (it.contains(BIND_CLIENT)) {
+                                                mClientSend += "server bind client success! ${"\n\n"}"
+                                                mClientSend += "server bind client address:${it} ${"\n\n"}"
+                                                mClientListener?.callBack(mClientSend, mClientResult)
+                                            }
                                         } else {
                                             mBindServerFlag = false
                                             mClientSend += "server disconnect the client ! ${"\n\n"}"
