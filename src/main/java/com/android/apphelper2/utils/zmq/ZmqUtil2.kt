@@ -201,6 +201,13 @@ object ZmqUtil2 {
         }
     }
 
+    suspend fun setConnectionLostListener(block: (Boolean) -> Unit) {
+        mDebounceUtil.listener {
+            log("ST socket connect lost ！")
+            block(it)
+        }
+    }
+
     fun log(content: String) {
         LogUtil.e(TAG, content)
         mWriter?.send(content)
