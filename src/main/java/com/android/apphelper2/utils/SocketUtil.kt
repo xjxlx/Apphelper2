@@ -224,14 +224,14 @@ class SocketUtil {
         private var mWrite: PrintStream? = null
         private var mClientSend = ""
         private var mClientResult = ""
-        private var isStop = false
+        private var isStop: AtomicBoolean = AtomicBoolean()
         private var mJob: Job? = null
-        private var mBindServerFlag = false;
+        private var mBindServerFlag: AtomicBoolean = AtomicBoolean()
 
         fun initClientSocket(ip: String) {
             mClientSend = ""
             mClientResult = ""
-            isStop = false
+            isStop.set(false)
 
             mJob = mScope.launch(Dispatchers.IO) {
                 runCatching {
@@ -259,7 +259,7 @@ class SocketUtil {
                             while (mRead?.readLine()
                                     .also {
                                         if (it != null) {
-                                            mBindServerFlag = true
+                                            mBindServerFlag.set(true)
                                             mClientResult = it
                                             if (it.contains(CLIENT_BIND_CLIENT)) {
                                                 val split = it.split(CLIENT_BIND_CLIENT)
@@ -268,7 +268,7 @@ class SocketUtil {
                                                 mClientListener?.callBack(mClientSend, mClientResult)
                                             }
                                         } else {
-                                            mBindServerFlag = false
+                                            mBindServerFlag.set(false)
                                             mClientSend += "server disconnect the link ! ${"\n\n"}"
                                             mClientListener?.callBack(mClientSend, mClientResult)
                                         }
@@ -302,14 +302,14 @@ class SocketUtil {
          */
         fun sendClientData(content: String): Boolean {
             runCatching {
-                if (isStop) {
+                if (isStop.get()) {
                     mClientSend += "the socket have stopped, do not send message !${"\n\n"}"
                     mClientListener?.callBack(mClientSend, mClientResult)
                     log(mClientSend)
                     return false
                 }
 
-                if (!mBindServerFlag) {
+                if (!mBindServerFlag.get()) {
                     mClientSend += "the server have stopped, do not send message !${"\n\n"}"
                     mClientListener?.callBack(mClientSend, mClientResult)
                     log(mClientSend)
@@ -355,15 +355,13 @@ class SocketUtil {
         fun stop() {
             mScope.launch(Dispatchers.IO) {
                 runCatching {
-                    isStop = true
-
+                    isStop.set(true)
                     runCatching {
                         mSocket?.close()
                         mSocket = null
                     }.onFailure {
                         log("server -- socket close failure!")
                     }
-
                     runCatching {
                         mRead?.close()
                         mRead = null
@@ -376,10 +374,8 @@ class SocketUtil {
                     }.onFailure {
                         log("client -- send steam close failure!")
                     }
-
                     mJob?.cancel()
                     log("release client!")
-
                     mClientSend += "release server!\n\n"
                     mClientListener?.callBack(mClientSend, mClientResult)
                 }.onFailure {
