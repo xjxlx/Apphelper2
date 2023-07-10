@@ -1,5 +1,6 @@
 package com.android.apphelper2.utils.socket
 
+import android.text.TextUtils
 import com.android.apphelper2.utils.zmq.ZmqUtil6.port
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,12 +38,14 @@ class SocketClientUtil {
      */
     private var mConnectErrorType: AtomicInteger = AtomicInteger()
 
-    fun initClientSocket(ip: String) {
+    fun initClientSocket(ip: String, msg: String = "") {
         this.mIp = ip
         mTraceInfo = ""
         isStop.set(false)
-        mConnectErrorType.set(0)
 
+        if (!TextUtils.isEmpty(msg)) {
+            trace(msg)
+        }
         trace("initClientSocket ...")
 
         mJob = mScope.launch(Dispatchers.IO) {
@@ -50,12 +53,13 @@ class SocketClientUtil {
                 trace("ip : [ $ip ] \r\nport : [ $port ]")
                 try {
                     mSocket = Socket(ip, SocketUtil.PORT)
-                    mSocket?.soTimeout = 3000
                 } catch (e: Exception) {
                     trace("the client connect server failure:${e.message}")
                     mConnectErrorType.set(1)
+                } finally {
+                    trace("finally ------->")
                 }
-
+                trace("finally ------->2")
                 mSocket?.let { socket ->
                     val connected = socket.isConnected
                     if (connected) {
@@ -172,9 +176,8 @@ class SocketClientUtil {
                 if (!isStop.get()) {
                     val type = mConnectErrorType.get()
 
-                    if (type == 1 || type == 2 || type == 3) {
-                        trace("try restart socket !")
-                        initClientSocket(mIp)
+                    if (type != 0) {
+                        initClientSocket(mIp, msg = "try restart connect !")
                     }
                 }
             }
