@@ -27,6 +27,8 @@ class SocketServerUtil {
     private var isStop: AtomicBoolean = AtomicBoolean()
     private var mJob: Job? = null
     private var mClientConnected = false
+    private var mResultListener: SocketListener? = null
+    private var mTraceListener: SocketListener? = null
 
     fun initSocketService() {
         mTraceInfo = ""
@@ -183,11 +185,6 @@ class SocketServerUtil {
         }
     }
 
-    private var mTraceListener: SocketListener? = null
-    fun setTraceListener(serviceListener: SocketListener) {
-        mTraceListener = serviceListener
-    }
-
     private fun trace(content: String, automaticAdd: Boolean = true) {
         if (automaticAdd) {
             mTraceInfo += (content + "\n\n")
@@ -197,7 +194,10 @@ class SocketServerUtil {
         mTraceListener?.callBackListener(mTraceInfo)
     }
 
-    private var mResultListener: SocketListener? = null
+    fun setTraceListener(serviceListener: SocketListener) {
+        mTraceListener = serviceListener
+    }
+
     fun setResultListener(listener: SocketListener) {
         this.mResultListener = listener
     }
