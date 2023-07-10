@@ -21,7 +21,7 @@ import java.net.URL
 
 /**
  * network util
- * if you want get the ssid ,must location permission
+ * if you want get the ssid ,must location permission ,and sdk >= 31
  *     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
  *     and start location switch
  */
@@ -51,7 +51,6 @@ class NetworkUtil private constructor() {
             .build()
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     private val mCallBack = object : ConnectivityManager.NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
         // called the method when the network is lost
         override fun onLost(network: Network) {
