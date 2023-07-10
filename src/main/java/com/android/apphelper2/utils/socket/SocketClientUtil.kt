@@ -1,6 +1,5 @@
 package com.android.apphelper2.utils.socket
 
-import com.android.apphelper2.utils.SocketUtil
 import com.android.apphelper2.utils.zmq.ZmqUtil6.port
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +12,7 @@ import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
 
 class SocketClientUtil {
+
     private val mScope: CoroutineScope by lazy {
         return@lazy CoroutineScope(Dispatchers.IO)
     }

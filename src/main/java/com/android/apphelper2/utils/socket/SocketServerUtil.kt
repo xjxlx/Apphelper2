@@ -1,6 +1,5 @@
 package com.android.apphelper2.utils.socket
 
-import com.android.apphelper2.utils.SocketUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
