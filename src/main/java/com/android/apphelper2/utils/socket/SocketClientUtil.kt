@@ -39,13 +39,13 @@ class SocketClientUtil {
                 try {
                     mSocket = Socket(ip, SocketUtil.PORT)
                 } catch (e: Exception) {
-                    trace("client connect server failure:${e.message}")
+                    trace("the client connect server failure:${e.message}")
                 }
 
                 mSocket?.let { socket ->
                     val connected = socket.isConnected
                     if (connected) {
-                        trace("client is connect success!")
+                        trace("the client is connect server success!")
                         mRead = BufferedReader(InputStreamReader(socket.getInputStream(), SocketUtil.ENCODING))
                         mWrite = PrintStream(socket.getOutputStream(), true, SocketUtil.ENCODING)
 
@@ -57,13 +57,13 @@ class SocketClientUtil {
                                         mBindServerFlag.set(true)
                                         if (it.contains(SocketUtil.CLIENT_BIND_CLIENT)) {
                                             val split = it.split(SocketUtil.CLIENT_BIND_CLIENT)
-                                            trace("server bind client success:${split[1]}")
+                                            trace("server bind success:${split[1]}")
                                         } else {
                                             mResultListener?.callBackListener(it)
                                         }
                                     } else {
                                         mBindServerFlag.set(false)
-                                        trace("server disconnect the link !")
+                                        trace("\n\nserver disconnect the link !")
                                     }
                                 } != null) {
                         }
@@ -80,7 +80,7 @@ class SocketClientUtil {
                     mSocket?.close()
                     mSocket = null
                 }
-                trace("client link failure:${it.message}")
+                trace("\n\nclient link failure:${it.message}")
             }
         }
     }
@@ -91,11 +91,11 @@ class SocketClientUtil {
     fun send(content: String): Boolean {
         runCatching {
             if (isStop.get()) {
-                trace("the socket have stopped, do not send message !")
+                trace("the socket is stop, can not send message !")
                 return false
             }
             if (!mBindServerFlag.get()) {
-                trace("the server have stopped, do not send message !")
+                trace("the server is stop, can not send message !")
                 return false
             }
 
@@ -111,7 +111,7 @@ class SocketClientUtil {
                 }
             }
         }.onFailure {
-            trace("\"socket snd error: ${it.message}")
+            trace("socket snd error: ${it.message}")
         }
         return false
     }

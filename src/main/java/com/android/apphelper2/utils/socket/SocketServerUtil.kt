@@ -86,13 +86,13 @@ class SocketServerUtil {
                                                             mClientConnected = true
                                                         } else {
                                                             mClientConnected = false
-                                                            trace("the client connect lost !")
+                                                            trace("\n\nthe client connect lost !")
                                                         }
                                                     } != null) {
                                                 mResultListener?.callBackListener(mServerResult)
                                             }
                                         } else {
-                                            trace("client is not connect!")
+                                            trace("\n\nclient is not connect!")
                                         }
                                     }
                                 } else {
