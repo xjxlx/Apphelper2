@@ -62,6 +62,7 @@ class SocketClientUtil {
                         trace("the client is connect server success!")
                         mRead = BufferedReader(InputStreamReader(socket.getInputStream(), SocketUtil.ENCODING))
                         mWrite = PrintStream(socket.getOutputStream(), true, SocketUtil.ENCODING)
+                        mConnectErrorType.set(0)
 
                         // read data
                         trace("loop wait read server send message ...")
