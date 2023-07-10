@@ -4,12 +4,14 @@ import com.android.apphelper2.utils.zmq.ZmqUtil6.port
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintStream
 import java.net.Socket
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 class SocketClientUtil {
 
@@ -25,21 +27,33 @@ class SocketClientUtil {
     private var mBindServerFlag: AtomicBoolean = AtomicBoolean()
     private var mTraceListener: SocketListener? = null
     private var mResultListener: SocketListener? = null
+    private var mRestartJob: Job? = null
+    private var mIp = ""
+
+    /**
+     * 1: 绑定服务端失败，极有可能是服务端网络异常
+     * 2: 客户端本身的网络出现了异常，比如断网了，或者服务端的链接被重置了
+     * 3: 服务端出现了异常，例如：服务端的socket close
+     */
+    private var mConnectErrorType: AtomicInteger = AtomicInteger()
 
     fun initClientSocket(ip: String) {
+        this.mIp = ip
         mTraceInfo = ""
         isStop.set(false)
+        mConnectErrorType.set(0)
 
         trace("initClientSocket ...")
 
         mJob = mScope.launch(Dispatchers.IO) {
             runCatching {
                 trace("ip : [ $ip ] \r\nport : [ $port ]")
-
                 try {
                     mSocket = Socket(ip, SocketUtil.PORT)
+                    mSocket?.soTimeout = 3000
                 } catch (e: Exception) {
                     trace("the client connect server failure:${e.message}")
+                    mConnectErrorType.set(1)
                 }
 
                 mSocket?.let { socket ->
@@ -63,7 +77,8 @@ class SocketClientUtil {
                                         }
                                     } else {
                                         mBindServerFlag.set(false)
-                                        trace("\n\nserver disconnect the link !")
+                                        trace("\nserver disconnect the link !")
+                                        mConnectErrorType.set(3)
                                     }
                                 } != null) {
                         }
@@ -80,7 +95,8 @@ class SocketClientUtil {
                     mSocket?.close()
                     mSocket = null
                 }
-                trace("\n\nclient link failure:${it.message}")
+                trace("\nclient link failure:${it.message}")
+                mConnectErrorType.set(2)
             }
         }
     }
@@ -119,6 +135,8 @@ class SocketClientUtil {
     fun stop() {
         mScope.launch(Dispatchers.IO) {
             runCatching {
+                mRestartJob?.cancel()
+
                 isStop.set(true)
                 runCatching {
                     mSocket?.close()
@@ -142,6 +160,22 @@ class SocketClientUtil {
                 trace("release server!")
             }.onFailure {
                 SocketUtil.log("release client error: ${it.message}")
+            }
+        }
+    }
+
+    fun autoRestart() {
+        mRestartJob = mScope.launch(Dispatchers.IO) {
+            while (true) {
+                delay(5000)
+                if (!isStop.get()) {
+                    val type = mConnectErrorType.get()
+
+                    if (type == 1 || type == 2 || type == 3) {
+                        trace("try restart socket !")
+                        initClientSocket(mIp)
+                    }
+                }
             }
         }
     }
