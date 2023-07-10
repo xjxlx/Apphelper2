@@ -48,7 +48,7 @@ class SocketServerUtil {
 
             runCatching {
                 mServerSocket?.let { server ->
-                    trace("server wait client connect...")
+                    trace("loop wait client connect ...")
                     while (mLoopFlag.get()) {
                         // block thread ,wait client connect
                         runCatching {
@@ -65,17 +65,17 @@ class SocketServerUtil {
                         mSocket?.let {
                             runCatching {
                                 if (mClientConnected) {
-                                    trace("client connected, start read and write...")
                                     mRead = BufferedReader(InputStreamReader(mSocket?.getInputStream(), SocketUtil.ENCODING))
                                     mWrite = PrintStream(mSocket?.getOutputStream(), true, SocketUtil.ENCODING)
 
                                     val address = it.inetAddress
                                     if (address != null) {
-                                        trace("client address：${address.hostAddress}")
-                                        trace("client name：${address.hostName}")
+                                        trace("client connect success, address：${address.hostAddress}")
                                         // send a message to the client,tell client bind address info
                                         mWrite?.println(SocketUtil.CLIENT_BIND_CLIENT + address.hostAddress)
                                     }
+
+                                    trace("loop wait start read data ...")
 
                                     // loop wait for a message sent by client
                                     mScope.launch(Dispatchers.IO) {
@@ -135,6 +135,7 @@ class SocketServerUtil {
                 if (connected) {
                     mWrite?.println(content)
                     trace(content, false)
+                    return true
                 } else {
                     trace("server is not connect!")
                 }
@@ -192,6 +193,7 @@ class SocketServerUtil {
             mTraceInfo = content
         }
         mTraceListener?.callBackListener(mTraceInfo)
+        SocketUtil.log(content)
     }
 
     fun setTraceListener(serviceListener: SocketListener) {

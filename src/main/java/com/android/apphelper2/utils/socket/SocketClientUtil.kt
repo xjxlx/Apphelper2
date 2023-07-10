@@ -66,7 +66,6 @@ class SocketClientUtil {
                                         trace("server disconnect the link !")
                                     }
                                 } != null) {
-
                         }
                     } else {
                         trace("client is not connected!")
