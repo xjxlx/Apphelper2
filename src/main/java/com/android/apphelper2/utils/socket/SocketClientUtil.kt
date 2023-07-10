@@ -56,10 +56,7 @@ class SocketClientUtil {
                 } catch (e: Exception) {
                     trace("the client connect server failure:${e.message}")
                     mConnectErrorType.set(1)
-                } finally {
-                    trace("finally ------->")
                 }
-                trace("finally ------->2")
                 mSocket?.let { socket ->
                     val connected = socket.isConnected
                     if (connected) {
