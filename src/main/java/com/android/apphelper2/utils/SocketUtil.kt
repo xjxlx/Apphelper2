@@ -236,6 +236,11 @@ class SocketUtil {
 
             mJob = mScope.launch(Dispatchers.IO) {
                 runCatching {
+                    mClientSend += "client ip：$ip\n"
+                    mClientSend += "client port: $PORT \n\n"
+                    mClientListener?.callBack(mClientSend, mClientResult)
+                    log(mClientSend)
+
                     try {
                         mClientSend += "client create socket ...\n\n"
                         mSocket = Socket(ip, PORT)
@@ -243,10 +248,7 @@ class SocketUtil {
                         val msg = "client create socket error:${e.message}!\n\n"
                         mClientSend += msg
                     }
-                    mClientSend += "client ip：$ip\n"
-                    mClientSend += "client port: $PORT \n\n"
                     mClientListener?.callBack(mClientSend, mClientResult)
-                    log(mClientSend)
 
                     mSocket?.let { socket ->
                         val connected = socket.isConnected
