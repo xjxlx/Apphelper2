@@ -46,6 +46,8 @@ object ZmqUtil2 {
         }
 
     private val mDebounceUtil: DebounceUtil<Boolean> by lazy { return@lazy DebounceUtil(15 * 1000) }
+    private val mTraceBuffer: StringBuffer = StringBuffer()
+    private var mTraceListener: TraceListener? = null
 
     init {
         mScope.launch {
@@ -208,9 +210,20 @@ object ZmqUtil2 {
         }
     }
 
+    interface TraceListener {
+        fun trace(content: String)
+    }
+
+    fun setTraceListener(listener: TraceListener) {
+        this.mTraceListener = listener
+    }
+
     fun log(content: String) {
         LogUtil.e(TAG, content)
         mWriter?.send(content)
+        mTraceBuffer.append(content)
+            .append("\r\n\n")
+        mTraceListener?.trace(mTraceBuffer.toString())
     }
 
     fun initLog(fragment: Fragment) {
