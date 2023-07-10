@@ -87,6 +87,7 @@ class SocketServerUtil {
                                                             mClientConnected = true
                                                         } else {
                                                             mClientConnected = false
+                                                            trace("the client connect lost !")
                                                         }
                                                     } != null) {
                                                 mResultListener?.callBackListener(mServerResult)
