@@ -6,7 +6,9 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
+import android.os.Build
 import android.text.TextUtils
+import androidx.annotation.RequiresApi
 import com.android.apphelper2.app.AppHelperManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +21,9 @@ import java.net.URL
 
 /**
  * network util
+ * if you want get the ssid ,must location permission
+ *     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+ *     and start location switch
  */
 class NetworkUtil private constructor() {
 
@@ -45,13 +50,15 @@ class NetworkUtil private constructor() {
             .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
             .build()
     }
-    private val mCallBack = object : ConnectivityManager.NetworkCallback() {
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private val mCallBack = object : ConnectivityManager.NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
         // called the method when the network is lost
         override fun onLost(network: Network) {
             super.onLost(network)
             LogUtil.e(TAG, "this $network is lost!")
-            mIpAddress?.hostIp = ""
-            mIpAddress?.hostName = ""
+            mIpAddress?.ip = ""
+            mIpAddress?.ssid = ""
         }
 
         // called the method when the network changes
@@ -75,12 +82,16 @@ class NetworkUtil private constructor() {
                                     if (hostAddress != null) {
                                         if ((!TextUtils.equals(hostAddress, "0.0.0.0")) && (!(hostAddress.contains(":")))) {
                                             LogUtil.e(TAG, "hostAddress: wifi: $hostAddress")
-                                            if (!TextUtils.equals(mIpAddress?.hostIp, hostAddress)) {
+                                            if (!TextUtils.equals(mIpAddress?.ip, hostAddress)) {
                                                 mScope.launch {
                                                     LogUtil.e(TAG, "send: wifi: $hostAddress  hostName:${address.hostName}")
                                                     if (mIpAddress != null) {
-                                                        mIpAddress?.hostIp = hostAddress
-                                                        mIpAddress?.hostName = address.hostName
+
+                                                        val replace = transportInfo.ssid.replace("\"", "")
+                                                            .replace("<", "")
+                                                            .replace(">", "")
+                                                        mIpAddress?.ip = hostAddress
+                                                        mIpAddress?.ssid = replace
                                                         mStateFlow.emit(mIpAddress!!)
                                                     }
                                                 }
@@ -106,12 +117,12 @@ class NetworkUtil private constructor() {
                                 val hostAddress = address.getHostAddress()
                                 if (!TextUtils.isEmpty(hostAddress)) {
                                     LogUtil.e(TAG, "hostAddress: mobile: $hostAddress")
-                                    if (!TextUtils.equals(hostAddress, mIpAddress?.hostIp)) {
+                                    if (!TextUtils.equals(hostAddress, mIpAddress?.ip)) {
                                         mScope.launch {
                                             LogUtil.e(TAG, "send : mobile: $hostAddress")
                                             if (mIpAddress != null) {
-                                                mIpAddress?.hostIp = hostAddress!!
-                                                mIpAddress?.hostName = address.hostName
+                                                mIpAddress?.ip = hostAddress!!
+                                                mIpAddress?.ssid = ""
                                                 mStateFlow.emit(mIpAddress!!)
                                             }
                                         }
@@ -149,7 +160,7 @@ class NetworkUtil private constructor() {
      */
     suspend fun getIPAddress(block: (ipAddress: IpAddress) -> Unit): NetworkUtil {
         mStateFlow.first {
-            if (!TextUtils.isEmpty(it.hostIp)) {
+            if (!TextUtils.isEmpty(it.ip)) {
                 block(it)
             }
             return@first false
@@ -163,10 +174,10 @@ class NetworkUtil private constructor() {
      * @return if network is connect ,return the ipAddress ,it only can call back one count
      */
     suspend fun getSingleIpAddress(block: (IpAddress) -> Unit): NetworkUtil {
-        if (TextUtils.isEmpty(mIpAddress?.hostIp)) {
+        if (TextUtils.isEmpty(mIpAddress?.ip)) {
             runCatching {
                 mStateFlow.first {
-                    if (!TextUtils.isEmpty(it.hostIp)) {
+                    if (!TextUtils.isEmpty(it.ip)) {
                         LogUtil.e(TAG, "hostAddress:------:> result--->block---> $it")
                         block(it)
                         return@first true
@@ -202,6 +213,7 @@ class NetworkUtil private constructor() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     fun register(): NetworkUtil {
         LogUtil.e(TAG, "register network !")
         mIpAddress = IpAddress()
@@ -209,11 +221,12 @@ class NetworkUtil private constructor() {
         return this
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     fun unregister() {
         LogUtil.e(TAG, "unregister network !")
         mConnectivityManager.unregisterNetworkCallback(mCallBack)
         mIpAddress = null
     }
 
-    data class IpAddress(var hostIp: String = "", var hostName: String = "")
+    data class IpAddress(var ip: String = "", var ssid: String = "")
 }
