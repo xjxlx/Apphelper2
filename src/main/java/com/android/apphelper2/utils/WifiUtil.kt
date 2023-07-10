@@ -9,7 +9,7 @@ class WifiUtil(val context: Context) {
         return@lazy context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
     }
 
-    fun getWifiSsId(context: Context): String {
+    fun getWifiSsId(): String {
         var ssid: String = ""
         val wifiInfo = wifiManager.connectionInfo
         if (wifiInfo != null) {
