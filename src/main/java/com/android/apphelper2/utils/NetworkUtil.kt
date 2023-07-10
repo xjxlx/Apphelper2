@@ -6,9 +6,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
-import android.os.Build
 import android.text.TextUtils
-import androidx.annotation.RequiresApi
 import com.android.apphelper2.app.AppHelperManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -212,7 +210,6 @@ class NetworkUtil private constructor() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     fun register(): NetworkUtil {
         LogUtil.e(TAG, "register network !")
         mIpAddress = IpAddress()
@@ -220,7 +217,6 @@ class NetworkUtil private constructor() {
         return this
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
     fun unregister() {
         LogUtil.e(TAG, "unregister network !")
         mConnectivityManager.unregisterNetworkCallback(mCallBack)
