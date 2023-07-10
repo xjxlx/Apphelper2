@@ -8,6 +8,7 @@ object SocketUtil {
     const val ENCODING = "UTF-8"
     const val CLIENT_BIND_CLIENT = "client:bind:"
     private const val TAG = "Socket-Util"
+
     fun log(content: String) {
         LogUtil.e(TAG, content)
     }
