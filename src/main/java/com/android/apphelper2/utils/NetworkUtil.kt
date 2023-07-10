@@ -29,11 +29,11 @@ class NetworkUtil private constructor() {
         }
     }
 
-    private var mIpAddress = ""
+    private var mIpAddress: IpAddress? = IpAddress()
     private val mScope: CoroutineScope by lazy {
         return@lazy CoroutineScope(Dispatchers.IO)
     }
-    private val mStateFlow: MutableSharedFlow<String> = MutableSharedFlow()
+    private val mStateFlow: MutableSharedFlow<IpAddress> = MutableSharedFlow()
     private val mConnectivityManager: ConnectivityManager by lazy {
         return@lazy AppHelperManager.context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
@@ -46,12 +46,12 @@ class NetworkUtil private constructor() {
             .build()
     }
     private val mCallBack = object : ConnectivityManager.NetworkCallback() {
-
         // called the method when the network is lost
         override fun onLost(network: Network) {
             super.onLost(network)
             LogUtil.e(TAG, "this $network is lost!")
-            mIpAddress = ""
+            mIpAddress?.hostIp = ""
+            mIpAddress?.hostName = ""
         }
 
         // called the method when the network changes
@@ -71,14 +71,18 @@ class NetworkUtil private constructor() {
                                 val address = ip.address
                                 if (address != null) {
                                     val hostAddress = address.hostAddress
+
                                     if (hostAddress != null) {
                                         if ((!TextUtils.equals(hostAddress, "0.0.0.0")) && (!(hostAddress.contains(":")))) {
                                             LogUtil.e(TAG, "hostAddress: wifi: $hostAddress")
-                                            if (!TextUtils.equals(mIpAddress, hostAddress)) {
+                                            if (!TextUtils.equals(mIpAddress?.hostIp, hostAddress)) {
                                                 mScope.launch {
-                                                    LogUtil.e(TAG, "send: wifi: $hostAddress")
-                                                    mStateFlow.emit(hostAddress)
-                                                    mIpAddress = hostAddress
+                                                    LogUtil.e(TAG, "send: wifi: $hostAddress  hostName:${address.hostName}")
+                                                    if (mIpAddress != null) {
+                                                        mIpAddress?.hostIp = hostAddress
+                                                        mIpAddress?.hostName = address.hostName
+                                                        mStateFlow.emit(mIpAddress!!)
+                                                    }
                                                 }
                                             }
                                             return
@@ -102,11 +106,14 @@ class NetworkUtil private constructor() {
                                 val hostAddress = address.getHostAddress()
                                 if (!TextUtils.isEmpty(hostAddress)) {
                                     LogUtil.e(TAG, "hostAddress: mobile: $hostAddress")
-                                    if (!TextUtils.equals(hostAddress, mIpAddress)) {
+                                    if (!TextUtils.equals(hostAddress, mIpAddress?.hostIp)) {
                                         mScope.launch {
                                             LogUtil.e(TAG, "send : mobile: $hostAddress")
-                                            mStateFlow.emit(hostAddress!!)
-                                            mIpAddress = hostAddress
+                                            if (mIpAddress != null) {
+                                                mIpAddress?.hostIp = hostAddress!!
+                                                mIpAddress?.hostName = address.hostName
+                                                mStateFlow.emit(mIpAddress!!)
+                                            }
                                         }
                                         return
                                     }
@@ -140,9 +147,9 @@ class NetworkUtil private constructor() {
      * must has permission
      *@return if network is connect ,return the ipAddress, it can call back multiple count
      */
-    suspend fun getIPAddress(block: (ipAddress: String) -> Unit): NetworkUtil {
+    suspend fun getIPAddress(block: (ipAddress: IpAddress) -> Unit): NetworkUtil {
         mStateFlow.first {
-            if (!TextUtils.isEmpty(it)) {
+            if (!TextUtils.isEmpty(it.hostIp)) {
                 block(it)
             }
             return@first false
@@ -155,11 +162,11 @@ class NetworkUtil private constructor() {
      * must has permission
      * @return if network is connect ,return the ipAddress ,it only can call back one count
      */
-    suspend fun getSingleIpAddress(block: (String) -> Unit): NetworkUtil {
-        if (TextUtils.isEmpty(mIpAddress)) {
+    suspend fun getSingleIpAddress(block: (IpAddress) -> Unit): NetworkUtil {
+        if (TextUtils.isEmpty(mIpAddress?.hostIp)) {
             runCatching {
                 mStateFlow.first {
-                    if (!TextUtils.isEmpty(it)) {
+                    if (!TextUtils.isEmpty(it.hostIp)) {
                         LogUtil.e(TAG, "hostAddress:------:> result--->block---> $it")
                         block(it)
                         return@first true
@@ -168,10 +175,10 @@ class NetworkUtil private constructor() {
                 }
             }.onFailure {
                 LogUtil.e(TAG, "network ---> error :" + it.message)
-                block("")
+                block(IpAddress())
             }
         } else {
-            block(mIpAddress)
+            block(IpAddress())
         }
         return this
     }
@@ -197,7 +204,7 @@ class NetworkUtil private constructor() {
 
     fun register(): NetworkUtil {
         LogUtil.e(TAG, "register network !")
-        mIpAddress = ""
+        mIpAddress = IpAddress()
         mConnectivityManager.requestNetwork(mRequest, mCallBack)
         return this
     }
@@ -205,6 +212,8 @@ class NetworkUtil private constructor() {
     fun unregister() {
         LogUtil.e(TAG, "unregister network !")
         mConnectivityManager.unregisterNetworkCallback(mCallBack)
-        mIpAddress = ""
+        mIpAddress = null
     }
+
+    data class IpAddress(var hostIp: String = "", var hostName: String = "")
 }
