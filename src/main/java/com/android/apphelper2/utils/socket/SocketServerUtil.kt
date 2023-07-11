@@ -56,7 +56,7 @@ class SocketServerUtil {
                         }.onFailure {
                             runCatching {
                                 trace("server socket accept error: ${it.message}")
-                                mClientConnected = true
+                                mClientConnected = false
                                 mSocket?.close()
                                 mSocket = null
                             }
