@@ -49,7 +49,9 @@ class NetworkUtil private constructor() {
             .build()
     }
 
-    private val mCallBack = object : ConnectivityManager.NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
+    // if sdk > Q(31) , need add  flag FLAG_INCLUDE_LOCATION_INFO
+    // private val mCallBack = object : ConnectivityManager.NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
+    private val mCallBack = object : ConnectivityManager.NetworkCallback() {
         // called the method when the network is lost
         override fun onLost(network: Network) {
             super.onLost(network)
