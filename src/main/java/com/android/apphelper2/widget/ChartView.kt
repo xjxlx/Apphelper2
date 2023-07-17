@@ -4,7 +4,8 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
-import com.android.apphelper2.utils.CustomViewUtil
+import com.android.apphelper2.utils.CustomViewUtil.getBaseLine
+import com.android.apphelper2.utils.CustomViewUtil.getTextSize
 import com.android.apphelper2.utils.ResourcesUtil
 
 class ChartView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
@@ -72,6 +73,15 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy ResourcesUtil.toPx(60f)
     }
 
+    private val mScoreText = "100 分"
+    private val mPaintScore: Paint by lazy {
+        return@lazy Paint().apply {
+            color = Color.parseColor("#B3FFFFFF")
+            style = Paint.Style.FILL
+            textSize = ResourcesUtil.toPx(14F)
+        }
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         setMeasuredDimension(mMaxWidth, mMaxHeight)
@@ -85,7 +95,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             it.drawRoundRect(mBackgroundRectF, mBackgroundAngle, mBackgroundAngle, mPaintBackground)
 
             // 2: draw top text
-            val mTitleBaseLine = CustomViewUtil.getBaseLine(mPaintTitle, mTitle)
+            val mTitleBaseLine = getBaseLine(mPaintTitle, mTitle)
             it.drawText(mTitle, mPadding, mTitleBaseLine + mPadding, mPaintTitle)
 
             // 3：draw bottom line
@@ -112,6 +122,11 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             mPaintLines.color = mLineThreadColor
             it.drawLine(mLineLeft, threeLineLocation, mLineRight, threeLineLocation, mPaintLines)
 
+            // 4: draw score
+            val scoreSize = getTextSize(mPaintScore, mScoreText)
+            val scoreLeft = mMaxWidth - scoreSize[0] - mPadding
+            val scoreBaseLine = getBaseLine(mPaintScore, mScoreText)
+            it.drawText(mScoreText, scoreLeft, threeLineLocation - scoreBaseLine, mPaintScore)
         }
     }
 }
