@@ -2,6 +2,8 @@ package com.android.apphelper2.utils
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Resources
+import android.util.TypedValue
 import androidx.annotation.DimenRes
 import androidx.annotation.StringRes
 import com.android.apphelper2.app.AppHelperManager
@@ -68,5 +70,29 @@ object ResourcesUtil {
             LogUtil.e("getStringMetaData ---> error: " + ex.message)
         }
         return result
+    }
+
+    /**
+     * @param dp 具体的dp值
+     * @return 使用标准的dp值
+     */
+    fun toDp(dp: Float): Float {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, Resources.getSystem().displayMetrics)
+    }
+
+    /**
+     * @param px px的值
+     * @return 返回一个标准的px的值
+     */
+    fun toPx(px: Float): Float {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, Resources.getSystem().displayMetrics)
+    }
+
+    /**
+     * @param sp sp的值
+     * @return 返回一个标准的sp的值
+     */
+    fun toSp(sp: Float): Float {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, Resources.getSystem().displayMetrics)
     }
 }
