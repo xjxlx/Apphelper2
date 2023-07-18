@@ -215,9 +215,9 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         }
     }
 
-    fun setChartArray(chartArray: FloatArray) {
-        this.mChartArray = chartArray
-        val maxProgress = chartArray.maxOrNull()
+    fun setChartArray(chartBottomArray: FloatArray, chartTopArray: FloatArray) {
+        this.mChartArray = chartBottomArray
+        val maxProgress = chartBottomArray.maxOrNull()
 
         // 只能在这里进行动画的监听
         var temp = 0F
