@@ -6,6 +6,7 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.animation.addListener
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.apphelper2.utils.CustomViewUtil.getBaseLine
 import com.android.apphelper2.utils.CustomViewUtil.getTextSize
@@ -141,6 +142,9 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private var mChartArray: FloatArray = FloatArray(mBottomTextArray.size)
     private var mProgressBottom = 0F
     private var mAnimationValue: Float = 0F
+    private val mProgressInterval: Float by lazy {
+        return@lazy ResourcesUtil.toPx(3F)
+    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -206,30 +210,42 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
 
             // 6: draw bottom progress
             mBottomTextArray.indices.forEach { index ->
-                drawProgress(index, it)
+                drawBottomProgress(index, it)
             }
         }
     }
 
     fun setChartArray(chartArray: FloatArray) {
         this.mChartArray = chartArray
+        val maxProgress = chartArray.maxOrNull()
+
         // 只能在这里进行动画的监听
         var temp = 0F
         val animation = ValueAnimator.ofFloat(0F, 1F)
-        animation.duration = 3000L
-        animation.addUpdateListener {
-            mAnimationValue = it.animatedValue as Float
-            if (temp != mAnimationValue) {
-                invalidate()
-                temp = mAnimationValue
+            .apply {
+                duration = 3000L
+                addUpdateListener {
+                    mAnimationValue = it.animatedValue as Float
+                    if (temp != mAnimationValue) {
+                        invalidate()
+                        temp = mAnimationValue
+                    }
+                    if (maxProgress != null) {
+                        if (mAnimationValue > maxProgress) {
+                            cancel()
+                        }
+                    }
+                    LogUtil.e("value: $mAnimationValue")
+                }
+                addListener(onEnd = {
+                    LogUtil.e("animation: onEnd")
+                })
             }
-            LogUtil.e("value: $mAnimationValue")
-        }
         animation.start()
     }
 
     @SuppressLint("Recycle")
-    private fun drawProgress(index: Int, canvas: Canvas) {
+    private fun drawBottomProgress(index: Int, canvas: Canvas) {
         val rectLeft = getRectLeft(index)
         val rectTop = getRectTop(index)
         val rectRight = getRectRight(index)
