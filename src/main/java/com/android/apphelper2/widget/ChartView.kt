@@ -218,6 +218,13 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             mBottomTextArray.indices.forEach { index ->
                 drawProgress(index)
             }
+            if (mAnimationFlag) {
+                mBottomTextArray.indices.forEach { index ->
+                    if (index == mProgressIndex) {
+                        drawProgress(mProgressIndex)
+                    }
+                }
+            }
         }
     }
 
@@ -256,29 +263,54 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         delay(2000)
         var temp = 0F
 
-        mBottomTextArray.indices.forEach { index ->
-            val bottomProgress = mChartBottomArray[index]
-            val topProgress = mChartTopArray[index]
+        val bottomProgress = mChartBottomArray[0]
+        val topProgress = mChartTopArray[0]
 
-            if (topProgress > bottomProgress) {
-                mProgressIndex = index
+        if (topProgress > bottomProgress) {
+            mProgressIndex = 0
 
-                ValueAnimator.ofFloat(bottomProgress, topProgress)
-                    .apply {
-                        duration = 3000L
-                        addUpdateListener {
-                            mAnimationTopValue = it.animatedValue as Float
-                            if (temp != mAnimationTopValue) {
-                                invalidate()
-                                temp = mAnimationTopValue
-                            }
-                            LogUtil.e("progress - : $mAnimationTopValue")
+            ValueAnimator.ofFloat(bottomProgress, topProgress)
+                .apply {
+                    duration = 3000L
+                    addUpdateListener {
+                        mAnimationTopValue = it.animatedValue as Float
+                        if (temp != mAnimationTopValue) {
+                            invalidate()
+                            temp = mAnimationTopValue
                         }
-                        start()
+                        LogUtil.e("progress - : $mAnimationTopValue")
                     }
-                delay(2000)
-            }
+                    addListener(onStart = {
+                        mAnimationFlag = true
+                    })
+                    start()
+                }
+            // delay(2000)
         }
+
+//        mBottomTextArray.indices.forEach { index ->
+//            val bottomProgress = mChartBottomArray[index]
+//            val topProgress = mChartTopArray[index]
+//
+//            if (topProgress > bottomProgress) {
+//                mProgressIndex = index
+//
+//                ValueAnimator.ofFloat(bottomProgress, topProgress)
+//                    .apply {
+//                        duration = 3000L
+//                        addUpdateListener {
+//                            mAnimationTopValue = it.animatedValue as Float
+//                            if (temp != mAnimationTopValue) {
+//                                invalidate()
+//                                temp = mAnimationTopValue
+//                            }
+//                            LogUtil.e("progress - : $mAnimationTopValue")
+//                        }
+//                        start()
+//                    }
+//                // delay(2000)
+//            }
+//        }
     }
 
     @SuppressLint("Recycle")
@@ -305,7 +337,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
 
     private fun getRectTop(index: Int): Float {
         return if (mAnimationFlag) {
-            mAnimationTopValue * mProgressMaxSpace
+            mProgressBottom - mAnimationTopValue * mProgressMaxSpace
         } else {
             // rect top = full.line.bottom - (input.height.percent*scope.maxHeight)
             val targetPercent = mChartBottomArray[index]
@@ -327,7 +359,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
 
     private fun getRectBottom(): Float {
         return if (mAnimationFlag) {
-            mChartBottomArray[mProgressIndex] * mProgressMaxSpace
+            mProgressBottom - mChartBottomArray[mProgressIndex] * mProgressMaxSpace
         } else {
             mProgressBottom
         }
