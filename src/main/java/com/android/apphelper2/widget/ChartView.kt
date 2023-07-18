@@ -12,6 +12,8 @@ import com.android.apphelper2.utils.CustomViewUtil.getBaseLine
 import com.android.apphelper2.utils.CustomViewUtil.getTextSize
 import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.ResourcesUtil
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 
 class ChartView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
@@ -128,7 +130,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy FloatArray(mBottomTextArray.size)
     }
 
-    private val mPaintProgressBottom: Paint by lazy {
+    private val mPaintProgress: Paint by lazy {
         return@lazy Paint().apply {
             // color = Color.parseColor("#33006FBF")
             color = Color.parseColor("#006FBF")
@@ -139,12 +141,16 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy ResourcesUtil.toPx(12F)
     }
     private var mProgressMaxSpace = 0F
-    private var mChartArray: FloatArray = FloatArray(mBottomTextArray.size)
+    private var mChartBottomArray: FloatArray = FloatArray(mBottomTextArray.size)
+    private var mChartTopArray: FloatArray = FloatArray(mBottomTextArray.size)
     private var mProgressBottom = 0F
-    private var mAnimationValue: Float = 0F
+    private var mAnimationBottomValue: Float = 0F
+    private var mAnimationTopValue: Float = 0F
     private val mProgressInterval: Float by lazy {
         return@lazy ResourcesUtil.toPx(3F)
     }
+    private var mAnimationFlag: Boolean = false
+    private var mProgressIndex = 0
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -208,44 +214,75 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
 
             mProgressBottom = mBottomLineLocation
 
-            // 6: draw bottom progress
+            // 6: draw progress
             mBottomTextArray.indices.forEach { index ->
-                drawBottomProgress(index, it)
+                drawProgress(index)
             }
         }
     }
 
     fun setChartArray(chartBottomArray: FloatArray, chartTopArray: FloatArray) {
-        this.mChartArray = chartBottomArray
+        this.mChartBottomArray = chartBottomArray
+        this.mChartTopArray = chartTopArray
+        this.mAnimationFlag = false
         val maxProgress = chartBottomArray.maxOrNull()
-
-        // 只能在这里进行动画的监听
         var temp = 0F
+
         val animation = ValueAnimator.ofFloat(0F, 1F)
             .apply {
                 duration = 3000L
                 addUpdateListener {
-                    mAnimationValue = it.animatedValue as Float
-                    if (temp != mAnimationValue) {
+                    mAnimationBottomValue = it.animatedValue as Float
+                    if (temp != mAnimationBottomValue) {
                         invalidate()
-                        temp = mAnimationValue
+                        temp = mAnimationBottomValue
                     }
                     if (maxProgress != null) {
-                        if (mAnimationValue > maxProgress) {
+                        if (mAnimationBottomValue > maxProgress) {
                             cancel()
                         }
                     }
-                    LogUtil.e("value: $mAnimationValue")
+                    LogUtil.e("value: $mAnimationBottomValue")
                 }
                 addListener(onEnd = {
                     LogUtil.e("animation: onEnd")
+                    startTopProgressAnimation()
                 })
             }
         animation.start()
     }
 
+    private fun startTopProgressAnimation() = runBlocking {
+        delay(2000)
+        var temp = 0F
+
+        mBottomTextArray.indices.forEach { index ->
+            val bottomProgress = mChartBottomArray[index]
+            val topProgress = mChartTopArray[index]
+
+            if (topProgress > bottomProgress) {
+                mProgressIndex = index
+
+                ValueAnimator.ofFloat(bottomProgress, topProgress)
+                    .apply {
+                        duration = 3000L
+                        addUpdateListener {
+                            mAnimationTopValue = it.animatedValue as Float
+                            if (temp != mAnimationTopValue) {
+                                invalidate()
+                                temp = mAnimationTopValue
+                            }
+                            LogUtil.e("progress - : $mAnimationTopValue")
+                        }
+                        start()
+                    }
+                delay(2000)
+            }
+        }
+    }
+
     @SuppressLint("Recycle")
-    private fun drawBottomProgress(index: Int, canvas: Canvas) {
+    private fun drawProgress(index: Int) {
         val rectLeft = getRectLeft(index)
         val rectTop = getRectTop(index)
         val rectRight = getRectRight(index)
@@ -253,7 +290,12 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         val rect = RectF(rectLeft, rectTop, rectRight, rectBottom)
 
         LogUtil.e("index: $index  rect:$rect")
-        canvas.drawRect(rect, mPaintProgressBottom)
+        if (mAnimationFlag) {
+            mPaintProgress.color = Color.parseColor("#006FBF")
+        } else {
+            mPaintProgress.color = Color.parseColor("#0094FF")
+        }
+        mCanvas?.drawRect(rect, mPaintProgress)
     }
 
     private fun getRectLeft(index: Int): Float {
@@ -262,16 +304,20 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
 
     private fun getRectTop(index: Int): Float {
-        // rect top = full.line.bottom - (input.height.percent*scope.maxHeight)
-        val targetPercent = mChartArray[index]
-        return if (targetPercent > 0) {
-            if (mAnimationValue < targetPercent) {
-                mProgressBottom - (mAnimationValue * mProgressMaxSpace)
-            } else {
-                mProgressBottom - (targetPercent * mProgressMaxSpace)
-            }
+        return if (mAnimationFlag) {
+            mAnimationTopValue * mProgressMaxSpace
         } else {
-            mProgressBottom
+            // rect top = full.line.bottom - (input.height.percent*scope.maxHeight)
+            val targetPercent = mChartBottomArray[index]
+            if (targetPercent > 0) {
+                if (mAnimationBottomValue < targetPercent) {
+                    mProgressBottom - (mAnimationBottomValue * mProgressMaxSpace)
+                } else {
+                    mProgressBottom - (targetPercent * mProgressMaxSpace)
+                }
+            } else {
+                mProgressBottom
+            }
         }
     }
 
@@ -280,6 +326,10 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
 
     private fun getRectBottom(): Float {
-        return mProgressBottom
+        return if (mAnimationFlag) {
+            mChartBottomArray[mProgressIndex] * mProgressMaxSpace
+        } else {
+            mProgressBottom
+        }
     }
 }
