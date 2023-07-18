@@ -1,5 +1,7 @@
 package com.android.apphelper2.widget
 
+import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
@@ -7,10 +9,12 @@ import android.view.View
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.apphelper2.utils.CustomViewUtil.getBaseLine
 import com.android.apphelper2.utils.CustomViewUtil.getTextSize
+import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.ResourcesUtil
 
 class ChartView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
+    private var mCanvas: Canvas? = null
     private val mMaxWidth: Int by lazy {
         return@lazy ResourcesUtil.toPx(500F)
             .toInt()
@@ -43,16 +47,16 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         }
     }
     private val mBottomLine: Float by lazy {
-        return@lazy ResourcesUtil.toPx(50F)
+        return@lazy ResourcesUtil.toPx(55F)
     }
 
     // todo 默认的1dp
     private val mLinesHeight: Float by lazy {
-        return@lazy ResourcesUtil.toPx(1F)
+        return@lazy ResourcesUtil.toPx(0.8F)
     }
     private val mPathEffect: PathEffect by lazy {
-        val f5 = ResourcesUtil.toPx(5F)
-        val f2 = ResourcesUtil.toPx(2F)
+        val f5 = ResourcesUtil.toPx(6F)
+        val f2 = ResourcesUtil.toPx(6F)
         return@lazy DashPathEffect(floatArrayOf(f5, f2), -1F)
     }
     private val mPaintLines: Paint by lazy {
@@ -119,6 +123,24 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private val mBottomTextTop: Float by lazy {
         return@lazy ResourcesUtil.toPx(8f)
     }
+    private val mBottomLeftArray: FloatArray by lazy {
+        return@lazy FloatArray(mBottomTextArray.size)
+    }
+
+    private val mPaintProgressBottom: Paint by lazy {
+        return@lazy Paint().apply {
+            // color = Color.parseColor("#33006FBF")
+            color = Color.parseColor("#006FBF")
+            style = Paint.Style.FILL
+        }
+    }
+    private val mProgressWith: Float by lazy {
+        return@lazy ResourcesUtil.toPx(12F)
+    }
+    private var mProgressMaxSpace = 0F
+    private var mChartArray: FloatArray = FloatArray(mBottomTextArray.size)
+    private var mProgressBottom = 0F
+    private var mAnimationValue: Float = 0F
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -129,6 +151,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         super.onDraw(canvas)
 
         canvas?.let {
+            mCanvas = it
             // 1: draw an background
             it.drawRoundRect(mBackgroundRectF, mBackgroundAngle, mBackgroundAngle, mPaintBackground)
 
@@ -136,8 +159,9 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             val mTitleBaseLine = getBaseLine(mPaintTitle, mTitle)
             it.drawText(mTitle, mPadding, mTitleBaseLine + mPadding, mPaintTitle)
 
-            // 3：draw bottom line
+            // 3：draw bottom line ---> full
             val mBottomLineLocation = mMaxHeight - mBottomLine
+
             val mLineLeft = mPadding
             val mLineRight = mMaxWidth - mPadding
 
@@ -160,6 +184,8 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             mPaintLines.color = mLineThreadColor
             it.drawLine(mLineLeft, threeLineLocation, mLineRight, threeLineLocation, mPaintLines)
 
+            mProgressMaxSpace = (mBottomLineLocation - threeLineLocation)
+
             // 4: draw score
             val scoreSize = getTextSize(mPaintScore, mScoreText)
             val scoreLeft = mMaxWidth - mPadding - scoreSize[0]
@@ -171,9 +197,73 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             var bottomLeft = mPaddingBottomText
             val bottomTop = mBottomLineLocation + mBottomTextMaxBaseLine + mBottomTextTop
             mBottomTextArray.forEachIndexed { index, s ->
+                mBottomLeftArray[index] = bottomLeft
                 it.drawText(s, bottomLeft, bottomTop, mPaintBottomText)
                 bottomLeft += (mBottomTextWithSize[index] + mBottomTextInterval)
             }
+
+            mProgressBottom = mBottomLineLocation
+
+            // 6: draw bottom progress
+            mBottomTextArray.indices.forEach { index ->
+                drawProgress(index, it)
+            }
         }
+    }
+
+    fun setChartArray(chartArray: FloatArray) {
+        this.mChartArray = chartArray
+        // 只能在这里进行动画的监听
+        var temp = 0F
+        val animation = ValueAnimator.ofFloat(0F, 1F)
+        animation.duration = 3000L
+        animation.addUpdateListener {
+            mAnimationValue = it.animatedValue as Float
+            if (temp != mAnimationValue) {
+                invalidate()
+                temp = mAnimationValue
+            }
+            LogUtil.e("value: $mAnimationValue")
+        }
+        animation.start()
+    }
+
+    @SuppressLint("Recycle")
+    private fun drawProgress(index: Int, canvas: Canvas) {
+        val rectLeft = getRectLeft(index)
+        val rectTop = getRectTop(index)
+        val rectRight = getRectRight(index)
+        val rectBottom = getRectBottom()
+        val rect = RectF(rectLeft, rectTop, rectRight, rectBottom)
+
+        LogUtil.e("index: $index  rect:$rect")
+        canvas.drawRect(rect, mPaintProgressBottom)
+    }
+
+    private fun getRectLeft(index: Int): Float {
+        // rect left = text left + (text.with - rect.with)/2
+        return mBottomLeftArray[index] + (mBottomTextWithSize[index] - mProgressWith) / 2
+    }
+
+    private fun getRectTop(index: Int): Float {
+        // rect top = full.line.bottom - (input.height.percent*scope.maxHeight)
+        val targetPercent = mChartArray[index]
+        return if (targetPercent > 0) {
+            if (mAnimationValue < targetPercent) {
+                mProgressBottom - (mAnimationValue * mProgressMaxSpace)
+            } else {
+                mProgressBottom - (targetPercent * mProgressMaxSpace)
+            }
+        } else {
+            mProgressBottom
+        }
+    }
+
+    private fun getRectRight(index: Int): Float {
+        return getRectLeft(index) + mProgressWith
+    }
+
+    private fun getRectBottom(): Float {
+        return mProgressBottom
     }
 }
