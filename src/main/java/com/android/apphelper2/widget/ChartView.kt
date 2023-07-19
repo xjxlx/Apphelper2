@@ -159,6 +159,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private var mTopMaxX = 0F
     private var mTopMaxPercent = 0F
     private var mProgressTopIndex = 0
+    private val mPath: Path = Path()
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -230,6 +231,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             // 7: draw top progress
             if (mAnimationFlag) {
                 drawTopProgress(mProgressTopIndex)
+                it.drawPath(mPath, mPaintTopProgress)
             }
         }
     }
@@ -321,7 +323,8 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         val rect = RectF(rectLeft, rectTop, rectRight, rectBottom)
 
         LogUtil.e("index -2: $index  rect:$rect")
-        mCanvas?.drawRect(rect, mPaintTopProgress)
+        // mCanvas?.drawRect(rect, mPaintTopProgress)
+        mPath.addRect(rect, Path.Direction.CW)
     }
 
     private fun getRectLeft(index: Int): Float {
