@@ -259,40 +259,45 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
                 }
                 addListener(onEnd = {
                     LogUtil.e("animation: onEnd")
-                    startTopProgressAnimation(0)
+
+                    mChartTopArray.indices.forEach {
+                        val bottomProgress = mChartBottomArray[it]
+                        val topProgress = mChartTopArray[it]
+                        if (topProgress > bottomProgress) {
+                            startTopProgressAnimation(it, bottomProgress, topProgress)
+                        }
+                    }
                 })
             }
         animation.start()
     }
 
-    private fun startTopProgressAnimation(index: Int) = runBlocking {
+    private fun startTopProgressAnimation(index: Int, bottomProgress: Float, topProgress: Float) = runBlocking {
         delay(1000)
-
         mTopMaxX = 0F
+        mAnimationTopValue = 0F
         mTopMaxPercent = 0F
         var temp = 0F
-        val bottomProgress = mChartBottomArray[index]
-        val topProgress = mChartTopArray[index]
 
-        if (topProgress > bottomProgress) {
-            mProgressIndex = index
-            ValueAnimator.ofFloat(bottomProgress, topProgress)
-                .apply {
-                    duration = 3000L
-                    addUpdateListener {
-                        mAnimationTopValue = it.animatedValue as Float
-                        if (temp != mAnimationTopValue) {
-                            invalidate()
-                            temp = mAnimationTopValue
-                        }
-                        LogUtil.e("progress - : $mAnimationTopValue")
+        mProgressIndex = index
+        ValueAnimator.ofFloat(bottomProgress, topProgress)
+            .apply {
+                duration = 3000L
+                addUpdateListener {
+                    mAnimationTopValue = it.animatedValue as Float
+                    if (temp != mAnimationTopValue) {
+                        invalidate()
+                        temp = mAnimationTopValue
                     }
-                    addListener(onStart = {
-                        mAnimationFlag = true
-                    })
-                    start()
+                    LogUtil.e("progress - index:$index ----: mAnimationTopValue : $mAnimationTopValue")
                 }
-        }
+                addListener(onStart = {
+                    mAnimationFlag = true
+                }, onEnd = {
+
+                })
+                start()
+            }
     }
 
     @SuppressLint("Recycle")
