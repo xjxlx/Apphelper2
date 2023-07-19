@@ -13,6 +13,7 @@ import com.android.apphelper2.utils.CustomViewUtil.getTextSize
 import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.ResourcesUtil
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class ChartView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
@@ -273,31 +274,33 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
 
     private fun startTopProgressAnimation(index: Int, bottomProgress: Float, topProgress: Float) = runBlocking {
-        delay(1000)
-        mTopMaxX = 0F
-        mAnimationTopValue = 0F
-        mTopMaxPercent = 0F
-        var temp = 0F
+        launch {
+            delay(1000)
+            mTopMaxX = 0F
+            mAnimationTopValue = 0F
+            mTopMaxPercent = 0F
+            var temp = 0F
 
-        mProgressIndex = index
-        ValueAnimator.ofFloat(bottomProgress, topProgress)
-            .apply {
-                duration = 3000L
-                addUpdateListener {
-                    mAnimationTopValue = it.animatedValue as Float
-                    if (temp != mAnimationTopValue) {
-                        invalidate()
-                        temp = mAnimationTopValue
+            mProgressIndex = index
+            ValueAnimator.ofFloat(bottomProgress, topProgress)
+                .apply {
+                    duration = 3000L
+                    addUpdateListener {
+                        mAnimationTopValue = it.animatedValue as Float
+                        if (temp != mAnimationTopValue) {
+                            invalidate()
+                            temp = mAnimationTopValue
+                        }
+                        LogUtil.e("progress - index:$index ----: mAnimationTopValue : $mAnimationTopValue")
                     }
-                    LogUtil.e("progress - index:$index ----: mAnimationTopValue : $mAnimationTopValue")
-                }
-                addListener(onStart = {
-                    mAnimationFlag = true
-                }, onEnd = {
+                    addListener(onStart = {
+                        mAnimationFlag = true
+                    }, onEnd = {
 
-                })
-                start()
-            }
+                    })
+                    start()
+                }
+        }
     }
 
     @SuppressLint("Recycle")
