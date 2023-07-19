@@ -218,13 +218,6 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             mBottomTextArray.indices.forEach { index ->
                 drawProgress(index)
             }
-            if (mAnimationFlag) {
-                mBottomTextArray.indices.forEach { index ->
-                    if (index == mProgressIndex) {
-                        drawProgress(mProgressIndex)
-                    }
-                }
-            }
         }
     }
 
@@ -287,30 +280,6 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
                 }
             // delay(2000)
         }
-
-//        mBottomTextArray.indices.forEach { index ->
-//            val bottomProgress = mChartBottomArray[index]
-//            val topProgress = mChartTopArray[index]
-//
-//            if (topProgress > bottomProgress) {
-//                mProgressIndex = index
-//
-//                ValueAnimator.ofFloat(bottomProgress, topProgress)
-//                    .apply {
-//                        duration = 3000L
-//                        addUpdateListener {
-//                            mAnimationTopValue = it.animatedValue as Float
-//                            if (temp != mAnimationTopValue) {
-//                                invalidate()
-//                                temp = mAnimationTopValue
-//                            }
-//                            LogUtil.e("progress - : $mAnimationTopValue")
-//                        }
-//                        start()
-//                    }
-//                // delay(2000)
-//            }
-//        }
     }
 
     @SuppressLint("Recycle")
@@ -336,20 +305,16 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
 
     private fun getRectTop(index: Int): Float {
-        return if (mAnimationFlag) {
-            mProgressBottom - mAnimationTopValue * mProgressMaxSpace
-        } else {
-            // rect top = full.line.bottom - (input.height.percent*scope.maxHeight)
-            val targetPercent = mChartBottomArray[index]
-            if (targetPercent > 0) {
-                if (mAnimationBottomValue < targetPercent) {
-                    mProgressBottom - (mAnimationBottomValue * mProgressMaxSpace)
-                } else {
-                    mProgressBottom - (targetPercent * mProgressMaxSpace)
-                }
+        // rect top = full.line.bottom - (input.height.percent*scope.maxHeight)
+        val targetPercent = mChartBottomArray[index]
+        return if (targetPercent > 0) {
+            if (mAnimationBottomValue < targetPercent) {
+                mProgressBottom - (mAnimationBottomValue * mProgressMaxSpace)
             } else {
-                mProgressBottom
+                mProgressBottom - (targetPercent * mProgressMaxSpace)
             }
+        } else {
+            mProgressBottom
         }
     }
 
@@ -358,10 +323,6 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
 
     private fun getRectBottom(): Float {
-        return if (mAnimationFlag) {
-            mProgressBottom - mChartBottomArray[mProgressIndex] * mProgressMaxSpace
-        } else {
-            mProgressBottom
-        }
+        return mProgressBottom
     }
 }
