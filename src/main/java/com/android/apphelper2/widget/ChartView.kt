@@ -12,6 +12,7 @@ import com.android.apphelper2.utils.CustomViewUtil.getBaseLine
 import com.android.apphelper2.utils.CustomViewUtil.getTextSize
 import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.ResourcesUtil
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
 class ChartView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
@@ -150,13 +151,14 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
     private var mAnimationFlag: Boolean = false
     private var mProgressIndex = 0
-
     private val mPaintTopProgress: Paint by lazy {
         return@lazy Paint().apply {
             color = Color.parseColor("#006FBF")
             style = Paint.Style.FILL
         }
     }
+    private var mTopMaxX = 0F
+    private var mTopMaxPercent = 0F
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -221,11 +223,10 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             mBottomLineX = mBottomLineLocation
 
             // 6: draw bottom progress
-            if (!mAnimationFlag) {
-                mBottomTextArray.indices.forEach { index ->
-                    drawBottomProgress(index)
-                }
+            mBottomTextArray.indices.forEach { index ->
+                drawBottomProgress(index)
             }
+
             // 7: draw top progress
             if (mAnimationFlag) {
                 drawTopProgress()
@@ -258,25 +259,23 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
                 }
                 addListener(onEnd = {
                     LogUtil.e("animation: onEnd")
-                    startTopProgressAnimation()
+                    startTopProgressAnimation(0)
                 })
             }
         animation.start()
     }
 
-    private fun startTopProgressAnimation() = runBlocking {
-        // delay(2000)
+    private fun startTopProgressAnimation(index: Int) = runBlocking {
+        delay(1000)
+
+        mTopMaxX = 0F
+        mTopMaxPercent = 0F
         var temp = 0F
-
-//        mBottomTextArray.indices.forEach {
-//
-//        }
-
-        val bottomProgress = mChartBottomArray[0]
-        val topProgress = mChartTopArray[0]
+        val bottomProgress = mChartBottomArray[index]
+        val topProgress = mChartTopArray[index]
 
         if (topProgress > bottomProgress) {
-            mProgressIndex = 0
+            mProgressIndex = index
             ValueAnimator.ofFloat(bottomProgress, topProgress)
                 .apply {
                     duration = 3000L
@@ -299,9 +298,9 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     @SuppressLint("Recycle")
     private fun drawBottomProgress(index: Int) {
         val rectLeft = getRectLeft(index)
-        val rectTop = getRectTop(index)
+        val rectTop = getBottomRectTop(index)
         val rectRight = getRectRight(index)
-        val rectBottom = getRectBottom()
+        val rectBottom = getBottomRectBottom()
         val rect = RectF(rectLeft, rectTop, rectRight, rectBottom)
         LogUtil.e("index -1: $index  rect:$rect")
         mCanvas?.drawRect(rect, mPaintBottomProgress)
@@ -310,9 +309,9 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     @SuppressLint("Recycle")
     private fun drawTopProgress() {
         val rectLeft = getRectLeft(mProgressIndex)
-        val rectTop = getRectTop(mProgressIndex)
+        val rectTop = getTopRectTop(mProgressIndex)
         val rectRight = getRectRight(mProgressIndex)
-        val rectBottom = getRectBottom()
+        val rectBottom = getTopRectBottom()
         val rect = RectF(rectLeft, rectTop, rectRight, rectBottom)
 
         LogUtil.e("index -2: $mProgressIndex  rect:$rect")
@@ -324,25 +323,32 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return mBottomLeftArray[index] + (mBottomTextWithSize[index] - mProgressWith) / 2
     }
 
-    private fun getRectTop(index: Int): Float {
-        if (mAnimationFlag) {
-            val targetTopPercent = mChartTopArray[index]
-            // top = bottom - ( current - bottom )
-            return if (mAnimationTopValue < targetTopPercent) {
-                mBottomLineX - (mAnimationTopValue * mProgressMaxSpace)
+    private fun getBottomRectTop(index: Int): Float {
+        // rect top = full.line.bottom - (input.height.percent*scope.maxHeight)
+        // bottom max height
+        val targetBottomPercent = mChartBottomArray[index]
+        return if (mAnimationBottomValue < targetBottomPercent) {
+            mBottomLineX - (mAnimationBottomValue * mProgressMaxSpace)
+        } else {
+            mBottomLineX - (targetBottomPercent * mProgressMaxSpace)
+        }
+    }
+
+    private fun getTopRectTop(index: Int): Float {
+        if (mTopMaxX == 0F) {
+            mTopMaxPercent = mChartTopArray[index]
+            mTopMaxX = mBottomLineX - (mTopMaxPercent * mProgressMaxSpace)
+        }
+
+        return if (mAnimationTopValue < mTopMaxPercent) {
+            val real = mBottomLineX - (mAnimationTopValue * mProgressMaxSpace) - mProgressInterval
+            if (real > mTopMaxX) {
+                real
             } else {
-                mBottomLineX - (targetTopPercent * mProgressMaxSpace)
+                mTopMaxX
             }
         } else {
-            // rect top = full.line.bottom - (input.height.percent*scope.maxHeight)
-
-            // bottom max height
-            val targetBottomPercent = mChartBottomArray[index]
-            return if (mAnimationBottomValue < targetBottomPercent) {
-                mBottomLineX - (mAnimationBottomValue * mProgressMaxSpace)
-            } else {
-                mBottomLineX - (targetBottomPercent * mProgressMaxSpace)
-            }
+            mTopMaxX
         }
     }
 
@@ -350,13 +356,11 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return getRectLeft(index) + mProgressWith
     }
 
-    private fun getRectBottom(): Float {
-        return if (mAnimationFlag) {
-            val fl = mBottomLineX - (mChartBottomArray[mProgressIndex] * mProgressMaxSpace)
-            LogUtil.e("pro -bottom:$fl")
-            fl
-        } else {
-            mBottomLineX
-        }
+    private fun getBottomRectBottom(): Float {
+        return mBottomLineX
+    }
+
+    private fun getTopRectBottom(): Float {
+        return (mBottomLineX - (mChartBottomArray[mProgressIndex] * mProgressMaxSpace)) - mProgressInterval
     }
 }
