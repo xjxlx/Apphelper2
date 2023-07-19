@@ -130,8 +130,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
 
     private val mPaintBottomProgress: Paint by lazy {
         return@lazy Paint().apply {
-            // color = Color.parseColor("#33006FBF")
-            color = Color.parseColor("#006FBF")
+            color = Color.parseColor("#400094FF")
             style = Paint.Style.FILL
         }
     }
@@ -160,6 +159,13 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private var mTopMaxPercent = 0F
     private var mProgressTopIndex = 0
     private val mPath: Path = Path()
+
+    private val mPaintProgressText: Paint by lazy {
+        return@lazy Paint().apply {
+            textSize = ResourcesUtil.toPx(20F)
+            color = Color.parseColor("#0094FF")
+        }
+    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -290,6 +296,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
                 addListener(onStart = {
                     mAnimationFlag = true
                 }, onEnd = {
+                    drawProgressText()
                     if ((mProgressTopIndex + 1) < mBottomTextArray.size) {
                         mProgressTopIndex += 1
                         if (mProgressTopIndex < mBottomTextArray.size) {
@@ -325,6 +332,22 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         LogUtil.e("index -2: $index  rect:$rect")
         // mCanvas?.drawRect(rect, mPaintTopProgress)
         mPath.addRect(rect, Path.Direction.CW)
+    }
+
+    private fun drawProgressText() {
+        val rectLeft = getRectLeft(mProgressTopIndex)
+
+        val rectTop = getTopRectTop(mProgressTopIndex)
+
+        val rectF = RectF(200F, 200F, 600F, 600F);
+        mPath.addArc(rectF, 0F, 120F);
+
+        // 绘制路径
+        mCanvas?.drawPath(mPath, mPaintProgressText);
+        val text = "happy everyday";
+        mCanvas?.drawTextOnPath(text, mPath, 0f, 0f, mPaintProgressText);
+
+//        mCanvas?.drawTextOnPath("+49", mPath, rectLeft, 20F, mPaintProgressText)
     }
 
     private fun getRectLeft(index: Int): Float {
@@ -371,5 +394,8 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
 
     private fun getTopRectBottom(index: Int): Float {
         return (mBottomLineX - (mChartBottomArray[index] * mProgressMaxSpace)) - mProgressInterval
+    }
+
+    fun test() {
     }
 }
