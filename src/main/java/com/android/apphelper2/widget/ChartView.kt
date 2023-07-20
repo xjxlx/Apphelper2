@@ -169,6 +169,15 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             style = Paint.Style.FILL
         }
     }
+    private val mTopRectSpeed: Float by lazy {
+        // todo 临时数据
+        val mTopRectMaxDuration = 2000L
+        // s = v * t
+        // s = mLineMaxSpace
+        // t = mTopRectMaxDuration
+        // v = s / t
+        return@lazy mLineMaxSpace / mTopRectMaxDuration
+    }
 
     private val mTopRectTextPaint: Paint by lazy {
         return@lazy Paint().apply {
@@ -319,8 +328,13 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         var temp = 0F
         ValueAnimator.ofFloat(bottomProgress, topProgress)
             .apply {
-                // todo 临时设置的数据
-                duration = 1000L
+                val s = (topProgress - bottomProgress) * mLineMaxSpace
+                val t = s / mTopRectSpeed
+
+                LogUtil.e(
+                    "topPer:$topProgress botPer:$bottomProgress cz:${topProgress - bottomProgress}  speed: $mTopRectSpeed  s:${s} t:${t}")
+
+                duration = t.toLong()
                 addUpdateListener {
                     mTopRectAnimationValue = it.animatedValue as Float
                     if (temp != mTopRectAnimationValue) {
