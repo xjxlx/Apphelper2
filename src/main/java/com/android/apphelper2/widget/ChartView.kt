@@ -252,7 +252,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
 
         ValueAnimator.ofFloat(0F, 1F)
             .apply {
-                duration = 3000L
+                duration = 2000L
                 addUpdateListener {
                     mAnimationBottomValue = it.animatedValue as Float
                     if (temp != mAnimationBottomValue) {
@@ -284,7 +284,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         var temp = 0F
         ValueAnimator.ofFloat(bottomProgress, topProgress)
             .apply {
-                duration = 3000L
+                duration = 1000L
                 addUpdateListener {
                     mAnimationTopValue = it.animatedValue as Float
                     if (temp != mAnimationTopValue) {
