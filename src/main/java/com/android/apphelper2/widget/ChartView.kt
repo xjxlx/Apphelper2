@@ -9,6 +9,7 @@ import android.view.View
 import androidx.core.animation.addListener
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.apphelper2.utils.CustomViewUtil.getBaseLine
+import com.android.apphelper2.utils.CustomViewUtil.getTextWidth
 import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.ResourcesUtil
 
@@ -24,6 +25,9 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
     private val mPadding: Float by lazy {
         return@lazy ResourcesUtil.toPx(24F)
+    }
+    private val mRectWith: Float by lazy {
+        return@lazy ResourcesUtil.toPx(12F)
     }
 
     private val mBackgroundAngle: Float by lazy {
@@ -48,8 +52,11 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         }
     }
 
-    private val mLineBottomY: Float by lazy {
+    private val mLineBottomInterval: Float by lazy {
         return@lazy ResourcesUtil.toPx(55F)
+    }
+    private val mLineBottomY: Float by lazy {
+        return@lazy mMaxHeight - mLineBottomInterval
     }
     private val mLineFirstColor: Int by lazy {
         return@lazy Color.parseColor("#33FFFFFF")
@@ -77,49 +84,58 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         val f2 = ResourcesUtil.toPx(6F)
         return@lazy DashPathEffect(floatArrayOf(f5, f2), -1F)
     }
-    private val mLinesInterval: Float by lazy {
+    private val mLinesEveryInterval: Float by lazy {
         return@lazy ResourcesUtil.toPx(60f)
     }
+    private var mLineMaxSpace: Float = 0F
 
-    private val mScoreText = "100 分"
-    private val mPaintScore: Paint by lazy {
+    private val mScoreText = "100  分"
+    private val mScorePaint: Paint by lazy {
         return@lazy Paint().apply {
             color = Color.parseColor("#B3FFFFFF")
             style = Paint.Style.FILL
             textSize = ResourcesUtil.toPx(14F)
         }
     }
+    private val mScoreInterval: Float by lazy {
+        // todo 假数据
+        return@lazy ResourcesUtil.toPx(10f)
+    }
+    private val mScoreLeft: Float by lazy {
+        val scoreWidth = getTextWidth(mScorePaint, mScoreText)
+        return@lazy mMaxWidth - mPadding - scoreWidth
+    }
 
     private val mBottomTextArray = arrayOf("情绪", "气息", "呼吸", "调息", "心肺")
-    private val mPaintBottomText: Paint by lazy {
+    private val mBottomTextPaint: Paint by lazy {
         return@lazy Paint().apply {
             color = Color.parseColor("#B3FFFFFF")
             textSize = ResourcesUtil.toPx(22f)
         }
     }
-    private val mPaddingBottomText: Float by lazy {
+    private val mBottomTextPadding: Float by lazy {
         return@lazy ResourcesUtil.toPx(84f)
     }
     private var mBottomTextMaxBaseLine: Float = 0F
     private val mBottomTextWithSize: FloatArray by lazy {
         val floatArray = FloatArray(mBottomTextArray.size)
         mBottomTextArray.forEachIndexed { index, s ->
-            val textWidth = CustomViewUtil.getTextWidth(mPaintBottomText, s)
+            val textWidth = CustomViewUtil.getTextWidth(mBottomTextPaint, s)
             floatArray[index] = textWidth
 
-            val baseLine = CustomViewUtil.getBaseLine(mPaintBottomText, s)
+            val baseLine = CustomViewUtil.getBaseLine(mBottomTextPaint, s)
             if (mBottomTextMaxBaseLine < baseLine) {
                 mBottomTextMaxBaseLine = baseLine
             }
         }
         return@lazy floatArray
     }
-    private val mBottomTextInterval: Float by lazy {
+    private val mBottomTextEveryInterval: Float by lazy {
         var with = 0F
         mBottomTextWithSize.forEach {
             with += it
         }
-        return@lazy (mMaxWidth - (mPaddingBottomText * 2) - with) / (mBottomTextWithSize.size - 1)
+        return@lazy (mMaxWidth - (mBottomTextPadding * 2) - with) / (mBottomTextWithSize.size - 1)
     }
     private val mBottomTextTop: Float by lazy {
         return@lazy ResourcesUtil.toPx(8f)
@@ -128,49 +144,46 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy FloatArray(mBottomTextArray.size)
     }
 
-    private val mPaintBottomProgress: Paint by lazy {
+    private var mBottomRectStartFlag = false
+    private var mBottomRectChartArray: FloatArray = FloatArray(mBottomTextArray.size)
+    private val mBottomRectPaint: Paint by lazy {
         return@lazy Paint().apply {
             color = Color.parseColor("#400094FF")
             style = Paint.Style.FILL
         }
     }
-    private val mProgressWith: Float by lazy {
-        return@lazy ResourcesUtil.toPx(12F)
-    }
-    private var mProgressMaxSpace = 0F
-    private var mChartBottomArray: FloatArray = FloatArray(mBottomTextArray.size)
-    private var mChartTopArray: FloatArray = FloatArray(mBottomTextArray.size)
-    private var mBottomLineX = 0F
-    private var mAnimationBottomValue: Float = 0F
-    private var mAnimationTopValue: Float = 0F
-    private val mProgressInterval: Float by lazy {
+    private var mBottomRectAnimationValue: Float = 0F
+
+    private val mRectEveryInterval: Float by lazy {
         return@lazy ResourcesUtil.toPx(3F)
     }
-    private var mAnimationFlag: Boolean = false
 
-    private val mPaintTopProgress: Paint by lazy {
+    private var mTopRectStartFlag: Boolean = false
+    private var mTopRectIndex = 0
+    private var mTopRectStartCount = 0
+    private var mTopRectChartArray: FloatArray = FloatArray(mBottomTextArray.size)
+    private var mTopRectAnimationValue: Float = 0F
+    private val mTopRectPaint: Paint by lazy {
         return@lazy Paint().apply {
             color = Color.parseColor("#006FBF")
             style = Paint.Style.FILL
         }
     }
-    private var mTopMaxX = 0F
-    private var mTopMaxPercent = 0F
-    private var mProgressTopIndex = 0
-    private val mPath: Path = Path()
 
-    private val mPaintProgressText: Paint by lazy {
+    private val mTopRectTextPaint: Paint by lazy {
         return@lazy Paint().apply {
             textSize = ResourcesUtil.toPx(20F)
             color = Color.parseColor("#0094FF")
             style = Paint.Style.FILL
         }
     }
-    private var mAnimationEnd = false
-    private val mProgressTopTextInterval: Float by lazy {
+    private var mTopRectTextAnimationEnd = false
+    private val mTopRectTextEveryInterval: Float by lazy {
         return@lazy ResourcesUtil.toPx(3f)
     }
-    private var mAnimationEndCount = 0
+    private var mTopRectTextAnimationEndCount = 0
+
+    private var mScoreArray: IntArray = IntArray(mBottomTextArray.size)
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -184,171 +197,155 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             // 1: draw an background
             it.drawRoundRect(mBackgroundRectF, mBackgroundAngle, mBackgroundAngle, mBackgroundPaint)
 
-            // 2: draw top text
+            // 2: draw title
             val mTitleBaseLine = getBaseLine(mTitlePaint, mTitle)
-            it.drawText(mTitle, mPadding, mTitleBaseLine + mPadding, mTitlePaint)
+            it.drawText(mTitle, mPadding, mPadding + mTitleBaseLine, mTitlePaint)
 
-            // 3：draw bottom line ---> full
-            val lineStartX = mPadding
-            var lineStartY = mMaxHeight - mLineBottomY
-            val lineStopX = mMaxWidth - mPadding
-            var lineStopY = mMaxHeight - mLineBottomY
-            for (index in 0 until 5) {
+            // 3：draw line
+            var lineY = mLineBottomY
+            for (index in 0 until 4) {
                 when (index) {
                     0 -> {
-                        mLinePaint.pathEffect = null
                         mLinePaint.color = mLineFirstColor
                     }
+
                     1 -> {
-                        mLinePaint.pathEffect = mLinePathEffect
-                        lineStartY -= mLinesInterval
-                        lineStopY -= mLinesInterval
                         mLinePaint.color = mLineSecondColor
                     }
+
                     2 -> {
-                        lineStartY -= mLinesInterval
-                        lineStopY -= mLinesInterval
                         mLinePaint.color = mLineThreeColor
                     }
+
                     3 -> {
-                        lineStartY -= mLinesInterval
-                        lineStopY -= mLinesInterval
-                        mLinePaint.color = mLineFirstColor
+                        mLinePaint.color = mLineFourColor
                     }
                 }
-                it.drawLine(lineStartX, lineStartY, lineStopX, lineStopY, mLinePaint)
+
+                if (index > 0) {
+                    lineY -= mLinesEveryInterval
+                    mLinePaint.pathEffect = mLinePathEffect
+                } else {
+                    mLinePaint.pathEffect = null
+                }
+
+                it.drawLine(mPadding, lineY, (mMaxWidth - mPadding), lineY, mLinePaint)
+            }
+            mLineMaxSpace = mLineBottomY - lineY
+
+            // 4: draw score
+            it.drawText(mScoreText, mScoreLeft, lineY - mScoreInterval, mScorePaint)
+
+            // 5: draw bottom text
+            mBottomTextEveryInterval
+            var bottomLeft = mBottomTextPadding
+            val bottomTop = mLineBottomY + mBottomTextMaxBaseLine + mBottomTextTop
+            mBottomTextArray.forEachIndexed { index, s ->
+                mBottomLeftArray[index] = bottomLeft
+                it.drawText(s, bottomLeft, bottomTop, mBottomTextPaint)
+                bottomLeft += (mBottomTextWithSize[index] + mBottomTextEveryInterval)
             }
 
-//            val lineFirstY = mMaxHeight - mLineFirstY
-//
-//            val mLineRight = mMaxWidth - mPadding
-//            it.drawLine(mPadding, lineFirstY, mLineRight, lineFirstY, mLinePaint)
-//
-//            mLinePaint.pathEffect = mLinePathEffect
-//
-//            // 3.1 draw first line
-//            val firstLineLocation = lineFirstY - mLinesInterval
-//            mLinePaint.color = mLineSecondColor
-//            it.drawLine(mPadding, firstLineLocation, mLineRight, firstLineLocation, mLinePaint)
-//
-//            // 3.2 draw second line
-//            val secondLineLocation = firstLineLocation - mLinesInterval
-//            mLinePaint.color = mLineThreeColor
-//            it.drawLine(mPadding, secondLineLocation, mLineRight, secondLineLocation, mLinePaint)
-//
-//            // 3.3 draw three line
-//            val threeLineLocation = secondLineLocation - mLinesInterval
-//            mLinePaint.color = mLineFourColor
-//            it.drawLine(mPadding, threeLineLocation, mLineRight, threeLineLocation, mLinePaint)
+            // 6: draw bottom rect
+            if (mBottomRectStartFlag) {
+                mBottomTextArray.indices.forEach { index ->
+                    drawBottomProgress(it, index)
+                }
+            }
 
-//            mProgressMaxSpace = (lineFirstY - threeLineLocation)
-//
-//            // 4: draw score
-//            val scoreSize = getTextSize(mPaintScore, mScoreText)
-//            val scoreLeft = mMaxWidth - mPadding - scoreSize[0]
-//            val scoreBaseLine = getBaseLine(mPaintScore, mScoreText)
-//            it.drawText(mScoreText, scoreLeft, threeLineLocation - scoreBaseLine, mPaintScore)
-//
-//            // 5: draw bottom text
-//            mBottomTextInterval
-//            var bottomLeft = mPaddingBottomText
-//            val bottomTop = lineFirstY + mBottomTextMaxBaseLine + mBottomTextTop
-//            mBottomTextArray.forEachIndexed { index, s ->
-//                mBottomLeftArray[index] = bottomLeft
-//                it.drawText(s, bottomLeft, bottomTop, mPaintBottomText)
-//                bottomLeft += (mBottomTextWithSize[index] + mBottomTextInterval)
-//            }
-//
-//            mBottomLineX = lineFirstY
-//
-//            // 6: draw bottom progress
-//            mBottomTextArray.indices.forEach { index ->
-//                drawBottomProgress(it, index)
-//            }
-//
-//            // 7: draw top progress
-//            if (mAnimationFlag) {
-//                drawTopProgress(mProgressTopIndex)
-//                it.drawPath(mPath, mPaintTopProgress)
-//            }
-//
-//            if (mAnimationEnd) {
-//                mBottomTextArray.indices.forEach { index ->
-//                    if (index < mAnimationEndCount) {
-//                        drawProgressText(it, index)
-//                    }
-//                }
-//            }
+            // 7: draw top rect
+            if (mTopRectStartFlag && mTopRectStartCount > 0) {
+                mBottomTextArray.indices.forEach { index ->
+                    if (index < mTopRectStartCount) {
+                        drawTopProgress(it, index)
+                    }
+                }
+            }
+
+            // 8: draw top text
+            if (mTopRectTextAnimationEnd && mTopRectTextAnimationEndCount > 0) {
+                mBottomTextArray.indices.forEach { index ->
+                    if (index < mTopRectTextAnimationEndCount) {
+                        drawProgressText(it, index)
+                    }
+                }
+            }
         }
     }
 
-    fun setChartArray(chartBottomArray: FloatArray, chartTopArray: FloatArray) {
-        this.mChartBottomArray = chartBottomArray
-        this.mChartTopArray = chartTopArray
-        this.mAnimationFlag = false
-        this.mProgressTopIndex = 0
-        this.mAnimationEndCount = 0
-        mPath.reset()
+    fun setChartArray(chartBottomArray: FloatArray, chartTopArray: FloatArray, scoreArray: IntArray) {
+        this.mBottomRectChartArray = chartBottomArray
+        this.mTopRectChartArray = chartTopArray
+        this.mScoreArray = scoreArray
+        this.mBottomRectStartFlag = false
+        this.mTopRectStartFlag = false
+        this.mTopRectIndex = 0
+        this.mTopRectStartCount = 0
+        this.mTopRectTextAnimationEndCount = 0
+
         val maxProgress = chartBottomArray.maxOrNull()
         var temp = 0F
 
-        ValueAnimator.ofFloat(0F, 1F)
-            .apply {
-                duration = 2000L
-                addUpdateListener {
-                    mAnimationBottomValue = it.animatedValue as Float
-                    if (temp != mAnimationBottomValue) {
-                        invalidate()
-                        temp = mAnimationBottomValue
-                    }
-                    if (maxProgress != null) {
-                        if (mAnimationBottomValue > maxProgress) {
-                            cancel()
+        if (maxProgress != null) {
+            ValueAnimator.ofFloat(0F, maxProgress)
+                .apply {
+                    duration = 2000L
+                    addUpdateListener {
+                        mBottomRectAnimationValue = it.animatedValue as Float
+                        if (temp != mBottomRectAnimationValue) {
+                            invalidate()
+                            temp = mBottomRectAnimationValue
                         }
+                        LogUtil.e("value: $mBottomRectAnimationValue")
                     }
-                    LogUtil.e("value: $mAnimationBottomValue")
+                    addListener(onStart = {
+                        mBottomRectStartFlag = true
+                        LogUtil.e("animation: onStart")
+                    }, onEnd = {
+                        LogUtil.e("animation: onEnd")
+                        mTopRectIndex = 0
+                        val bottomPercent = mBottomRectChartArray[mTopRectIndex]
+                        val topPercent = mTopRectChartArray[mTopRectIndex]
+                        startTopProgressAnimation(mTopRectIndex, bottomPercent, topPercent)
+                    })
+                    start()
                 }
-                addListener(onEnd = {
-                    LogUtil.e("animation: onEnd")
-                    mProgressTopIndex = 0
-                    val bottomProgress = mChartBottomArray[mProgressTopIndex]
-                    val topProgress = mChartTopArray[mProgressTopIndex]
-                    startTopProgressAnimation(mProgressTopIndex, bottomProgress, topProgress)
-                })
-                start()
-            }
+        }
     }
 
     private fun startTopProgressAnimation(index: Int, bottomProgress: Float = 0F, topProgress: Float = 0F) {
-        mTopMaxX = 0F
-        mAnimationTopValue = 0F
-        mTopMaxPercent = 0F
+        this.mTopRectAnimationValue = 0F
+
         var temp = 0F
         ValueAnimator.ofFloat(bottomProgress, topProgress)
             .apply {
+                // todo 临时设置的数据
                 duration = 1000L
                 addUpdateListener {
-                    mAnimationTopValue = it.animatedValue as Float
-                    if (temp != mAnimationTopValue) {
+                    mTopRectAnimationValue = it.animatedValue as Float
+                    if (temp != mTopRectAnimationValue) {
                         invalidate()
-                        temp = mAnimationTopValue
+                        temp = mTopRectAnimationValue
                     }
-                    LogUtil.e("progress - index:$index ----: mAnimationTopValue : $mAnimationTopValue")
+                    LogUtil.e("progress - index:$index ----: mAnimationTopValue : $mTopRectAnimationValue")
                 }
                 addListener(onStart = {
-                    mAnimationFlag = true
+                    mTopRectStartFlag = true
+                    if (mTopRectStartCount < mTopRectChartArray.size) {
+                        mTopRectStartCount += 1
+                    }
+                    LogUtil.e("top - start  onStart  : $mTopRectStartCount")
                 }, onEnd = {
-                    LogUtil.e("thread: ${Thread.currentThread().name}")
-                    mAnimationEnd = true
-                    mAnimationEndCount++
+                    mTopRectTextAnimationEnd = true
+                    if (mTopRectTextAnimationEndCount < mTopRectChartArray.size) {
+                        mTopRectTextAnimationEndCount += 1
+                    }
 
-                    if ((mProgressTopIndex + 1) < mBottomTextArray.size) {
-                        mProgressTopIndex += 1
-                        if (mProgressTopIndex < mBottomTextArray.size) {
-                            val bottomProgressNext = mChartBottomArray[mProgressTopIndex]
-                            val topProgressNext = mChartTopArray[mProgressTopIndex]
-                            startTopProgressAnimation(mProgressTopIndex, bottomProgressNext, topProgressNext)
-                        }
+                    if (mTopRectIndex < mBottomTextArray.size - 1) {
+                        mTopRectIndex += 1
+                        val bottomPercent = mBottomRectChartArray[mTopRectIndex]
+                        val topPercent = mTopRectChartArray[mTopRectIndex]
+                        startTopProgressAnimation(mTopRectIndex, bottomPercent, topPercent)
                     }
                 })
                 start()
@@ -359,15 +356,16 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private fun drawBottomProgress(canvas: Canvas, index: Int) {
         val rectLeft = getRectLeft(index)
         val rectTop = getBottomRectTop(index)
+        LogUtil.e("bottom - index:${index} top:$rectTop")
         val rectRight = getRectRight(index)
         val rectBottom = getBottomRectBottom()
         val rect = RectF(rectLeft, rectTop, rectRight, rectBottom)
         LogUtil.e("index -1: $index  rect:$rect")
-        canvas.drawRect(rect, mPaintBottomProgress)
+        canvas.drawRect(rect, mBottomRectPaint)
     }
 
     @SuppressLint("Recycle")
-    private fun drawTopProgress(index: Int) {
+    private fun drawTopProgress(canvas: Canvas, index: Int) {
         val rectLeft = getRectLeft(index)
         val rectTop = getTopRectTop(index)
         val rectRight = getRectRight(index)
@@ -375,68 +373,67 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         val rect = RectF(rectLeft, rectTop, rectRight, rectBottom)
 
         LogUtil.e("index -2: $index  rect:$rect")
-        // mCanvas?.drawRect(rect, mPaintTopProgress)
-        mPath.addRect(rect, Path.Direction.CW)
+        canvas.drawRect(rect, mTopRectPaint)
     }
 
-    val score = 45
     private fun drawProgressText(canvas: Canvas, index: Int) {
         val rectLeft = getRectLeft(index)
-        // val score = Random.nextInt(10, 100)
-        val text = "+$score"
-
-        val textWidth = CustomViewUtil.getTextWidth(mPaintProgressText, text)
-        val realX = rectLeft - ((textWidth - mProgressWith) / 2)
-
-        val targetPercent = mChartTopArray[index]
-        val maxTop = mBottomLineX - (targetPercent * mProgressMaxSpace)
-
-        canvas.drawText(text, realX, maxTop - mProgressTopTextInterval, mPaintProgressText)
+        val text = "+${mScoreArray[index]}"
+        val textWidth = CustomViewUtil.getTextWidth(mTopRectTextPaint, text)
+        val realX = rectLeft - ((textWidth - mRectWith) / 2)
+        val targetPercent = mTopRectChartArray[index]
+        val maxTop = mLineBottomY - (targetPercent * mLineMaxSpace)
+        canvas.drawText(text, realX, maxTop - mTopRectTextEveryInterval, mTopRectTextPaint)
     }
 
     private fun getRectLeft(index: Int): Float {
-        // rect left = text left + (text.with - rect.with)/2
-        return mBottomLeftArray[index] + (mBottomTextWithSize[index] - mProgressWith) / 2
-    }
-
-    private fun getBottomRectTop(index: Int): Float {
-        // rect top = full.line.bottom - (input.height.percent*scope.maxHeight)
-        // bottom max height
-        val targetBottomPercent = mChartBottomArray[index]
-        return if (mAnimationBottomValue < targetBottomPercent) {
-            mBottomLineX - (mAnimationBottomValue * mProgressMaxSpace)
-        } else {
-            mBottomLineX - (targetBottomPercent * mProgressMaxSpace)
-        }
-    }
-
-    private fun getTopRectTop(index: Int): Float {
-        if (mTopMaxX == 0F) {
-            mTopMaxPercent = mChartTopArray[index]
-            mTopMaxX = mBottomLineX - (mTopMaxPercent * mProgressMaxSpace)
-        }
-
-        return if (mAnimationTopValue < mTopMaxPercent) {
-            val real = mBottomLineX - (mAnimationTopValue * mProgressMaxSpace) - mProgressInterval
-            if (real > mTopMaxX) {
-                real
-            } else {
-                mTopMaxX
-            }
-        } else {
-            mTopMaxX
-        }
+        return mBottomLeftArray[index] + ((mBottomTextWithSize[index] - mRectWith) / 2)
     }
 
     private fun getRectRight(index: Int): Float {
-        return getRectLeft(index) + mProgressWith
+        return getRectLeft(index) + mRectWith
+    }
+
+    private fun getBottomRectTop(index: Int): Float {
+        val targetBottomPercent = mBottomRectChartArray[index]
+        return if (mBottomRectAnimationValue < targetBottomPercent) {
+            mLineBottomY - (mBottomRectAnimationValue * mLineMaxSpace)
+        } else {
+            mLineBottomY - (targetBottomPercent * mLineMaxSpace)
+        }
     }
 
     private fun getBottomRectBottom(): Float {
-        return mBottomLineX
+        return mLineBottomY
+    }
+
+    private fun getTopRectTop(index: Int): Float {
+        val topRectMaxPercent = mTopRectChartArray[index]
+        val topRectMaxValue = mLineBottomY - (topRectMaxPercent * mLineMaxSpace)
+
+        return if (index != mTopRectIndex) {
+            topRectMaxValue
+        } else {
+            if (mTopRectAnimationValue < topRectMaxPercent) {
+                val currentValue = mLineBottomY - (mTopRectAnimationValue * mLineMaxSpace) - mRectEveryInterval
+                if (currentValue > topRectMaxValue) {
+                    currentValue
+                } else {
+                    topRectMaxValue
+                }
+            } else {
+                topRectMaxValue
+            }
+        }
     }
 
     private fun getTopRectBottom(index: Int): Float {
-        return (mBottomLineX - (mChartBottomArray[index] * mProgressMaxSpace)) - mProgressInterval
+        val bottomPercent = mBottomRectChartArray[index]
+        val topPercent = mTopRectChartArray[index]
+        return if (bottomPercent != topPercent) {
+            mLineBottomY - (bottomPercent * mLineMaxSpace) - mRectEveryInterval
+        } else {
+            mLineBottomY - (bottomPercent * mLineMaxSpace)
+        }
     }
 }
