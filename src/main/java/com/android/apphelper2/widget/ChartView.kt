@@ -246,6 +246,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         this.mChartBottomArray = chartBottomArray
         this.mChartTopArray = chartTopArray
         this.mAnimationFlag = false
+        mPath.reset()
         val maxProgress = chartBottomArray.maxOrNull()
         var temp = 0F
 
