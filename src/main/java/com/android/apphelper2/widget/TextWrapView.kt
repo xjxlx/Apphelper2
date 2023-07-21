@@ -2,6 +2,8 @@ package com.android.apphelper2.widget
 
 import android.content.Context
 import android.graphics.*
+import android.text.StaticLayout
+import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.View
 import com.android.apphelper2.utils.CustomViewUtil
@@ -57,8 +59,8 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
     }
 
     private var mWrapTextContent = "呼吸时长足够，注意保持均匀的呼吸次数和平缓的心率，让情绪更稳定些效果更好哦！"
-    private val mWrapTextPaint: Paint by lazy {
-        return@lazy Paint().apply {
+    private val mWrapTextPaint: TextPaint by lazy {
+        return@lazy TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
             textSize = ResourcesUtil.toPx(26F)
             style = Paint.Style.FILL
@@ -68,6 +70,11 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         return@lazy ResourcesUtil.toPx(160F)
     }
 
+    private val staticLayout =
+        StaticLayout.Builder.obtain(mWrapTextContent, 0, mWrapTextContent.length, mWrapTextPaint, mMaxWidth.toInt() - 20)
+
+            .build()
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         setMeasuredDimension(mMaxWidth.toInt(), mMaxHeight.toInt())
@@ -75,6 +82,7 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+
 
         canvas?.let {
             // 1: draw background
@@ -94,6 +102,8 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
             val wrapBaseLine = CustomViewUtil.getBaseLine(mWrapTextPaint, mWrapTextContent)
             val wrapTop = mWrapTextTop + wrapBaseLine
             it.drawText(mWrapTextContent, mPadding, wrapTop, mWrapTextPaint)
+
+            staticLayout.draw(it)
 
         }
     }
