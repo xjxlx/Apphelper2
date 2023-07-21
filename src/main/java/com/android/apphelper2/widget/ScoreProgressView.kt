@@ -49,7 +49,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         }
     }
     private var mArcBeforeFlag: Boolean = false
-    private var mArcScorePercentValue: Float = 0F
+    private var mArcScorePercentValue: Int = 0
     private val mArcScorePercent: Float by lazy {
         //  mArcMaxSweepAngle * x =
         // s =  v * t
@@ -66,7 +66,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         // t = mScoreMaxValue
         // v = s / t
         // v = mArcMaxSweepAngle / mScoreMaxValue
-        return@lazy (mArcMaxDuration / mScoreMaxValue).toLong()
+        return@lazy (mArcMaxDuration / mTotalScoreMaxValue).toLong()
     }
 
     private val mTitleContent = "综合评分"
@@ -90,9 +90,9 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         return@lazy CustomViewUtil.getBaseLine(mTitlePaint, mTitleContent)
     }
 
-    private var mScoreValue: Float = 0F
-    private val mScoreMaxValue = 100F
-    private val mSorePaint: Paint by lazy {
+    private var mTotalScoreValue: Int = 0
+    private val mTotalScoreMaxValue: Int = 100
+    private val mTotalSorePaint: Paint by lazy {
         return@lazy Paint().apply {
             color = Color.WHITE
             textSize = ResourcesUtil.toPx(108F)
@@ -101,8 +101,40 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     }
 
     // todo temp data
-    private val mScoreInterval: Float by lazy {
+    private val mTotalScoreInterval: Float by lazy {
         return@lazy ResourcesUtil.toPx(110F)
+    }
+
+    // todo temp data
+    private val mUpValueInterval: Float by lazy {
+        return@lazy ResourcesUtil.toPx(230F)
+    }
+    private val mTotalUpTextContent = "总提升"
+    private val mTotalUpTextPaint: Paint by lazy {
+        return@lazy Paint().apply {
+            textSize = ResourcesUtil.toPx(24F)
+            color = Color.WHITE
+            style = Paint.Style.FILL
+        }
+    }
+    private val mTotalUpTextWith: Float by lazy {
+        return@lazy CustomViewUtil.getTextWidth(mTotalUpTextPaint, mTotalUpTextContent)
+    }
+
+    private val mUpTextToValueInterval: Float by lazy {
+        return@lazy ResourcesUtil.toPx(5F)
+    }
+
+    private var mUpScoreValue: String = ""
+    private val mUpScorePaint: Paint by lazy {
+        return@lazy Paint().apply {
+            color = Color.WHITE
+            textSize = ResourcesUtil.toPx(32F)
+            style = Paint.Style.FILL
+        }
+    }
+    private val mUpScoreWith: Float by lazy {
+        return@lazy CustomViewUtil.getTextWidth(mUpScorePaint, mUpScoreValue)
     }
 
     val paint = Paint().apply {
@@ -124,8 +156,8 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         // useCenter:为True时，在绘制圆弧时将圆心包括在内，通常用来绘制扇形。
         // paint: 绘制圆弧的画板属性
         canvas?.let {
-            val y = 226.28F
-            it.drawLine(0f, y, mMaxWidth, y, paint)
+//            val y = 226.28F
+//            it.drawLine(0f, y, mMaxWidth, y, paint)
 
             // 1: draw background arc
             it.drawArc(mArcRectF, mArcStartAngle, mArcMaxSweepAngle, false, mArcPaintBackground)
@@ -140,23 +172,41 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
                 // 4: draw score
                 val content = mArcScorePercentValue.toInt()
                     .toString()
-                val scoreWidth = CustomViewUtil.getTextWidth(mSorePaint, content)
+                val scoreWidth = CustomViewUtil.getTextWidth(mTotalSorePaint, content)
                 val scoreLeft = (mMaxWidth - scoreWidth) / 2
-                val scoreBaseLine = CustomViewUtil.getBaseLine(mSorePaint, content)
-                it.drawText(content, scoreLeft, (mScoreInterval + scoreBaseLine), mSorePaint)
+                val scoreBaseLine = CustomViewUtil.getBaseLine(mTotalSorePaint, content)
+                it.drawText(content, scoreLeft, (mTotalScoreInterval + scoreBaseLine), mTotalSorePaint)
+
+                // 5: draw total up text
+                val totalUpTextLeft = (mMaxWidth - mTotalUpTextWith - mUpScoreWith - mUpTextToValueInterval) / 2
+                it.drawText(mTotalUpTextContent, totalUpTextLeft, mUpValueInterval, mTotalUpTextPaint)
+
+                // 6: draw up score value
+                val totalUpScoreLeft = totalUpTextLeft + mTotalUpTextWith + mUpTextToValueInterval
+                it.drawText(mUpScoreValue, totalUpScoreLeft, mUpValueInterval, mUpScorePaint)
             }
         }
     }
 
-    fun setScore(score: Float) {
+    fun setScore(totalScore: Int, upScore: Int) {
         this.mArcBeforeFlag = true
-        this.mScoreValue = min(score, mScoreMaxValue)
+        this.mTotalScoreValue = min(totalScore, mTotalScoreMaxValue)
+        this.mUpScoreValue = "+$upScore"
 
-        ValueAnimator.ofFloat(0F, this.mScoreValue)
+        // todo 临时的逻辑
+        if (mTotalScoreValue < 40) {
+            mArcPaintBefore.color = Color.parseColor("#E26666")
+        } else if (mTotalScoreValue in 41..69) {
+            mArcPaintBefore.color = Color.parseColor("#EDD452")
+        } else if (mTotalScoreValue > 69) {
+            mArcPaintBefore.color = Color.parseColor("#57AB64")
+        }
+
+        ValueAnimator.ofInt(0, this.mTotalScoreValue)
             .apply {
-                duration = (mArcDurationSpeed * mScoreValue).toLong()
+                duration = (mArcDurationSpeed * mTotalScoreValue)
                 addUpdateListener {
-                    mArcScorePercentValue = it.animatedValue as Float
+                    mArcScorePercentValue = it.animatedValue as Int
                     invalidate()
                 }
                 start()
@@ -164,7 +214,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     }
 
     fun restart() {
-        this.mScoreValue = 0f
+        this.mTotalScoreValue = 0
         this.mArcBeforeFlag = false
         invalidate()
     }
