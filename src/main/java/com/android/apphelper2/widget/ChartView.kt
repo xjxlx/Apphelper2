@@ -12,9 +12,16 @@ import com.android.apphelper2.utils.CustomViewUtil.getBaseLine
 import com.android.apphelper2.utils.CustomViewUtil.getTextWidth
 import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.ResourcesUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class ChartView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
+    private val mScope: CoroutineScope by lazy {
+        return@lazy CoroutineScope(Dispatchers.Main)
+    }
     private val mMaxWidth: Int by lazy {
         return@lazy ResourcesUtil.toPx(500F)
             .toInt()
@@ -153,6 +160,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         }
     }
     private var mBottomRectAnimationValue: Float = 0F
+    private val mBottomRectDelay: Long = 2000
 
     private val mRectEveryInterval: Float by lazy {
         return@lazy ResourcesUtil.toPx(3F)
@@ -311,11 +319,15 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
                         mBottomRectStartFlag = true
                         LogUtil.e("animation: onStart")
                     }, onEnd = {
-                        LogUtil.e("animation: onEnd")
-                        mTopRectIndex = 0
-                        val bottomPercent = mBottomRectChartArray[mTopRectIndex]
-                        val topPercent = mTopRectChartArray[mTopRectIndex]
-                        startTopProgressAnimation(mTopRectIndex, bottomPercent, topPercent)
+
+                        mScope.launch {
+                            delay(mBottomRectDelay)
+                            LogUtil.e("animation: onEnd")
+                            mTopRectIndex = 0
+                            val bottomPercent = mBottomRectChartArray[mTopRectIndex]
+                            val topPercent = mTopRectChartArray[mTopRectIndex]
+                            startTopProgressAnimation(mTopRectIndex, bottomPercent, topPercent)
+                        }
                     })
                     start()
                 }
