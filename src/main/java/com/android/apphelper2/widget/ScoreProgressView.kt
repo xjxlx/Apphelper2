@@ -9,8 +9,8 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 import com.android.apphelper2.utils.CustomViewUtil
-import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.ResourcesUtil
+import kotlin.math.min
 
 class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
@@ -49,15 +49,24 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         }
     }
     private var mArcBeforeFlag: Boolean = false
-    private var mArcScoreValue: Float = 0F
-    private val mArcMaxDuration: Long = 3000
-    private val mArcDuration: Long by lazy {
-        // s = v * t
+    private var mArcScorePercentValue: Float = 0F
+    private val mArcScorePercent: Float by lazy {
+        //  mArcMaxSweepAngle * x =
+        // s =  v * t
         // s = mArcMaxSweepAngle
-        // t = 3000
+        // t =  100
         // v = s / t
-        // v = mArcMaxSweepAngle / mArcMaxDuration
-        return@lazy (mArcMaxSweepAngle / mArcMaxDuration).toLong()
+        // mArcMaxSweepAngle / 100
+        return@lazy mArcMaxSweepAngle / 100F
+    }
+    private val mArcMaxDuration: Long = 3000
+    private val mArcDurationSpeed: Long by lazy {
+        // s = v * t
+        // s = mArcMaxDuration
+        // t = mScoreMaxValue
+        // v = s / t
+        // v = mArcMaxSweepAngle / mScoreMaxValue
+        return@lazy (mArcMaxDuration / mScoreMaxValue).toLong()
     }
 
     private val mTitleContent = "综合评分"
@@ -82,6 +91,19 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     }
 
     private var mScoreValue: Float = 0F
+    private val mScoreMaxValue = 100F
+    private val mSorePaint: Paint by lazy {
+        return@lazy Paint().apply {
+            color = Color.WHITE
+            textSize = ResourcesUtil.toPx(108F)
+            style = Paint.Style.FILL
+        }
+    }
+
+    // todo temp data
+    private val mScoreInterval: Float by lazy {
+        return@lazy ResourcesUtil.toPx(110F)
+    }
 
     val paint = Paint().apply {
         color = Color.WHITE
@@ -113,29 +135,37 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
 
             if (mArcBeforeFlag) {
                 // 3: draw before arc
-                it.drawArc(mArcRectF, mArcStartAngle, mArcScoreValue, false, mArcPaintBefore)
-            }
+                it.drawArc(mArcRectF, mArcStartAngle, (mArcScorePercent * mArcScorePercentValue), false, mArcPaintBefore)
 
-            LogUtil.e("mMaxSweepAngle: $mArcMaxSweepAngle")
+                // 4: draw score
+                val content = mArcScorePercentValue.toInt()
+                    .toString()
+                val scoreWidth = CustomViewUtil.getTextWidth(mSorePaint, content)
+                val scoreLeft = (mMaxWidth - scoreWidth) / 2
+                val scoreBaseLine = CustomViewUtil.getBaseLine(mSorePaint, content)
+                it.drawText(content, scoreLeft, (mScoreInterval + scoreBaseLine), mSorePaint)
+            }
         }
     }
 
     fun setScore(score: Float) {
         this.mArcBeforeFlag = true
-        if (score > mArcMaxSweepAngle) {
-            this.mArcScoreValue = mArcMaxSweepAngle
-        } else {
-            this.mArcScoreValue = score
-        }
+        this.mScoreValue = min(score, mScoreMaxValue)
 
-        ValueAnimator.ofFloat(0F, this.mArcScoreValue)
+        ValueAnimator.ofFloat(0F, this.mScoreValue)
             .apply {
-                duration = mArcMaxDuration
+                duration = (mArcDurationSpeed * mScoreValue).toLong()
                 addUpdateListener {
-                    mArcScoreValue = it.animatedValue as Float
+                    mArcScorePercentValue = it.animatedValue as Float
                     invalidate()
                 }
                 start()
             }
+    }
+
+    fun restart() {
+        this.mScoreValue = 0f
+        this.mArcBeforeFlag = false
+        invalidate()
     }
 }
