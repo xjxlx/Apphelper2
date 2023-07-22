@@ -1,9 +1,15 @@
 package com.android.apphelper2.widget
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
+import android.graphics.Typeface
+import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.View
 import com.android.apphelper2.utils.CustomViewUtil
@@ -33,7 +39,7 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         }
     }
 
-    private var mTitleContent = "加油!"
+    private var mTitleContent = ""
     private val mTitlePaint: Paint by lazy {
         return@lazy Paint().apply {
             color = Color.parseColor("#57AB64")
@@ -46,7 +52,7 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         return@lazy ResourcesUtil.toPx(32F)
     }
 
-    private var mSubheadContent = "下次努力哦！"
+    private var mSubheadContent = ""
     private val mSubheadPaint: Paint by lazy {
         return@lazy Paint().apply {
             color = Color.WHITE
@@ -58,9 +64,9 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         return@lazy ResourcesUtil.toPx(100F)
     }
 
-    private var mWrapTextContent = "呼吸时长足够，注意保持均匀的呼吸次数和平缓的心率，让情绪更稳定些效果更好哦！"
+    private var mWrapTextContent = ""
     private val mWrapTextPaint: TextPaint by lazy {
-        return@lazy TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+        return@lazy TextPaint().apply {
             color = Color.WHITE
             textSize = ResourcesUtil.toPx(26F)
             style = Paint.Style.FILL
@@ -70,10 +76,14 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         return@lazy ResourcesUtil.toPx(160F)
     }
 
-    private val staticLayout =
-        StaticLayout.Builder.obtain(mWrapTextContent, 0, mWrapTextContent.length, mWrapTextPaint, mMaxWidth.toInt() - 20)
-
+    private val mStaticLayout: StaticLayout by lazy {
+        return@lazy StaticLayout.Builder.obtain(mWrapTextContent, 0, mWrapTextContent.length, mWrapTextPaint,
+            mMaxWidth.toInt() - (mPadding * 2).toInt())
+            .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+            .setMaxLines(3)
+            .setEllipsize(TextUtils.TruncateAt.END)
             .build()
+    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -83,28 +93,47 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
-
         canvas?.let {
             // 1: draw background
             it.drawRoundRect(mBackgroundRectF, mBackgroundRadius, mBackgroundRadius, mBackgroundPaint)
 
             // 2: draw title
-            val titleBaseLine = CustomViewUtil.getBaseLine(mTitlePaint, mTitleContent)
-            val titleTop = mTitleTop + titleBaseLine
-            it.drawText(mTitleContent, mPadding, titleTop, mTitlePaint)
+            if (!TextUtils.isEmpty(mTitleContent)) {
+                val titleBaseLine = CustomViewUtil.getBaseLine(mTitlePaint, mTitleContent)
+                val titleTop = mTitleTop + titleBaseLine
+                it.drawText(mTitleContent, mPadding, titleTop, mTitlePaint)
+            }
 
             // 3: draw subhead
-            val subheadBaseLine = CustomViewUtil.getBaseLine(mSubheadPaint, mSubheadContent)
-            val subheadTop = mSubheadTop + subheadBaseLine
-            it.drawText(mSubheadContent, mPadding, subheadTop, mSubheadPaint)
+            if (!TextUtils.isEmpty(mSubheadContent)) {
+                val subheadBaseLine = CustomViewUtil.getBaseLine(mSubheadPaint, mSubheadContent)
+                val subheadTop = mSubheadTop + subheadBaseLine
+                it.drawText(mSubheadContent, mPadding, subheadTop, mSubheadPaint)
+            }
 
             // 4: draw wrap text
-            val wrapBaseLine = CustomViewUtil.getBaseLine(mWrapTextPaint, mWrapTextContent)
-            val wrapTop = mWrapTextTop + wrapBaseLine
-            it.drawText(mWrapTextContent, mPadding, wrapTop, mWrapTextPaint)
-
-            staticLayout.draw(it)
-
+            if (!TextUtils.isEmpty(mWrapTextContent)) {
+                it.save()
+                it.translate(mPadding, mWrapTextTop)
+                mStaticLayout.draw(it)
+                it.restore()
+            }
         }
+    }
+
+    fun setExplain(score: Int, title: String, subhead: String, content: String) {
+        this.mTitleContent = title
+        this.mSubheadContent = subhead
+        this.mWrapTextContent = content
+
+        // todo 临时的逻辑
+        if (score < 40) {
+            mTitlePaint.color = Color.parseColor("#E26666")
+        } else if (score in 41..69) {
+            mTitlePaint.color = Color.parseColor("#EDD452")
+        } else if (score > 69) {
+            mTitlePaint.color = Color.parseColor("#57AB64")
+        }
+        invalidate()
     }
 }
