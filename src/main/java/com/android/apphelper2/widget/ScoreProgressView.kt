@@ -137,7 +137,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         return@lazy CustomViewUtil.getTextWidth(mUpScorePaint, mUpScoreValue)
     }
 
-    val paint = Paint().apply {
+    private val paint = Paint().apply {
         color = Color.WHITE
         strokeWidth = 1f
     }
