@@ -56,6 +56,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             color = Color.WHITE
             style = Paint.Style.FILL
             textSize = ResourcesUtil.toPx(24F)
+            typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
     }
 
@@ -102,6 +103,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             color = Color.parseColor("#B3FFFFFF")
             style = Paint.Style.FILL
             textSize = ResourcesUtil.toPx(14F)
+            typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
     }
     private val mScoreInterval: Float by lazy {
@@ -118,6 +120,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy Paint().apply {
             color = Color.parseColor("#B3FFFFFF")
             textSize = ResourcesUtil.toPx(22f)
+            typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
     }
     private val mBottomTextPadding: Float by lazy {
@@ -197,6 +200,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             textSize = ResourcesUtil.toPx(20F)
             color = Color.parseColor("#0094FF")
             style = Paint.Style.FILL
+            typeface = Typeface.createFromAsset(context.assets, "Inter-SemiBoldItalic.otf")
         }
     }
     private var mTopRectTextAnimationEnd = false
