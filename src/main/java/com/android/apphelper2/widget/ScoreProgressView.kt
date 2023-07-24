@@ -2,10 +2,7 @@ package com.android.apphelper2.widget
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.RectF
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import com.android.apphelper2.utils.CustomViewUtil
@@ -28,9 +25,9 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     private val mArcRectF: RectF by lazy {
         return@lazy RectF(mArcRadius, mArcRadius, mMaxWidth - mArcRadius, mMaxHeight - mArcRadius)
     }
-    private val mArcStartAngle: Float = 159F
+    private val mArcStartAngle: Float = 139.3F
     private val mArcMaxSweepAngle: Float by lazy {
-        return@lazy mArcStartAngle + 63F
+        return@lazy mArcStartAngle + 120F
     }
     private val mArcPaintBackground: Paint by lazy {
         return@lazy Paint().apply {
@@ -75,6 +72,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
             color = Color.WHITE
             textSize = ResourcesUtil.toPx(36F)
             style = Paint.Style.FILL
+            typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
     }
     private val mTitleSize: FloatArray by lazy {
@@ -84,7 +82,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         return@lazy (mMaxWidth - mTitleSize[0]) / 2
     }
     private val mTitleTop: Float by lazy {
-        return@lazy ResourcesUtil.toPx(50F)
+        return@lazy ResourcesUtil.toPx(56F)
     }
     private val mTitleBaseLine: Float by lazy {
         return@lazy CustomViewUtil.getBaseLine(mTitlePaint, mTitleContent)
@@ -97,17 +95,15 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
             color = Color.WHITE
             textSize = ResourcesUtil.toPx(108F)
             style = Paint.Style.FILL
+            typeface = Typeface.createFromAsset(context.assets, "Niramit-SemiBold.ttf")
         }
     }
-
-    // todo temp data
     private val mTotalScoreInterval: Float by lazy {
-        return@lazy ResourcesUtil.toPx(110F)
+        return@lazy ResourcesUtil.toPx(119.5F)
     }
 
-    // todo temp data
     private val mUpValueInterval: Float by lazy {
-        return@lazy ResourcesUtil.toPx(230F)
+        return@lazy ResourcesUtil.toPx(229F)
     }
     private val mTotalUpTextContent = "总提升"
     private val mTotalUpTextPaint: Paint by lazy {
@@ -115,10 +111,14 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
             textSize = ResourcesUtil.toPx(24F)
             color = Color.WHITE
             style = Paint.Style.FILL
+            typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
     }
     private val mTotalUpTextWith: Float by lazy {
         return@lazy CustomViewUtil.getTextWidth(mTotalUpTextPaint, mTotalUpTextContent)
+    }
+    private val mTotalUpTextBaseLine: Float by lazy {
+        return@lazy CustomViewUtil.getBaseLine(mTotalUpTextPaint, mTotalUpTextContent)
     }
 
     private val mUpTextToValueInterval: Float by lazy {
@@ -126,20 +126,16 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     }
 
     private var mUpScoreValue: String = ""
-    private val mUpScorePaint: Paint by lazy {
+    private val mUpScoreValuePaint: Paint by lazy {
         return@lazy Paint().apply {
             color = Color.WHITE
             textSize = ResourcesUtil.toPx(32F)
             style = Paint.Style.FILL
+            typeface = Typeface.createFromAsset(context.assets, "Inter-SemiBoldItalic.otf")
         }
     }
-    private val mUpScoreWith: Float by lazy {
-        return@lazy CustomViewUtil.getTextWidth(mUpScorePaint, mUpScoreValue)
-    }
-
-    private val paint = Paint().apply {
-        color = Color.WHITE
-        strokeWidth = 1f
+    private val mUpScoreValueWith: Float by lazy {
+        return@lazy CustomViewUtil.getTextWidth(mUpScoreValuePaint, mUpScoreValue)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -156,8 +152,6 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         // useCenter:为True时，在绘制圆弧时将圆心包括在内，通常用来绘制扇形。
         // paint: 绘制圆弧的画板属性
         canvas?.let {
-//            val y = 226.28F
-//            it.drawLine(0f, y, mMaxWidth, y, paint)
 
             // 1: draw background arc
             it.drawArc(mArcRectF, mArcStartAngle, mArcMaxSweepAngle, false, mArcPaintBackground)
@@ -169,21 +163,21 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
                 // 3: draw before arc
                 it.drawArc(mArcRectF, mArcStartAngle, (mArcScorePercent * mArcScorePercentValue), false, mArcPaintBefore)
 
-                // 4: draw score
-                val content = mArcScorePercentValue.toInt()
-                    .toString()
+                // 4: draw total score
+                val content = mArcScorePercentValue.toString()
                 val scoreWidth = CustomViewUtil.getTextWidth(mTotalSorePaint, content)
                 val scoreLeft = (mMaxWidth - scoreWidth) / 2
                 val scoreBaseLine = CustomViewUtil.getBaseLine(mTotalSorePaint, content)
                 it.drawText(content, scoreLeft, (mTotalScoreInterval + scoreBaseLine), mTotalSorePaint)
 
                 // 5: draw total up text
-                val totalUpTextLeft = (mMaxWidth - mTotalUpTextWith - mUpScoreWith - mUpTextToValueInterval) / 2
-                it.drawText(mTotalUpTextContent, totalUpTextLeft, mUpValueInterval, mTotalUpTextPaint)
+                val totalUpTextLeft = (mMaxWidth - mTotalUpTextWith - mUpScoreValueWith - mUpTextToValueInterval) / 2
+                it.drawText(mTotalUpTextContent, totalUpTextLeft, mUpValueInterval + mTotalUpTextBaseLine, mTotalUpTextPaint)
 
                 // 6: draw up score value
+                val totalUpScoreBaseLine = CustomViewUtil.getBaseLine(mUpScoreValuePaint, mUpScoreValue + "")
                 val totalUpScoreLeft = totalUpTextLeft + mTotalUpTextWith + mUpTextToValueInterval
-                it.drawText(mUpScoreValue, totalUpScoreLeft, mUpValueInterval, mUpScorePaint)
+                it.drawText(mUpScoreValue, totalUpScoreLeft, mUpValueInterval + totalUpScoreBaseLine, mUpScoreValuePaint)
             }
         }
     }
