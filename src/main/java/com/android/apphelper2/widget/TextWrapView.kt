@@ -1,11 +1,7 @@
 package com.android.apphelper2.widget
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.RectF
-import android.graphics.Typeface
+import android.graphics.*
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
@@ -45,7 +41,7 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
             color = Color.parseColor("#57AB64")
             style = Paint.Style.FILL
             textSize = ResourcesUtil.toPx(40F)
-            typeface = Typeface.DEFAULT_BOLD
+            typeface = Typeface.create(Typeface.createFromAsset(context.assets, "DroidSans.ttf"), Typeface.BOLD)
         }
     }
     private val mTitleTop: Float by lazy {
@@ -58,6 +54,7 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
             color = Color.WHITE
             style = Paint.Style.FILL
             textSize = ResourcesUtil.toPx(28F)
+            typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
     }
     private val mSubheadTop: Float by lazy {
@@ -67,9 +64,10 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
     private var mWrapTextContent = ""
     private val mWrapTextPaint: TextPaint by lazy {
         return@lazy TextPaint().apply {
-            color = Color.WHITE
+            color = Color.parseColor("#80FFFFFF")
             textSize = ResourcesUtil.toPx(26F)
             style = Paint.Style.FILL
+            typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
     }
     private val mWrapTextTop: Float by lazy {
@@ -81,6 +79,7 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
             mMaxWidth.toInt() - (mPadding * 2).toInt())
             .setAlignment(Layout.Alignment.ALIGN_NORMAL)
             .setMaxLines(3)
+            .setLineSpacing(0f, 1.5F)
             .setEllipsize(TextUtils.TruncateAt.END)
             .build()
     }
