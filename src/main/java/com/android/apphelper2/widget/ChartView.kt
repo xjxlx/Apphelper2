@@ -83,7 +83,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             style = Paint.Style.FILL
             color = mLineFirstColor
             // todo 默认的1dp
-            strokeWidth = ResourcesUtil.toPx(0.8F)
+            strokeWidth = ResourcesUtil.toPx(1F)
             strokeCap = Paint.Cap.ROUND
         }
     }
