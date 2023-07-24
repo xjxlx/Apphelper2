@@ -124,7 +124,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         }
     }
     private val mBottomTextPadding: Float by lazy {
-        return@lazy ResourcesUtil.toPx(84f)
+        return@lazy ResourcesUtil.toPx(84F)
     }
     private var mBottomTextMaxBaseLine: Float = 0F
     private val mBottomTextWithSize: FloatArray by lazy {
@@ -148,7 +148,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy (mMaxWidth - (mBottomTextPadding * 2) - with) / (mBottomTextWithSize.size - 1)
     }
     private val mBottomTextTop: Float by lazy {
-        return@lazy ResourcesUtil.toPx(8f)
+        return@lazy ResourcesUtil.toPx(10F)
     }
     private val mBottomLeftArray: FloatArray by lazy {
         return@lazy FloatArray(mBottomTextArray.size)
@@ -269,6 +269,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             mBottomTextEveryInterval
             var bottomLeft = mBottomTextPadding
             val bottomTop = mLineBottomY + mBottomTextMaxBaseLine + mBottomTextTop
+
             mBottomTextArray.forEachIndexed { index, s ->
                 mBottomLeftArray[index] = bottomLeft
                 it.drawText(s, bottomLeft, bottomTop, mBottomTextPaint)
