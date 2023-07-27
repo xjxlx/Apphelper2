@@ -159,8 +159,12 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         }
     }
     private var mBottomRectAnimationValue: Float = 0F
-
     private val mBottomRectDelay: Long = 500L
+    private val mBottomRectArray: Array<RectF> by lazy {
+        return@lazy Array<RectF>(mBottomTextArray.size) {
+            RectF()
+        }
+    }
 
     private val mRectEveryInterval: Float by lazy {
         return@lazy ResourcesUtil.toPx(3F)
@@ -201,6 +205,11 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy ResourcesUtil.toPx(6f)
     }
     private var mTopRectTextAnimationEndCount = 0
+    private val mTopRectArray: Array<RectF> by lazy {
+        return@lazy Array<RectF>(mBottomTextArray.size) {
+            RectF()
+        }
+    }
 
     private var mScoreArray: IntArray = IntArray(mBottomTextArray.size)
 
