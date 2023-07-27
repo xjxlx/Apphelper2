@@ -12,10 +12,7 @@ import com.android.apphelper2.utils.CustomViewUtil.getBaseLine
 import com.android.apphelper2.utils.CustomViewUtil.getTextWidth
 import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.ResourcesUtil
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class ChartView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
@@ -474,6 +471,14 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             mLineBottomY - (bottomPercent * mLineMaxSpace) - mRectEveryInterval
         } else {
             mLineBottomY - (bottomPercent * mLineMaxSpace)
+        }
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        LogUtil.e("tag", "onDetachedFromWindow")
+        kotlin.runCatching {
+            mScope.cancel()
         }
     }
 }
