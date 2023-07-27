@@ -17,7 +17,7 @@ import kotlinx.coroutines.*
 class ChartView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
     private val mScope: CoroutineScope by lazy {
-        return@lazy CoroutineScope(Dispatchers.Main)
+        return@lazy MainScope()
     }
     private val mMaxWidth: Int by lazy {
         return@lazy ResourcesUtil.toPx(500F)
@@ -326,6 +326,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
                     }, onEnd = {
 
                         mScope.launch {
+                            // wait for the specified time before the execution start
                             delay(mBottomRectDelay)
                             LogUtil.e("animation: onEnd")
 
