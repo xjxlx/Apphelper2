@@ -1,0 +1,9 @@
+
+1: 添加
+    git submodule   add git@github.com:xjxlx/apphelper2.git apphelper2
+
+2：初始化
+    git submodule init
+
+3：更新
+    git submodule update
