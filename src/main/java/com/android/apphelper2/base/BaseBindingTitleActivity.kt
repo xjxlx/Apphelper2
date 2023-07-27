@@ -9,6 +9,7 @@ import com.android.apphelper2.interfaces.TitleInterface
 open abstract class BaseBindingTitleActivity<T : ViewBinding> : BaseBindingActivity<T>(), TitleInterface {
 
     private var mBaseTitlePageBinding: BaseTitlePageBinding? = null
+    var autoFinish = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // init title page binding
@@ -20,9 +21,13 @@ open abstract class BaseBindingTitleActivity<T : ViewBinding> : BaseBindingActiv
         }
         super.onCreate(savedInstanceState)
 
-        // init title
         mBaseTitlePageBinding?.let {
+            // init title
             initTitle(it)
+
+            if (autoFinish) {
+                goBack()
+            }
         }
     }
 
@@ -36,5 +41,17 @@ open abstract class BaseBindingTitleActivity<T : ViewBinding> : BaseBindingActiv
     private fun initTitle(binding: BaseTitlePageBinding) {
         val titleContent = getTitleContent()
         binding.baseTitle.tvBaseTitle.text = titleContent ?: ""
+    }
+
+    fun goBack(listener: View.OnClickListener? = null) {
+        mBaseTitlePageBinding?.let {
+            if (autoFinish) {
+                it.baseTitle.llBaseTitleBack.setOnClickListener {
+                    finish()
+                }
+            } else {
+                it.baseTitle.llBaseTitleBack.setOnClickListener(listener)
+            }
+        }
     }
 }
