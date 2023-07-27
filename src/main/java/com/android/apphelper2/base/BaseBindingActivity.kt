@@ -36,10 +36,17 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
     override fun initStatusBar() {
         super.initStatusBar()
 
-        val statusBarColor = BaseApplication.builder.statusBarColor
-        if (statusBarColor != 0) {
-            StatusBarUtil.getInstance(this)
-                .setStatusColor(statusBarColor)
+        if (BaseApplication.builder != null) {
+            BaseApplication.builder?.let {
+                val statusBarColor = it.statusBarColor
+                if (statusBarColor > 0) {
+                    StatusBarUtil.getInstance(this)
+                        .setStatusColor(statusBarColor)
+                } else {
+                    StatusBarUtil.getInstance(this)
+                        .setStatusColor(R.color.base_title_background_color)
+                }
+            }
         } else {
             StatusBarUtil.getInstance(this)
                 .setStatusColor(R.color.base_title_background_color)

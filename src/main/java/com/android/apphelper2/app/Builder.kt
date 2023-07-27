@@ -11,5 +11,5 @@ class Builder {
     /**
      * title bar view resource
      */
-    var titleBar: Int = R.layout.base_title_item
+    var titleBarLayout: Int = R.layout.base_title_item
 }

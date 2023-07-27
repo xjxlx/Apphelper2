@@ -1,6 +1,5 @@
 package com.android.apphelper2.app
 
-import android.annotation.SuppressLint
 import android.app.Application
 import com.android.apphelper2.BuildConfig
 import com.orhanobut.logger.AndroidLogAdapter
@@ -12,8 +11,7 @@ object BaseApplication {
 
     lateinit var application: Application
 
-    @SuppressLint("StaticFieldLeak")
-    lateinit var builder: Builder
+    var builder: Builder? = null
     var isDebug = BuildConfig.DEBUG
 
     val mPackageName: String by lazy {
