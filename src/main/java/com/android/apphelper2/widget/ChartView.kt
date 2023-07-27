@@ -205,7 +205,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
     private var mTopRectTextAnimationEnd = false
     private val mTopRectTextEveryInterval: Float by lazy {
-        return@lazy ResourcesUtil.toPx(3f)
+        return@lazy ResourcesUtil.toPx(6f)
     }
     private var mTopRectTextAnimationEndCount = 0
 
