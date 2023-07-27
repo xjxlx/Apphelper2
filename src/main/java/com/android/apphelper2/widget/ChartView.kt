@@ -401,23 +401,22 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
 
     @SuppressLint("Recycle")
     private fun drawBottomProgress(canvas: Canvas, index: Int) {
-        val rectLeft = getRectLeft(index)
-        val rectTop = getBottomRectTop(index)
-        LogUtil.e("bottom - index:${index} top:$rectTop")
-        val rectRight = getRectRight(index)
-        val rectBottom = getBottomRectBottom()
-        val rect = RectF(rectLeft, rectTop, rectRight, rectBottom)
+        val rect = mBottomRectArray[index]
+        rect.left = getRectLeft(index)
+        rect.top = getBottomRectTop(index)
+        rect.right = getRectRight(index)
+        rect.bottom = getBottomRectBottom()
         LogUtil.e("index -1: $index  rect:$rect")
         canvas.drawRect(rect, mBottomRectPaint)
     }
 
     @SuppressLint("Recycle")
     private fun drawTopProgress(canvas: Canvas, index: Int) {
-        val rectLeft = getRectLeft(index)
-        val rectTop = getTopRectTop(index)
-        val rectRight = getRectRight(index)
-        val rectBottom = getTopRectBottom(index)
-        val rect = RectF(rectLeft, rectTop, rectRight, rectBottom)
+        val rect = mTopRectArray[index]
+        rect.left = getRectLeft(index)
+        rect.top = getTopRectTop(index)
+        rect.right = getRectRight(index)
+        rect.bottom = getTopRectBottom(index)
 
         LogUtil.e("index -2: $index  rect:$rect")
         canvas.drawRect(rect, mTopRectPaint)
