@@ -61,7 +61,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         // mArcMaxSweepAngle / 100
         return@lazy mArcMaxSweepAngle / 100F
     }
-    private val mArcMaxDuration: Long = 3000
+    private val mArcMaxDuration: Long = 3500
     private val mArcDurationSpeed: Long by lazy {
         // s = v * t
         // s = mArcMaxDuration
@@ -198,12 +198,12 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         this.mTotalScoreValue = min(totalScore, mTotalScoreMaxValue)
         this.mUpScoreValue = "+$upScore"
 
-        // todo 临时的逻辑
-        if (mTotalScoreValue < 40) {
+        // todo 随后修改
+        if (mTotalScoreValue <= 40) {
             mArcPaintBefore.color = Color.parseColor("#E26666")
-        } else if (mTotalScoreValue in 41..69) {
+        } else if (mTotalScoreValue in 41..70) {
             mArcPaintBefore.color = Color.parseColor("#EDD452")
-        } else if (mTotalScoreValue > 69) {
+        } else if (mTotalScoreValue < 71) {
             mArcPaintBefore.color = Color.parseColor("#57AB64")
         }
 
