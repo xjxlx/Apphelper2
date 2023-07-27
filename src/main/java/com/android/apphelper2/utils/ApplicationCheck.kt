@@ -1,9 +1,9 @@
 package com.android.apphelper2.utils
 
-import com.android.apphelper2.app.AppHelperManager
+import com.android.apphelper2.app.BaseApplication
 
 open class ApplicationCheck {
     init {
-        AppHelperManager.checkRegister()
+        BaseApplication.checkRegister()
     }
 }

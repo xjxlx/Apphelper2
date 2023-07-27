@@ -3,14 +3,14 @@ package com.android.apphelper2.utils
 import android.content.Context
 import android.content.SharedPreferences
 import android.text.TextUtils
-import com.android.apphelper2.app.AppHelperManager
+import com.android.apphelper2.app.BaseApplication
 
 object SpUtil {
 
     private const val TAG = "spUtil"
     private const val SP_FILE_NAME = "userInfo"
     private val mSp: SharedPreferences by lazy {
-        return@lazy AppHelperManager.context.getSharedPreferences(SP_FILE_NAME, Context.MODE_PRIVATE)
+        return@lazy BaseApplication.application.getSharedPreferences(SP_FILE_NAME, Context.MODE_PRIVATE)
     }
 
     fun putString(key: String, value: String) {

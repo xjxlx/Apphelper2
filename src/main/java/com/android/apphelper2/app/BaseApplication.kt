@@ -7,19 +7,22 @@ import com.orhanobut.logger.FormatStrategy
 import com.orhanobut.logger.Logger
 import com.orhanobut.logger.PrettyFormatStrategy
 
-object AppHelperManager {
+object BaseApplication {
 
-    lateinit var context: Application
+    lateinit var application: Application
+    lateinit var builder: Builder
     var isDebug = BuildConfig.DEBUG
+
     val mPackageName: String by lazy {
-        return@lazy context.packageName
+        return@lazy application.packageName
     }
 
     @JvmOverloads
     @JvmStatic
-    fun init(app: Application, repeat: Boolean = false) {
-        context = app
-        if (!this::context.isInitialized) {
+    fun init(app: Application, repeat: Boolean = false, builder: Builder) {
+        this.builder = builder
+        application = app
+        if (!this::application.isInitialized) {
             throw java.lang.NullPointerException("context is not initialized !")
         }
 
@@ -45,8 +48,12 @@ object AppHelperManager {
     }
 
     fun checkRegister() {
-        if (!this::context.isInitialized) {
+        if (!this::application.isInitialized) {
             throw java.lang.NullPointerException("application is not register !")
         }
+    }
+
+    class Builder {
+        var statusBarColor: Int = 0
     }
 }

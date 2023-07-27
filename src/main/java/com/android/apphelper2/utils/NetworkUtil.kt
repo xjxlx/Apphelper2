@@ -7,7 +7,7 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
 import android.text.TextUtils
-import com.android.apphelper2.app.AppHelperManager
+import com.android.apphelper2.app.BaseApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -38,7 +38,7 @@ class NetworkUtil private constructor() {
     }
     private val mStateFlow: MutableSharedFlow<IpAddress> = MutableSharedFlow()
     private val mConnectivityManager: ConnectivityManager by lazy {
-        return@lazy AppHelperManager.context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        return@lazy BaseApplication.application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
     private val mRequest: NetworkRequest by lazy {
         return@lazy NetworkRequest.Builder()

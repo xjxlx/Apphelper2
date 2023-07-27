@@ -16,7 +16,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils
 import androidx.annotation.RequiresPermission
-import com.android.apphelper2.app.AppHelperManager.mPackageName
+import com.android.apphelper2.app.BaseApplication.mPackageName
 
 /**
  * 使用这个工具类，大多的方法都会用到一个权限：
