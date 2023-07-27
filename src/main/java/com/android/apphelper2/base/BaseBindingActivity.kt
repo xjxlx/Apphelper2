@@ -3,18 +3,23 @@ package com.android.apphelper2.base
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.viewbinding.ViewBinding
 import com.android.apphelper2.R
 import com.android.apphelper2.app.BaseApplication
 import com.android.apphelper2.interfaces.UiInterface
+import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.statusBar.StatusBarUtil
 
 open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), UiInterface<T> {
 
     lateinit var mBinding: T
+    lateinit var mActivity: FragmentActivity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        mActivity = this
+        LogUtil.e("当前页面是：Activity: " + javaClass.name)
 
         initStatusBar()
         onCreateViewBefore()
@@ -65,5 +70,15 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
 
     override fun getRootView(): View {
         return mBinding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mActivity = this
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mActivity = this
     }
 }
