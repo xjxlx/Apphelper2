@@ -82,9 +82,9 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy Paint().apply {
             style = Paint.Style.FILL
             color = mLineFirstColor
-            // todo 默认的1dp
             strokeWidth = ResourcesUtil.toPx(1F)
             strokeCap = Paint.Cap.ROUND
+            strokeJoin = Paint.Join.ROUND
         }
     }
     private val mLinePathEffect: PathEffect by lazy {
@@ -107,8 +107,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         }
     }
     private val mScoreInterval: Float by lazy {
-        // todo 假数据
-        return@lazy ResourcesUtil.toPx(10f)
+        return@lazy ResourcesUtil.toPx(6f)
     }
     private val mScoreLeft: Float by lazy {
         val scoreWidth = getTextWidth(mScorePaint, mScoreText)
@@ -164,8 +163,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
     private var mBottomRectAnimationValue: Float = 0F
 
-    // todo temp delay
-    private val mBottomRectDelay: Long = 1000L
+    private val mBottomRectDelay: Long = 500L
 
     private val mRectEveryInterval: Float by lazy {
         return@lazy ResourcesUtil.toPx(3F)
@@ -183,8 +181,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         }
     }
     private val mTopRectSpeed: Float by lazy {
-        // todo 临时数据
-        val mTopRectMaxDuration = 2000L
+        val mTopRectMaxDuration = 2500L
         // s = v * t
         // s = mLineMaxSpace
         // t = mTopRectMaxDuration
@@ -192,7 +189,6 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy mLineMaxSpace / mTopRectMaxDuration
     }
 
-    // todo temp delay
     private val mTopRectDelay: Long = 1000L
 
     private val mTopRectTextPaint: Paint by lazy {
@@ -211,8 +207,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
 
     private var mScoreArray: IntArray = IntArray(mBottomTextArray.size)
 
-    // todo temp delay
-    private val mScoreDelay: Long = 1000L
+    private val mScoreDelay: Long = 500L
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -319,7 +314,6 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         if (maxProgress != null) {
             ValueAnimator.ofFloat(0F, maxProgress)
                 .apply {
-                    // todo temp time
                     duration = 2000L
                     addUpdateListener {
                         mBottomRectAnimationValue = it.animatedValue as Float
