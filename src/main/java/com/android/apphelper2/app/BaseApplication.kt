@@ -1,5 +1,6 @@
 package com.android.apphelper2.app
 
+import android.annotation.SuppressLint
 import android.app.Application
 import com.android.apphelper2.BuildConfig
 import com.orhanobut.logger.AndroidLogAdapter
@@ -10,6 +11,8 @@ import com.orhanobut.logger.PrettyFormatStrategy
 object BaseApplication {
 
     lateinit var application: Application
+
+    @SuppressLint("StaticFieldLeak")
     lateinit var builder: Builder
     var isDebug = BuildConfig.DEBUG
 
@@ -51,9 +54,5 @@ object BaseApplication {
         if (!this::application.isInitialized) {
             throw java.lang.NullPointerException("application is not register !")
         }
-    }
-
-    class Builder {
-        var statusBarColor: Int = 0
     }
 }

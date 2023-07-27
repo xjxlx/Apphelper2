@@ -1,22 +1,40 @@
 package com.android.apphelper2.base
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.viewbinding.ViewBinding
+import com.android.apphelper2.databinding.BaseTitlePageBinding
+import com.android.apphelper2.interfaces.TitleInterface
 
-abstract class BaseBindingTitleActivity<T : ViewBinding> : BaseBindingActivity<T>() {
+open abstract class BaseBindingTitleActivity<T : ViewBinding> : BaseBindingActivity<T>(), TitleInterface {
 
-    override fun initData(savedInstanceState: Bundle?) {
-        TODO("Not yet implemented")
+    private var mBaseTitlePageBinding: BaseTitlePageBinding? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // init title page binding
+        mBaseTitlePageBinding = BaseTitlePageBinding.inflate(layoutInflater, null, false)
+        // init mBinding
+        mBaseTitlePageBinding?.let {
+            // attach root view
+            mBinding = getBinding(layoutInflater, it.root, true)
+        }
+        super.onCreate(savedInstanceState)
+
+        // init title
+        mBaseTitlePageBinding?.let {
+            initTitle(it)
+        }
     }
 
-    override fun getBinding(inflater: LayoutInflater, container: ViewGroup?): T {
-        TODO("Not yet implemented")
+    override fun getContentView(): View {
+        mBaseTitlePageBinding?.let {
+            return it.root
+        }
+        return super.getContentView()
     }
 
-    override fun getRootView(): View {
-        TODO("Not yet implemented")
+    private fun initTitle(binding: BaseTitlePageBinding) {
+        val titleContent = getTitleContent()
+        binding.baseTitle.tvBaseTitle.text = titleContent ?: ""
     }
 }

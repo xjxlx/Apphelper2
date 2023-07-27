@@ -19,8 +19,8 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
         initStatusBar()
         onCreateViewBefore()
 
-        mBinding = getBinding(layoutInflater, null)
-        setContentView(mBinding.root)
+        val contentView = getContentView()
+        setContentView(contentView)
 
         initView()
         initListener()
@@ -37,8 +37,13 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
                 .setStatusColor(statusBarColor)
         } else {
             StatusBarUtil.getInstance(this)
-                .setStatusColor(R.color.statusBar)
+                .setStatusColor(R.color.base_title_background_color)
         }
+    }
+
+    override fun getContentView(): View {
+        mBinding = getBinding(layoutInflater, null)
+        return getRootView()
     }
 
     override fun onCreateViewBefore() {
@@ -56,5 +61,9 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
 
     override fun onCreateViewAfter() {
         super.onCreateViewAfter()
+    }
+
+    override fun getRootView(): View {
+        return mBinding.root
     }
 }

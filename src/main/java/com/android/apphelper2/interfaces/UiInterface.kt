@@ -18,6 +18,8 @@ interface UiInterface<T : ViewBinding?> {
      */
     fun onCreateViewBefore() {}
 
+    fun getContentView(): View
+
     fun initView()
 
     fun initView(rootView: View?)
@@ -44,7 +46,7 @@ interface UiInterface<T : ViewBinding?> {
      * @return return an ViewBinding content ,if need required，use XXXBinding.inflate(layoutInflater, container,true),
      * if not required, use XXXBinding.inflate(layoutInflater)
      */
-    fun getBinding(inflater: LayoutInflater, container: ViewGroup?): T
+    fun getBinding(inflater: LayoutInflater, container: ViewGroup?, attachToRoot: Boolean = false): T
 
     /**
      * @return get rootView for the bindingView
