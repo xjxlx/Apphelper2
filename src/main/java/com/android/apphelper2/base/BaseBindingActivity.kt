@@ -8,6 +8,7 @@ import androidx.viewbinding.ViewBinding
 import com.android.apphelper2.R
 import com.android.apphelper2.app.BaseApplication
 import com.android.apphelper2.interfaces.UiInterface
+import com.android.apphelper2.utils.ActivityManager
 import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.statusBar.StatusBarUtil
 
@@ -31,6 +32,9 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
         initListener()
         initData(savedInstanceState)
         onCreateViewAfter()
+
+        // add the activity to the Stack
+        ActivityManager.addActivity(this)
     }
 
     override fun initStatusBar() {
