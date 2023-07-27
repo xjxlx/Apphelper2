@@ -76,7 +76,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         }
     }
     private val mTitleSize: FloatArray by lazy {
-        return@lazy CustomViewUtil.getTextSize(mTitlePaint, mTitleContent)
+        return@lazy CustomViewUtil.getTextSize(mTitlePaint, mTitleContent)!!
     }
     private val mTitleLeft: Float by lazy {
         return@lazy (mMaxWidth - mTitleSize[0]) / 2

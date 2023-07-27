@@ -158,7 +158,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private var mBottomRectChartArray: FloatArray = FloatArray(mBottomTextArray.size)
     private val mBottomRectPaint: Paint by lazy {
         return@lazy Paint().apply {
-            color = Color.parseColor("#400094FF")
+            color = Color.parseColor("#006FBF")
             style = Paint.Style.FILL
         }
     }
@@ -178,7 +178,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private var mTopRectAnimationValue: Float = 0F
     private val mTopRectPaint: Paint by lazy {
         return@lazy Paint().apply {
-            color = Color.parseColor("#006FBF")
+            color = Color.parseColor("#0094FF")
             style = Paint.Style.FILL
         }
     }
