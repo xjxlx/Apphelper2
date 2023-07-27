@@ -5,8 +5,13 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.animation.addListener
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.apphelper2.utils.ResourcesUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.min
 
 class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
@@ -137,6 +142,10 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     private val mUpScoreValueWith: Float by lazy {
         return@lazy CustomViewUtil.getTextWidth(mUpScoreValuePaint, mUpScoreValue)
     }
+    private var mDrawText = false
+    private val mScope: CoroutineScope by lazy {
+        return@lazy CoroutineScope(Dispatchers.Main)
+    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -170,14 +179,16 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
                 val scoreBaseLine = CustomViewUtil.getBaseLine(mTotalSorePaint, content)
                 it.drawText(content, scoreLeft, (mTotalScoreInterval + scoreBaseLine), mTotalSorePaint)
 
-                // 5: draw total up text
-                val totalUpTextLeft = (mMaxWidth - mTotalUpTextWith - mUpScoreValueWith - mUpTextToValueInterval) / 2
-                it.drawText(mTotalUpTextContent, totalUpTextLeft, mUpValueInterval + mTotalUpTextBaseLine, mTotalUpTextPaint)
+                if (mDrawText) {
+                    // 5: draw total up text
+                    val totalUpTextLeft = (mMaxWidth - mTotalUpTextWith - mUpScoreValueWith - mUpTextToValueInterval) / 2
+                    it.drawText(mTotalUpTextContent, totalUpTextLeft, mUpValueInterval + mTotalUpTextBaseLine, mTotalUpTextPaint)
 
-                // 6: draw up score value
-                val totalUpScoreBaseLine = CustomViewUtil.getBaseLine(mUpScoreValuePaint, mUpScoreValue + "")
-                val totalUpScoreLeft = totalUpTextLeft + mTotalUpTextWith + mUpTextToValueInterval
-                it.drawText(mUpScoreValue, totalUpScoreLeft, mUpValueInterval + totalUpScoreBaseLine, mUpScoreValuePaint)
+                    // 6: draw up score value
+                    val totalUpScoreBaseLine = CustomViewUtil.getBaseLine(mUpScoreValuePaint, mUpScoreValue + "")
+                    val totalUpScoreLeft = totalUpTextLeft + mTotalUpTextWith + mUpTextToValueInterval
+                    it.drawText(mUpScoreValue, totalUpScoreLeft, mUpValueInterval + totalUpScoreBaseLine, mUpScoreValuePaint)
+                }
             }
         }
     }
@@ -203,6 +214,28 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
                     mArcScorePercentValue = it.animatedValue as Int
                     invalidate()
                 }
+                addListener(onEnd = {
+                    mScope.launch {
+                        delay(500)
+                        mDrawText = true
+                        alphaAnimation()
+                        invalidate()
+                    }
+                })
+                start()
+            }
+    }
+
+    private fun alphaAnimation() {
+        ValueAnimator.ofInt(0, 255)
+            .apply {
+                duration = 1000
+                addUpdateListener {
+                    val value = it.animatedValue as Int
+                    mTotalUpTextPaint.alpha = value
+                    mUpScoreValuePaint.alpha = value
+                    invalidate()
+                }
                 start()
             }
     }
@@ -210,6 +243,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     fun restart() {
         this.mTotalScoreValue = 0
         this.mArcBeforeFlag = false
+        this.mDrawText = false
         invalidate()
     }
 }

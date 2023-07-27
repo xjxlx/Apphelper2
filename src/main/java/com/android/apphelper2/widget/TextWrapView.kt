@@ -1,5 +1,6 @@
 package com.android.apphelper2.widget
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.text.Layout
@@ -10,6 +11,7 @@ import android.util.AttributeSet
 import android.view.View
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.apphelper2.utils.ResourcesUtil
+import kotlinx.coroutines.delay
 
 class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
@@ -120,11 +122,13 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         }
     }
 
-    fun setExplain(score: Int, title: String, subhead: String, content: String) {
+    suspend fun setExplain(score: Int, title: String, subhead: String, content: String) {
         this.mTitleContent = title
         this.mSubheadContent = subhead
         this.mWrapTextContent = content
 
+        delay(500)
+        alphaAnimation()
         // todo 临时的逻辑
         if (score < 40) {
             mTitlePaint.color = Color.parseColor("#E26666")
@@ -134,5 +138,20 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
             mTitlePaint.color = Color.parseColor("#57AB64")
         }
         invalidate()
+    }
+
+    private fun alphaAnimation() {
+        ValueAnimator.ofInt(0, 255)
+            .apply {
+                duration = 1000
+                addUpdateListener {
+                    val value = it.animatedValue as Int
+                    mTitlePaint.alpha = value
+                    mSubheadPaint.alpha = value
+                    mWrapTextPaint.alpha = value
+                    invalidate()
+                }
+                start()
+            }
     }
 }
