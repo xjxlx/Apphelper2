@@ -200,7 +200,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             typeface = Typeface.createFromAsset(context.assets, "Inter-SemiBoldItalic.otf")
         }
     }
-    private var mTopRectTextAnimationEnd = false
+    private var mTopRectTextFlag = false
     private val mTopRectTextEveryInterval: Float by lazy {
         return@lazy ResourcesUtil.toPx(6f)
     }
@@ -294,7 +294,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             }
 
             // 8: draw top text
-            if (mTopRectTextAnimationEnd && mTopRectTextAnimationEndCount > 0) {
+            if (mTopRectTextFlag && mTopRectTextAnimationEndCount > 0) {
                 mBottomTextArray.indices.forEach { index ->
                     if (index < mTopRectTextAnimationEndCount) {
                         drawProgressText(it, index)
@@ -339,16 +339,10 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
                             delay(mBottomRectDelay)
                             LogUtil.e("animation: onEnd")
 
-                            for (index in mBottomTextArray.indices) {
-                                mTopRectIndex = index
-                                val bottomPercent = mBottomRectChartArray[mTopRectIndex]
-                                val topPercent = mTopRectChartArray[mTopRectIndex]
-                                startTopProgressAnimation(mTopRectIndex, bottomPercent, topPercent)
-
-                                if (topPercent > bottomPercent) {
-                                    delay(mTopRectDelay)
-                                }
-                            }
+                            mTopRectIndex = 0
+                            val bottomPercent = mBottomRectChartArray[mTopRectIndex]
+                            val topPercent = mTopRectChartArray[mTopRectIndex]
+                            startTopProgressAnimation(mTopRectIndex, bottomPercent, topPercent)
                         }
                     })
                     start()
@@ -385,13 +379,28 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
                     }
                     LogUtil.e("top - start  onStart  : $mTopRectStartCount")
                 }, onEnd = {
-
                     mScope.launch {
-                        mTopRectTextAnimationEnd = true
-                        if (mTopRectTextAnimationEndCount < mTopRectChartArray.size) {
-                            mTopRectTextAnimationEndCount += 1
+
+                        // 1: first draw top text content
+                        mTopRectTextFlag = true
+                        if (mTopRectTextAnimationEndCount < mBottomTextArray.size) {
+                            // delay wait
                             delay(mScoreDelay)
+                            mTopRectTextAnimationEndCount++
                             invalidate()
+                        }
+
+                        // 2: second draw top rect
+                        if (mTopRectIndex + 1 < mBottomTextArray.size) {
+                            mTopRectIndex++
+                            val bottomPercent = mBottomRectChartArray[mTopRectIndex]
+                            val topPercent = mTopRectChartArray[mTopRectIndex]
+
+                            // wait next loop start
+                            if (topPercent > bottomPercent) {
+                                delay(mTopRectDelay)
+                            }
+                            startTopProgressAnimation(mTopRectIndex, bottomPercent, topPercent)
                         }
                     }
                 })
