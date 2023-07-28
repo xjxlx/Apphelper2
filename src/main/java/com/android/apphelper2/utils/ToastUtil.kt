@@ -11,13 +11,13 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.android.apphelper2.R
-import com.android.apphelper2.app.BaseApplication
+import com.android.apphelper2.app.AppHelper2
 
 @SuppressLint("StaticFieldLeak")
 object ToastUtil {
 
     private const val TAG = "ToastUtil"
-    private var mContext: Context = BaseApplication.application
+    private var mContext: Context = AppHelper2.application
     private val mToast: Toast by lazy {
         return@lazy Toast(mContext)
     }

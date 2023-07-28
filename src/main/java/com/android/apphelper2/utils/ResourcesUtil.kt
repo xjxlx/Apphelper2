@@ -6,7 +6,7 @@ import android.content.res.Resources
 import android.util.TypedValue
 import androidx.annotation.DimenRes
 import androidx.annotation.StringRes
-import com.android.apphelper2.app.BaseApplication
+import com.android.apphelper2.app.AppHelper2
 
 object ResourcesUtil {
 
@@ -61,7 +61,7 @@ object ResourcesUtil {
     fun getStringMetaData(context: Context, key: String): String {
         var result: String = ""
         try {
-            val metaData = context.packageManager.getApplicationInfo(BaseApplication.mPackageName, PackageManager.GET_META_DATA).metaData
+            val metaData = context.packageManager.getApplicationInfo(AppHelper2.mPackageName, PackageManager.GET_META_DATA).metaData
             if (metaData != null) {
                 val value = metaData.getString(key)
                 result = value ?: ""

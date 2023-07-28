@@ -2,16 +2,17 @@ package com.android.apphelper2.app
 
 import android.app.Application
 import com.android.apphelper2.BuildConfig
+import com.android.apphelper2.R
 import com.orhanobut.logger.AndroidLogAdapter
 import com.orhanobut.logger.FormatStrategy
 import com.orhanobut.logger.Logger
 import com.orhanobut.logger.PrettyFormatStrategy
 
-object BaseApplication {
+object AppHelper2 {
 
     lateinit var application: Application
 
-    var builder: Builder? = null
+    private var builder: Builder? = null
     var isDebug = BuildConfig.DEBUG
 
     val mPackageName: String by lazy {
@@ -52,5 +53,21 @@ object BaseApplication {
         if (!this::application.isInitialized) {
             throw java.lang.NullPointerException("application is not register !")
         }
+    }
+
+    fun getBuilder(): Builder? {
+        return builder
+    }
+
+    class Builder {
+        /**
+         * status bar color
+         */
+        var statusBarColor: Int = 0
+
+        /**
+         * title bar view resource
+         */
+        var titleBarLayout: Int = R.layout.base_title_item
     }
 }

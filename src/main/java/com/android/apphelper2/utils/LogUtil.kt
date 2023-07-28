@@ -1,7 +1,7 @@
 package com.android.apphelper2.utils
 
 import android.text.TextUtils
-import com.android.apphelper2.app.BaseApplication.isDebug
+import com.android.apphelper2.app.AppHelper2.isDebug
 import com.orhanobut.logger.Logger
 
 /**
