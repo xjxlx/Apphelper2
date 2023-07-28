@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 abstract class BaseRecycleView<T, E : BaseVH> : RecyclerView.Adapter<E>() {
 
-    var mList: MutableList<T> = mutableListOf()
-    var mContext: Context? = null
+    protected var mList: MutableList<T> = mutableListOf()
+    protected var mContext: Context? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): E {
         mContext = parent.context

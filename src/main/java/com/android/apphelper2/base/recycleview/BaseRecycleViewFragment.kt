@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 
 abstract class BaseRecycleViewFragment<T, E : BaseVH> : RecyclerView.Adapter<E>() {
 
-    var mList: MutableList<T> = mutableListOf()
-    var mContext: Context? = null
+    protected var mList: MutableList<T> = mutableListOf()
+    protected var mContext: Context? = null
 
     // 默认是有数据的布局
     private var mViewType: ViewTypeEnum = ViewType.TYPE_DATA
