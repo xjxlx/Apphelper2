@@ -1,7 +1,11 @@
 # apphelper2
 
 # 使用手册
+
+    appheler2: 最低兼容 29
+
 ## 1：修改statusBar颜色
+
     class App : Application() {
         override fun onCreate() {
             super.onCreate()
