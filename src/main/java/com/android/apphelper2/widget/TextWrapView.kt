@@ -10,11 +10,15 @@ import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.View
 import com.android.apphelper2.utils.CustomViewUtil
+import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.ResourcesUtil
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 
 class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
+    private val mScope: CoroutineScope by lazy {
+        return@lazy CoroutineScope(Dispatchers.Main)
+    }
     private val mMaxWidth: Float by lazy {
         return@lazy ResourcesUtil.toPx(500F)
     }
@@ -122,22 +126,25 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         }
     }
 
-    suspend fun setExplain(score: Int, title: String, subhead: String, content: String) {
+    fun setExplain(score: Int, title: String, subhead: String, content: String) {
         this.mTitleContent = title
         this.mSubheadContent = subhead
         this.mWrapTextContent = content
 
-        delay(500)
-        alphaAnimation()
-        // todo 临时的逻辑
-        if (score < 40) {
-            mTitlePaint.color = Color.parseColor("#E26666")
-        } else if (score in 41..69) {
-            mTitlePaint.color = Color.parseColor("#EDD452")
-        } else if (score > 69) {
-            mTitlePaint.color = Color.parseColor("#57AB64")
+        mScope.launch {
+            delay(500)
+            alphaAnimation()
+
+            if (score <= 40) {
+                mTitlePaint.color = Color.parseColor("#E26666")
+            } else if (score in 41..70) {
+                mTitlePaint.color = Color.parseColor("#EDD452")
+            } else if (score in 71..100) {
+                mTitlePaint.color = Color.parseColor("#57AB64")
+            }
+
+            invalidate()
         }
-        invalidate()
     }
 
     private fun alphaAnimation() {
@@ -153,5 +160,20 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
                 }
                 start()
             }
+    }
+
+    fun reset() {
+        mTitleContent = ""
+        mSubheadContent = ""
+        mWrapTextContent = ""
+        invalidate()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        LogUtil.e("tag", "onDetachedFromWindow")
+        kotlin.runCatching {
+            mScope.cancel()
+        }
     }
 }

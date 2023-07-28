@@ -6,12 +6,10 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.animation.addListener
+import com.android.apphelper2.interfaces.AnimationListener
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.apphelper2.utils.ResourcesUtil
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlin.math.min
 
 class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
@@ -142,10 +140,11 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     private val mUpScoreValueWith: Float by lazy {
         return@lazy CustomViewUtil.getTextWidth(mUpScoreValuePaint, mUpScoreValue)
     }
-    private var mDrawText = false
+    private var mDrawUpScoreTextFlag = false
     private val mScope: CoroutineScope by lazy {
         return@lazy CoroutineScope(Dispatchers.Main)
     }
+    private var mAnimationListener: AnimationListener? = null
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -179,7 +178,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
                 val scoreBaseLine = CustomViewUtil.getBaseLine(mTotalSorePaint, content)
                 it.drawText(content, scoreLeft, (mTotalScoreInterval + scoreBaseLine), mTotalSorePaint)
 
-                if (mDrawText) {
+                if (mDrawUpScoreTextFlag) {
                     // 5: draw total up text
                     val totalUpTextLeft = (mMaxWidth - mTotalUpTextWith - mUpScoreValueWith - mUpTextToValueInterval) / 2
                     it.drawText(mTotalUpTextContent, totalUpTextLeft, mUpValueInterval + mTotalUpTextBaseLine, mTotalUpTextPaint)
@@ -198,12 +197,11 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         this.mTotalScoreValue = min(totalScore, mTotalScoreMaxValue)
         this.mUpScoreValue = "+$upScore"
 
-        // todo 随后修改
         if (mTotalScoreValue <= 40) {
             mArcPaintBefore.color = Color.parseColor("#E26666")
         } else if (mTotalScoreValue in 41..70) {
             mArcPaintBefore.color = Color.parseColor("#EDD452")
-        } else if (mTotalScoreValue < 71) {
+        } else if (mTotalScoreValue in 71..100) {
             mArcPaintBefore.color = Color.parseColor("#57AB64")
         }
 
@@ -217,7 +215,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
                 addListener(onEnd = {
                     mScope.launch {
                         delay(500)
-                        mDrawText = true
+                        mDrawUpScoreTextFlag = true
                         alphaAnimation()
                         invalidate()
                     }
@@ -236,14 +234,32 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
                     mUpScoreValuePaint.alpha = value
                     invalidate()
                 }
+                addListener(onEnd = {
+                    mScope.launch {
+                        // todo 等待1秒
+                        delay(1000)
+                        mAnimationListener?.onEndAnimation()
+                    }
+                })
                 start()
             }
     }
 
-    fun restart() {
+    fun setAnimationListener(listener: AnimationListener) {
+        this.mAnimationListener = listener
+    }
+
+    fun reset() {
         this.mTotalScoreValue = 0
         this.mArcBeforeFlag = false
-        this.mDrawText = false
+        this.mDrawUpScoreTextFlag = false
         invalidate()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        kotlin.runCatching {
+            mScope.cancel()
+        }
     }
 }

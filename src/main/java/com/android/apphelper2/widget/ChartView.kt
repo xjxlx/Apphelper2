@@ -7,6 +7,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.animation.addListener
+import com.android.apphelper2.interfaces.AnimationListener
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.apphelper2.utils.CustomViewUtil.getBaseLine
 import com.android.apphelper2.utils.CustomViewUtil.getTextWidth
@@ -214,6 +215,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private var mScoreArray: IntArray = IntArray(mBottomTextArray.size)
 
     private val mScoreDelay: Long = 500L
+    private var mAnimationListener: AnimationListener? = null
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -388,6 +390,12 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
                             delay(mScoreDelay)
                             mTopRectTextAnimationEndCount++
                             invalidate()
+
+                            if (mTopRectTextAnimationEndCount == mBottomTextArray.size) {
+                                // todo 等待1秒钟
+                                delay(mTopRectDelay)
+                                mAnimationListener?.onEndAnimation()
+                            }
                         }
 
                         // 2: second draw top rect
@@ -498,5 +506,9 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         kotlin.runCatching {
             mScope.cancel()
         }
+    }
+
+    fun setAnimationListener(listener: AnimationListener) {
+        this.mAnimationListener = listener
     }
 }
