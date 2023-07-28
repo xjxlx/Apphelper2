@@ -13,12 +13,17 @@ object ViewType {
     var TYPE_EMPTY = ViewTypeEnum(2)
 
     /**
+     * 异常布局
+     */
+    var TYPE_ERROR = ViewTypeEnum(3)
+
+    /**
      * 头布局
      */
-    var TYPE_HEAD = ViewTypeEnum(3)
+    var TYPE_HEAD = ViewTypeEnum(4)
 
     /**
      * 脚布局
      */
-    var TYPE_FOOT = ViewTypeEnum(4)
+    var TYPE_FOOT = ViewTypeEnum(5)
 }
