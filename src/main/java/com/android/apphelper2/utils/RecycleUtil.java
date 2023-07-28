@@ -1,4 +1,4 @@
-package com.android.apphelper2.utils.recycleview;
+package com.android.apphelper2.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
