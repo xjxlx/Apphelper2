@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.android.apphelper2.app.AppHelper2
 
 abstract class BaseRecycleViewFragment<T, E : BaseVH> : RecyclerView.Adapter<E>() {
 
@@ -16,13 +17,37 @@ abstract class BaseRecycleViewFragment<T, E : BaseVH> : RecyclerView.Adapter<E>(
     private var mViewType: ViewTypeEnum = ViewType.TYPE_DATA
     private var mRecycleView: RecyclerView? = null
 
+    private var mPlaceHolderEmptyView: View? = null
+        get() {
+            AppHelper2.getBuilder()
+                ?.let {
+                    return LayoutInflater.from(mContext)
+                        .inflate(it.placeHolderRecycleTempView, null, false)
+                }
+            return null
+        }
+
+    private var mPlaceHolderErrorView: View? = null
+        get() {
+            AppHelper2.getBuilder()
+                ?.let {
+                    return LayoutInflater.from(mContext)
+                        .inflate(it.PlaceHolderRecycleErrorView, null, false)
+                }
+            return null
+        }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): E {
         mContext = parent.context
 
-        val resource = getLayout(viewType)
-        val view = LayoutInflater.from(parent.context)
-            .inflate(resource, parent, false)
-        return createVH(viewType, view)
+        if (mViewType == ViewType.TYPE_DATA) {
+            val resource = getLayout(viewType)
+            val view = LayoutInflater.from(parent.context)
+                .inflate(resource, parent, false)
+            return createVH(viewType, view)
+        } else if (mViewType == ViewType.TYPE_EMPTY) {
+
+        }
     }
 
     override fun getItemCount(): Int {
@@ -104,6 +129,30 @@ abstract class BaseRecycleViewFragment<T, E : BaseVH> : RecyclerView.Adapter<E>(
 
     open fun scrollTop() {
         mRecycleView?.smoothScrollToPosition(0)
+    }
+
+    fun setPlaceHolderErrorView(resource: Int) {
+        val inflate = LayoutInflater.from(mContext)
+            ?.inflate(resource, null, false)
+        if (inflate != null) {
+            setPlaceHolderErrorView(inflate)
+        }
+    }
+
+    fun setPlaceHolderErrorView(errorView: View) {
+        this.mPlaceHolderErrorView = errorView
+    }
+
+    fun setPlaceHolderEmptyView(resource: Int) {
+        val inflate = LayoutInflater.from(mContext)
+            ?.inflate(resource, null, false)
+        if (inflate != null) {
+            setPlaceHolderEmptyView(inflate)
+        }
+    }
+
+    fun setPlaceHolderEmptyView(errorView: View) {
+        this.mPlaceHolderEmptyView = errorView
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {

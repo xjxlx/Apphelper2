@@ -8,6 +8,10 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="base_loading_button_background">#3E485A</color>
+    <color name="base_loading_text">#414344</color>
+    <color name="base_loading_button_text">#3E485A</color>
+
     <color name="statusBar">#FF000000</color>
     <color name="statusBar_alpha">#4d000000</color>
     <color name="statusBar_background_color">#222222</color>
