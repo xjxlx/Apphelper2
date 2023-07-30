@@ -17,7 +17,7 @@ import okio.Buffer;
  * Created by spc on 2017/6/17.
  */
 
-public class AutoInterceptor implements Interceptor {
+public class AutoInterceptor2 implements Interceptor {
 
     private static String mOneId = "";
     private String encode;

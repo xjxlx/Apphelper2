@@ -1,6 +1,5 @@
 package com.android.apphelper2.utils.httpclient
 
-import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.httpclient.listener.HttpCallBackListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -70,8 +69,7 @@ object HttpClient {
                                                            callback: HttpCallBackListener<Result>) {
 
         http<T, Parameter, Result>({ block(it) }, p).onStart {
-            LogUtil.e("http thread started :" + Thread.currentThread().name)
-            callback.onStart()
+             callback.onStart()
         }
             .catch {
                 it.printStackTrace()
@@ -94,7 +92,6 @@ object HttpClient {
     @JvmStatic
     suspend inline fun <reified T, Result> http(crossinline block: suspend T.() -> Result, callback: HttpCallBackListener<Result>) {
         http<T, Result> { block() }.onStart {
-            LogUtil.e("http thread started :" + Thread.currentThread().name)
             callback.onStart()
         }
             .catch {
