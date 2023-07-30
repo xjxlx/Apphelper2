@@ -6,49 +6,87 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.android.apphelper2.R
 import com.android.apphelper2.app.AppHelper2
 
-abstract class BaseRecycleViewFragment<T, E : BaseVH> : RecyclerView.Adapter<E>() {
+abstract class BaseRecycleViewFragment<T, E : BaseVH> : RecyclerView.Adapter<BaseVH>() {
 
     protected var mList: MutableList<T> = mutableListOf()
-    protected var mContext: Context? = null
+    protected lateinit var mContext: Context
+    protected lateinit var mParent: ViewGroup
+    protected lateinit var mLayoutInflater: LayoutInflater
 
     // 默认是有数据的布局
     private var mViewType: ViewTypeEnum = ViewType.TYPE_DATA
     private var mRecycleView: RecyclerView? = null
 
     private var mPlaceHolderEmptyView: View? = null
-        get() {
-            AppHelper2.getBuilder()
-                ?.let {
-                    return LayoutInflater.from(mContext)
-                        .inflate(it.placeHolderRecycleTempView, null, false)
-                }
-            return null
-        }
-
+    private var mPlaceHolderEmptyTryClickListener: View.OnClickListener? = null
     private var mPlaceHolderErrorView: View? = null
-        get() {
-            AppHelper2.getBuilder()
-                ?.let {
-                    return LayoutInflater.from(mContext)
-                        .inflate(it.PlaceHolderRecycleErrorView, null, false)
-                }
-            return null
-        }
+    private var mPlaceHolderErrorTryClickListener: View.OnClickListener? = null
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): E {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseVH {
         mContext = parent.context
+        mParent = parent
+        mLayoutInflater = LayoutInflater.from(parent.context)
 
+        var vh: BaseVH? = null
         if (mViewType == ViewType.TYPE_DATA) {
-            val resource = getLayout(viewType)
-            val view = LayoutInflater.from(parent.context)
-                .inflate(resource, parent, false)
-            return createVH(viewType, view)
+            vh = createVH(viewType, parent)
         } else if (mViewType == ViewType.TYPE_EMPTY) {
+            if (mPlaceHolderEmptyView == null) {
+                AppHelper2.getBuilder()
+                    ?.let { builder ->
+                        mPlaceHolderEmptyView = LayoutInflater.from(parent.context)
+                            .inflate(builder.placeHolderRecycleTempView, parent, false)
+                    }
+            }
+            mPlaceHolderEmptyView?.let {
+                vh = EmptyVH(it)
+            }
+        } else if (mViewType == ViewType.TYPE_ERROR) {
+            if (mPlaceHolderErrorView == null) {
+                AppHelper2.getBuilder()
+                    ?.let { builder ->
+                        mPlaceHolderErrorView = LayoutInflater.from(parent.context)
+                            .inflate(builder.placeHolderRecycleErrorView, parent, false)
+                    }
+            }
+            mPlaceHolderErrorView?.let {
+                vh = ErrorVH(it)
+            }
+        }
+        assert(vh != null)
+        return vh!!
+    }
 
+    override fun onBindViewHolder(holder: BaseVH, position: Int) {
+        if (mViewType == ViewType.TYPE_DATA) {
+            onBindViewHolders(holder as E, position)
+        } else if (mViewType == ViewType.TYPE_EMPTY) {
+            if (holder is EmptyVH) {
+                holder.itemView.findViewById<View>(R.id.iv_base_error_placeholder)
+                    ?.let {
+                        mPlaceHolderEmptyTryClickListener?.let { listener ->
+                            it.visibility = View.VISIBLE
+                            it.setOnClickListener(listener)
+                        }
+                    }
+            }
+        } else if (mViewType == ViewType.TYPE_ERROR) {
+            if (holder is ErrorVH) {
+                holder.itemView.findViewById<View>(R.id.tv_base_error_refresh)
+                    ?.let {
+                        mPlaceHolderErrorTryClickListener?.let { listener ->
+                            it.visibility = View.VISIBLE
+                            it.setOnClickListener(listener)
+                        }
+                    }
+            }
         }
     }
+
+    abstract fun onBindViewHolders(holder: E, position: Int)
 
     override fun getItemCount(): Int {
         return if (mViewType == ViewType.TYPE_DATA) {
@@ -160,6 +198,18 @@ abstract class BaseRecycleViewFragment<T, E : BaseVH> : RecyclerView.Adapter<E>(
         this.mRecycleView = recyclerView
     }
 
-    abstract fun createVH(viewType: Int, view: View): E
-    abstract fun getLayout(viewType: Int): Int
+    /**
+     * @return return an RecyclerView.ViewHolder ，
+     * ex：
+     * return VH2(ItemTestBinding.inflate(mLayoutInflater, parent, false))
+     */
+    abstract fun createVH(viewType: Int, parent: ViewGroup): E
+
+    fun placeHolderEmptyTryClick(listener: View.OnClickListener) {
+        this.mPlaceHolderEmptyTryClickListener = listener
+    }
+
+    fun placeHolderErrorTryClick(listener: View.OnClickListener) {
+        this.mPlaceHolderErrorTryClickListener = listener
+    }
 }

@@ -71,6 +71,6 @@ object AppHelper2 {
         var titleBarLayout: Int = R.layout.base_title_item
 
         var placeHolderRecycleTempView: Int = R.layout.base_recycle_empty
-        var PlaceHolderRecycleErrorView: Int = R.layout.base_recycle_error
+        var placeHolderRecycleErrorView: Int = R.layout.base_recycle_error
     }
 }
