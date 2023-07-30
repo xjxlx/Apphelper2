@@ -53,6 +53,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     //协程依赖 - 基础
+    //noinspection GradleDependency
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 
     // gson
