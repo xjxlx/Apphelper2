@@ -72,5 +72,7 @@ object AppHelper2 {
 
         var placeHolderRecycleTempView: Int = R.layout.base_recycle_empty
         var placeHolderRecycleErrorView: Int = R.layout.base_recycle_error
+
+        var httpBaseUrl: String = ""
     }
 }
