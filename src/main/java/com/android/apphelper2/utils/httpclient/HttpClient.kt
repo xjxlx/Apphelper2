@@ -13,6 +13,38 @@ import kotlinx.coroutines.flow.*
  */
 object HttpClient {
 
+    @JvmStatic
+    suspend inline fun <reified T, Result> http(crossinline block: suspend T.() -> Result) = callbackFlow {
+        try {
+            val bean = RetrofitHelper.create(T::class.java)
+                .block()
+            // send request data
+            trySend(bean)
+        } catch (exception: Throwable) {
+            exception.printStackTrace()
+            close(exception)
+        }
+        // close callback
+        awaitClose()
+    }.flowOn(Dispatchers.IO)
+
+    @JvmStatic
+    suspend inline fun <reified T, Parameter, Result> http(crossinline block: suspend T.(Parameter) -> Result, p: Parameter) =
+        callbackFlow {
+            try {
+                // LogUtil.e("http thread callbackFlow :" + Thread.currentThread().name)
+                val bean = RetrofitHelper.create(T::class.java)
+                    .block(p)
+                // send request data
+                trySend(bean)
+            } catch (exception: Throwable) {
+                exception.printStackTrace()
+                close(exception)
+            }
+            // close callback
+            awaitClose()
+        }.flowOn(Dispatchers.IO)
+
     /**
      * @param T Api的对象
      * @param Parameter 参数的具体类型，一般传递map集合，例如：MutableMap<String, Any>
