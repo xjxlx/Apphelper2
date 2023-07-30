@@ -55,7 +55,7 @@
 
     <!--网络异常的刷新按钮-->
     <TextView
-        android:id="@+id/iv_base_placeholder_empty_button"
+        android:id="@+id/iv_base_placeholder_empty_refresh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dp_15"

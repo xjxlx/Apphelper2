@@ -65,7 +65,7 @@ abstract class BaseRecycleViewFragment<T, E : BaseVH> : RecyclerView.Adapter<Bas
             onBindViewHolders(holder as E, position)
         } else if (mViewType == ViewType.TYPE_EMPTY) {
             if (holder is EmptyVH) {
-                holder.itemView.findViewById<View>(R.id.iv_base_error_placeholder)
+                holder.itemView.findViewById<View>(R.id.iv_base_placeholder_empty_refresh)
                     ?.let {
                         mPlaceHolderEmptyTryClickListener?.let { listener ->
                             it.visibility = View.VISIBLE
@@ -75,7 +75,7 @@ abstract class BaseRecycleViewFragment<T, E : BaseVH> : RecyclerView.Adapter<Bas
             }
         } else if (mViewType == ViewType.TYPE_ERROR) {
             if (holder is ErrorVH) {
-                holder.itemView.findViewById<View>(R.id.tv_base_error_refresh)
+                holder.itemView.findViewById<View>(R.id.tv_base_placeholder_error_refresh)
                     ?.let {
                         mPlaceHolderErrorTryClickListener?.let { listener ->
                             it.visibility = View.VISIBLE

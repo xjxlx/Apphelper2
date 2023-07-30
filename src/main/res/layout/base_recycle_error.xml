@@ -6,21 +6,21 @@
     android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/line_base_empty_1"
+        android:id="@+id/line_base_error_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.35" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/line_base_empty_2"
+        android:id="@+id/line_base_error_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.65" />
 
     <ImageView
-        android:id="@+id/iv_base_error_image"
+        android:id="@+id/iv_base_placeholder_error_image"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:adjustViewBounds="true"
@@ -28,13 +28,13 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="110:90"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintLeft_toRightOf="@id/line_base_empty_1"
-        app:layout_constraintRight_toLeftOf="@+id/line_base_empty_2"
+        app:layout_constraintLeft_toRightOf="@id/line_base_error_left"
+        app:layout_constraintRight_toLeftOf="@+id/line_base_error_right"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.3" />
 
     <TextView
-        android:id="@+id/tv_base_error_title"
+        android:id="@+id/tv_base_placeholder_error_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dp_10"
@@ -48,12 +48,12 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/iv_base_error_image"
+        app:layout_constraintTop_toBottomOf="@+id/iv_base_placeholder_error_image"
         app:layout_constraintVertical_bias="0"
         tools:text="当前网络不太顺畅 " />
 
     <TextView
-        android:id="@+id/tv_base_error_msg"
+        android:id="@+id/tv_base_placeholder_error_msg"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
@@ -66,12 +66,12 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_base_error_title"
+        app:layout_constraintTop_toBottomOf="@+id/tv_base_placeholder_error_title"
         app:layout_constraintVertical_bias="0"
         tools:text="请点击刷新按钮，来进行刷新状态 " />
 
     <TextView
-        android:id="@+id/tv_base_error_refresh"
+        android:id="@+id/tv_base_placeholder_error_refresh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dp_10"
@@ -88,7 +88,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_base_error_msg"
+        app:layout_constraintTop_toBottomOf="@+id/tv_base_placeholder_error_msg"
         app:layout_constraintVertical_bias="0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
