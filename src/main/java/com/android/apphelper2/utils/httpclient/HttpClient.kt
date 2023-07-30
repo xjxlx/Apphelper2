@@ -13,23 +13,17 @@ import kotlinx.coroutines.flow.*
  */
 object HttpClient {
 
+    /**
+     * @param T Api的对象
+     * @param Parameter 参数的具体类型，一般传递map集合，例如：MutableMap<String, Any>
+     * @param Result 数据类型
+     * @param block 里面传递Api具体的方法
+     * @return 这个方法用来请求单参数的方法
+     */
     @JvmStatic
-    suspend inline fun <reified T, Result> http(crossinline block: suspend T.() -> Result) = callbackFlow {
-        try {
-            val bean = RetrofitHelper.create(T::class.java)
-                .block()
-            // send request data
-            trySend(bean)
-        } catch (exception: Throwable) {
-            exception.printStackTrace()
-            close(exception)
-        }
-        // close callback
-        awaitClose()
-    }.flowOn(Dispatchers.IO)
+    suspend inline fun <reified T, Parameter, Result> http(crossinline block: suspend T.(Parameter) -> Result, p: Parameter,
+                                                           callback: HttpCallBackListener<Result>) {
 
-    @JvmStatic
-    suspend inline fun <reified T, Parameter, Result> http(crossinline block: suspend T.(Parameter) -> Result, p: Parameter) =
         callbackFlow {
             try {
                 // LogUtil.e("http thread callbackFlow :" + Thread.currentThread().name)
@@ -44,14 +38,10 @@ object HttpClient {
             // close callback
             awaitClose()
         }.flowOn(Dispatchers.IO)
-
-    @JvmStatic
-    suspend inline fun <reified T, Parameter, Result> http(crossinline block: suspend T.(Parameter) -> Result, p: Parameter,
-                                                           callback: HttpCallBackListener<Result>) {
-        http<T, Parameter, Result>({ block(it) }, p).onStart {
-            LogUtil.e("http thread started :" + Thread.currentThread().name)
-            callback.onStart()
-        }
+            .onStart {
+                LogUtil.e("http thread started :" + Thread.currentThread().name)
+                callback.onStart()
+            }
             .catch {
                 it.printStackTrace()
                 callback.onFailure(it)
@@ -64,12 +54,31 @@ object HttpClient {
             }
     }
 
+    /**
+     * @param T Api的对象
+     * @param Result 数据类型
+     * @param block 里面传递Api具体的方法
+     * @return 这个方法用来请求不带单参数的方法
+     */
     @JvmStatic
     suspend inline fun <reified T, Result> http(crossinline block: suspend T.() -> Result, callback: HttpCallBackListener<Result>) {
-        http<T, Result> { block() }.onStart {
-            LogUtil.e("http thread started :" + Thread.currentThread().name)
-            callback.onStart()
-        }
+        callbackFlow {
+            try {
+                val bean = RetrofitHelper.create(T::class.java)
+                    .block()
+                // send request data
+                trySend(bean)
+            } catch (exception: Throwable) {
+                exception.printStackTrace()
+                close(exception)
+            }
+            // close callback
+            awaitClose()
+        }.flowOn(Dispatchers.IO)
+            .onStart {
+                LogUtil.e("http thread started :" + Thread.currentThread().name)
+                callback.onStart()
+            }
             .catch {
                 it.printStackTrace()
                 callback.onFailure(it)
