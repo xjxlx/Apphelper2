@@ -14,7 +14,7 @@ interface TestApiService {
     // L6 - 课程首页 - 右侧列表
     @FormUrlEncoded
     @POST("https://web.jollyeng.com/")
-    suspend fun getL6BookList(@FieldMap map: MutableMap<String, Any>): HttpResponse<String>
+    suspend fun getL6BookList(@FieldMap map: MutableMap<String, Any>): HttpResponse<L6HomeRightBookListBean>
 
     @FormUrlEncoded
     @POST("https://web.jollyeng.com/")
