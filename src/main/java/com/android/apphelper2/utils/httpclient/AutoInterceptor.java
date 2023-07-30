@@ -1,7 +1,5 @@
 package com.android.apphelper2.utils.httpclient;
 
-import android.text.TextUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,15 +55,15 @@ public class AutoInterceptor implements Interceptor {
 //        }
 
         // 智慧管家
-        if (!TextUtils.isEmpty(mToken) && !TextUtils.isEmpty(mToken)) {
-            request = request.newBuilder().addHeader("authorization", "Bearer " + mToken).addHeader("versionInfo", encode).build();
-        }
+//        if (!TextUtils.isEmpty(mToken) && !TextUtils.isEmpty(mToken)) {
+//            request = request.newBuilder().addHeader("authorization", "Bearer " + mToken).addHeader("versionInfo", encode).build();
+//        }
 
-        // 添加请求头  一丰的项目
+    /*    // 添加请求头  一丰的项目
         String token = "39d5bf3e9b5fc7e41f949063fb139309";
         if (!TextUtils.isEmpty(token)) {
             request = request.newBuilder().addHeader("Authorization", token).addHeader("plat_number", "1").build();
-        }
+        }*/
 
         if (request.method().equals("GET")) {
             request = addGetParams(request);
