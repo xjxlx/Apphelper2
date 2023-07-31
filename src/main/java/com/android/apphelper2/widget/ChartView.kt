@@ -11,8 +11,8 @@ import com.android.apphelper2.interfaces.AnimationListener
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.apphelper2.utils.CustomViewUtil.getBaseLine
 import com.android.apphelper2.utils.CustomViewUtil.getTextWidth
-import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.ResourcesUtil
+import com.android.common.utils.LogUtil
 import kotlinx.coroutines.*
 
 class ChartView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.text.TextUtils
 import com.android.apphelper2.app.AppHelper2
+import com.android.common.utils.LogUtil
 
 object SpUtil {
 

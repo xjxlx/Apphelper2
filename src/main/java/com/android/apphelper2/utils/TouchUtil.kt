@@ -3,6 +3,7 @@ package com.android.apphelper2.utils
 import android.annotation.SuppressLint
 import android.view.MotionEvent
 import android.view.View
+import com.android.common.utils.LogUtil
 import kotlinx.coroutines.*
 
 class TouchUtil {

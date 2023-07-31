@@ -10,7 +10,7 @@ import android.widget.PopupWindow
 import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import com.android.apphelper2.utils.LogUtil
+import com.android.common.utils.LogUtil
 
 class PopupWindowUtil {
 

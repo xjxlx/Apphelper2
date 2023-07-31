@@ -8,6 +8,7 @@ import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
 import android.text.TextUtils
 import com.android.apphelper2.app.AppHelper2
+import com.android.common.utils.LogUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow

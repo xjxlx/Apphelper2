@@ -1,6 +1,6 @@
 package com.android.apphelper2.utils.socket
 
-import com.android.apphelper2.utils.LogUtil
+import com.android.common.utils.LogUtil
 
 object SocketUtil {
 

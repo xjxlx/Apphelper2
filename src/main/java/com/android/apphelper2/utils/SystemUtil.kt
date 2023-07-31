@@ -17,6 +17,7 @@ import android.provider.Settings
 import android.text.TextUtils
 import androidx.annotation.RequiresPermission
 import com.android.apphelper2.app.AppHelper2.mPackageName
+import com.android.common.utils.LogUtil
 
 /**
  * 使用这个工具类，大多的方法都会用到一个权限：

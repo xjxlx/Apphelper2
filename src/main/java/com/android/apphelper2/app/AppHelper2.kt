@@ -3,10 +3,7 @@ package com.android.apphelper2.app
 import android.app.Application
 import com.android.apphelper2.BuildConfig
 import com.android.apphelper2.R
-import com.orhanobut.logger.AndroidLogAdapter
-import com.orhanobut.logger.FormatStrategy
-import com.orhanobut.logger.Logger
-import com.orhanobut.logger.PrettyFormatStrategy
+import com.android.common.app.CommonManager
 
 object AppHelper2 {
 
@@ -19,34 +16,16 @@ object AppHelper2 {
         return@lazy application.packageName
     }
 
-    @JvmOverloads
     @JvmStatic
-    fun init(app: Application, repeat: Boolean = false, builder: Builder) {
+    fun init(app: Application, builder: Builder) {
         this.builder = builder
         application = app
         if (!this::application.isInitialized) {
             throw java.lang.NullPointerException("context is not initialized !")
         }
 
-        // 避免和appHelper 重复初始化
-        if (!repeat) {
-            initLogger()
-        }
-    }
-
-    private fun initLogger() {
-        val formatStrategy: FormatStrategy = PrettyFormatStrategy.newBuilder()
-            .showThreadInfo(false) // （可选）是否显示线程信息。
-            // 默认值为true
-            .methodCount(0) // （可选）要显示的方法行数。 默认2
-            .methodOffset(0) // （可选）设置调用堆栈的函数偏移值，0的话则从打印该Log的函数开始输出堆栈信息，默认是0
-            .tag(mPackageName) // （可选）每个日志的全局标记。 默认PRETTY_LOGGER（如上图）
-            .build()
-        Logger.addLogAdapter(object : AndroidLogAdapter(formatStrategy) {
-            override fun isLoggable(priority: Int, tag: String?): Boolean {
-                return isDebug // 只有在 Debug模式下才会打印
-            }
-        })
+        // init common
+        CommonManager.init(app, isDebug, mPackageName)
     }
 
     fun checkRegister() {

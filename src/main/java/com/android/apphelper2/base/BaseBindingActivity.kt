@@ -9,8 +9,8 @@ import com.android.apphelper2.R
 import com.android.apphelper2.app.AppHelper2
 import com.android.apphelper2.interfaces.UiInterface
 import com.android.apphelper2.utils.ActivityManager
-import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.statusBar.StatusBarUtil
+import com.android.common.utils.LogUtil
 
 open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), UiInterface<T> {
 

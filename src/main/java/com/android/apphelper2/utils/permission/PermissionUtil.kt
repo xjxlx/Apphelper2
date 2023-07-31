@@ -8,7 +8,7 @@ import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import com.android.apphelper2.utils.LogUtil
+import com.android.common.utils.LogUtil
 
 class PermissionUtil private constructor() {
 

@@ -3,6 +3,7 @@ package com.android.apphelper2.utils
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import com.android.common.utils.LogUtil
 
 object BitmapUtil {
 

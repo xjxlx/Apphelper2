@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewbinding.ViewBinding
 import com.android.apphelper2.interfaces.UiInterface
-import com.android.apphelper2.utils.LogUtil
+import com.android.common.utils.LogUtil
 
 open abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterface<T> {
 

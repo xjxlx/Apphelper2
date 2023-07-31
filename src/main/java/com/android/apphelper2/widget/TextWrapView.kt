@@ -10,9 +10,11 @@ import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.View
 import com.android.apphelper2.utils.CustomViewUtil
-import com.android.apphelper2.utils.LogUtil
 import com.android.apphelper2.utils.ResourcesUtil
-import kotlinx.coroutines.*
+import com.android.common.utils.LogUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 
 class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
@@ -131,20 +133,18 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         this.mSubheadContent = subhead
         this.mWrapTextContent = content
 
-        mScope.launch {
-            delay(500)
-            alphaAnimation()
+        // delay(500)
+        alphaAnimation()
 
-            if (score <= 40) {
-                mTitlePaint.color = Color.parseColor("#E26666")
-            } else if (score in 41..70) {
-                mTitlePaint.color = Color.parseColor("#EDD452")
-            } else if (score in 71..100) {
-                mTitlePaint.color = Color.parseColor("#57AB64")
-            }
-
-            invalidate()
+        if (score <= 40) {
+            mTitlePaint.color = Color.parseColor("#E26666")
+        } else if (score in 41..70) {
+            mTitlePaint.color = Color.parseColor("#EDD452")
+        } else if (score in 71..100) {
+            mTitlePaint.color = Color.parseColor("#57AB64")
         }
+
+        invalidate()
     }
 
     private fun alphaAnimation() {

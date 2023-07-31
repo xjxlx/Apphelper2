@@ -7,6 +7,7 @@ import android.util.TypedValue
 import androidx.annotation.DimenRes
 import androidx.annotation.StringRes
 import com.android.apphelper2.app.AppHelper2
+import com.android.common.utils.LogUtil
 
 object ResourcesUtil {
 
