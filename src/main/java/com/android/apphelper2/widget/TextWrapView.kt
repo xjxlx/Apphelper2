@@ -11,16 +11,9 @@ import android.util.AttributeSet
 import android.view.View
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.apphelper2.utils.ResourcesUtil
-import com.android.common.utils.LogUtil
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 
 class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
-    private val mScope: CoroutineScope by lazy {
-        return@lazy CoroutineScope(Dispatchers.Main)
-    }
     private val mMaxWidth: Float by lazy {
         return@lazy ResourcesUtil.toPx(500F)
     }
@@ -133,7 +126,6 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         this.mSubheadContent = subhead
         this.mWrapTextContent = content
 
-        // delay(500)
         alphaAnimation()
 
         if (score <= 40) {
@@ -167,13 +159,5 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         mSubheadContent = ""
         mWrapTextContent = ""
         invalidate()
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        LogUtil.e("tag", "onDetachedFromWindow")
-        kotlin.runCatching {
-            mScope.cancel()
-        }
     }
 }

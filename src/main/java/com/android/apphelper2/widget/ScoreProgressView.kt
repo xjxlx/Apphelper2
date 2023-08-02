@@ -236,7 +236,6 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
                 }
                 addListener(onEnd = {
                     mScope.launch {
-                        // todo 等待1秒
                         delay(1000)
                         mAnimationListener?.onEndAnimation()
                     }

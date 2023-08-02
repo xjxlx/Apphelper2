@@ -392,7 +392,6 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
                             invalidate()
 
                             if (mTopRectTextAnimationEndCount == mBottomTextArray.size) {
-                                // todo 等待1秒钟
                                 delay(mTopRectDelay)
                                 mAnimationListener?.onEndAnimation()
                             }
