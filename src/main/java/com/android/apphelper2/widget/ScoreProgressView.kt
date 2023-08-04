@@ -9,6 +9,7 @@ import androidx.core.animation.addListener
 import com.android.apphelper2.interfaces.AnimationListener
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.apphelper2.utils.ResourcesUtil
+import com.android.common.utils.LogUtil
 import kotlinx.coroutines.*
 import kotlin.math.min
 
@@ -232,7 +233,8 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
                 }
                 addListener(onEnd = {
                     mScope.launch {
-                        delay(1000)
+                        LogUtil.e("score", "onEndAnimation")
+                        delay(500)
                         mAnimationListener?.onEndAnimation()
                     }
                 })
