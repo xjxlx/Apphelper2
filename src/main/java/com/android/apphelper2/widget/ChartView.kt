@@ -7,6 +7,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.animation.addListener
+import androidx.core.graphics.ColorUtils
 import com.android.apphelper2.interfaces.AnimationListener
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.apphelper2.utils.CustomViewUtil.getBaseLine
@@ -64,22 +65,22 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private val mLineBottomY: Float by lazy {
         return@lazy mMaxHeight - mLineBottomInterval
     }
-    private val mLineFirstColor: Int by lazy {
-        return@lazy Color.parseColor("#33FFFFFF")
+    private val mLineFirstAlpha: Int by lazy {
+        return@lazy (0.2F * 255).toInt()
     }
-    private val mLineSecondColor: Int by lazy {
-        return@lazy Color.parseColor("#1AFFFFFF")
+    private val mLineSecondAlpha: Int by lazy {
+        return@lazy (0.1F * 255).toInt()
     }
-    private val mLineThreeColor: Int by lazy {
-        return@lazy Color.parseColor("#26FFFFFF")
+    private val mLineThreeAlpha: Int by lazy {
+        return@lazy (0.15F * 255).toInt()
     }
-    private val mLineFourColor: Int by lazy {
-        return@lazy Color.parseColor("#40FFFFFF")
+    private val mLineFourAlpha: Int by lazy {
+        return@lazy (0.25F * 255).toInt()
     }
     private val mLinePaint: Paint by lazy {
         return@lazy Paint().apply {
             style = Paint.Style.FILL
-            color = mLineFirstColor
+            color = Color.WHITE
             strokeWidth = ResourcesUtil.toPx(1F)
             strokeCap = Paint.Cap.ROUND
             strokeJoin = Paint.Join.ROUND
@@ -98,8 +99,8 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private val mScoreText = "100  分"
     private val mScorePaint: Paint by lazy {
         return@lazy Paint().apply {
-            // color = Color.parseColor("#B3FFFFFF")
-            color = Color.parseColor("#80FFFFFF")
+            color = Color.WHITE
+            alpha = (0.5F * 255).toInt()
             style = Paint.Style.FILL
             textSize = ResourcesUtil.toPx(14F)
             typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
@@ -116,7 +117,8 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private val mBottomTextArray = arrayOf("情绪", "气息", "呼吸", "调息", "心肺")
     private val mBottomTextPaint: Paint by lazy {
         return@lazy Paint().apply {
-            color = Color.parseColor("#B3FFFFFF")
+            color = Color.WHITE
+            alpha = (0.7F * 255).toInt()
             textSize = ResourcesUtil.toPx(22f)
             typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
@@ -156,8 +158,8 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private var mBottomRectChartArray: FloatArray = FloatArray(mBottomTextArray.size)
     private val mBottomRectPaint: Paint by lazy {
         return@lazy Paint().apply {
-            // color = Color.parseColor("#006FBF")
-            color = Color.parseColor("#005999")
+            // color = Color.parseColor("#005999")
+            color = ColorUtils.blendARGB(Color.parseColor("#0094FF"), Color.parseColor("#000000"), 0.25F)
             style = Paint.Style.FILL
         }
     }
@@ -239,19 +241,19 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             for (index in 0 until 4) {
                 when (index) {
                     0 -> {
-                        mLinePaint.color = mLineFirstColor
+                        mLinePaint.alpha = mLineFirstAlpha
                     }
 
                     1 -> {
-                        mLinePaint.color = mLineSecondColor
+                        mLinePaint.alpha = mLineSecondAlpha
                     }
 
                     2 -> {
-                        mLinePaint.color = mLineThreeColor
+                        mLinePaint.alpha = mLineThreeAlpha
                     }
 
                     3 -> {
-                        mLinePaint.color = mLineFourColor
+                        mLinePaint.alpha = mLineFourAlpha
                     }
                 }
 
