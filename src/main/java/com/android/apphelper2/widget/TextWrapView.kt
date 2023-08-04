@@ -46,7 +46,7 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         }
     }
     private val mTitleTop: Float by lazy {
-        return@lazy ResourcesUtil.toPx(32F)
+        return@lazy ResourcesUtil.toPx(40F)
     }
 
     private var mSubheadContent = ""
@@ -59,28 +59,28 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         }
     }
     private val mSubheadTop: Float by lazy {
-        return@lazy ResourcesUtil.toPx(100F)
+        return@lazy ResourcesUtil.toPx(108.45F)
     }
 
     private var mWrapTextContent = ""
     private val mWrapTextPaint: TextPaint by lazy {
         return@lazy TextPaint().apply {
             color = Color.parseColor("#80FFFFFF")
-            textSize = ResourcesUtil.toPx(26F)
+            textSize = ResourcesUtil.toPx(24F)
             style = Paint.Style.FILL
             typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
     }
     private val mWrapTextTop: Float by lazy {
-        return@lazy ResourcesUtil.toPx(160F)
+        return@lazy ResourcesUtil.toPx(156F)
     }
 
     private val mStaticLayout: StaticLayout by lazy {
         return@lazy StaticLayout.Builder.obtain(mWrapTextContent, 0, mWrapTextContent.length, mWrapTextPaint,
             mMaxWidth.toInt() - (mPadding * 2).toInt())
             .setAlignment(Layout.Alignment.ALIGN_NORMAL)
-            .setMaxLines(3)
-            .setLineSpacing(0f, 1.5F)
+            .setMaxLines(4)
+            .setLineSpacing(8f, 1F)
             .setEllipsize(TextUtils.TruncateAt.END)
             .build()
     }
