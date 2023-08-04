@@ -50,9 +50,11 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
     }
 
     private var mSubheadContent = ""
+    private val mSubheadPaintAlpha = (255 * 0.8).toInt()
     private val mSubheadPaint: Paint by lazy {
         return@lazy Paint().apply {
             color = Color.WHITE
+            alpha = mSubheadPaintAlpha
             style = Paint.Style.FILL
             textSize = ResourcesUtil.toPx(28F)
             typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
@@ -63,11 +65,13 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
     }
 
     private var mWrapTextContent = ""
+    private var mWrapTextPaintAlpha = (0.5 * 255).toInt()
     private val mWrapTextPaint: TextPaint by lazy {
         return@lazy TextPaint().apply {
-            color = Color.parseColor("#80FFFFFF")
             textSize = ResourcesUtil.toPx(24F)
             style = Paint.Style.FILL
+            color = Color.WHITE
+            alpha = mWrapTextPaintAlpha
             typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
     }
@@ -146,8 +150,12 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
                 addUpdateListener {
                     val value = it.animatedValue as Int
                     mTitlePaint.alpha = value
-                    mSubheadPaint.alpha = value
-                    mWrapTextPaint.alpha = value
+                    if (value <= mSubheadPaintAlpha) {
+                        mSubheadPaint.alpha = value
+                    }
+                    if (value <= mWrapTextPaintAlpha) {
+                        mWrapTextPaint.alpha = value
+                    }
                     invalidate()
                 }
                 start()
