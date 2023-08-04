@@ -110,11 +110,12 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         return@lazy ResourcesUtil.toPx(229F)
     }
     private val mTotalUpTextContent = "总提升"
+    private val mTotalUpTextAlpha = (255 * 0.8F).toInt()
     private val mTotalUpTextPaint: Paint by lazy {
         return@lazy Paint().apply {
             textSize = ResourcesUtil.toPx(24F)
-            // color = Color.parseColor("#CCFFFFFF")
-            color = Color.parseColor("#D9D9D9")
+            color = Color.WHITE
+            alpha = mTotalUpTextAlpha
             style = Paint.Style.FILL
             typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
@@ -133,8 +134,8 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     private var mUpScoreValue: String = ""
     private val mUpScoreValuePaint: Paint by lazy {
         return@lazy Paint().apply {
-            // color = Color.parseColor("#CCFFFFFF")
-            color = Color.parseColor("#D9D9D9")
+            color = Color.WHITE
+            alpha = mTotalUpTextAlpha
             textSize = ResourcesUtil.toPx(32F)
             style = Paint.Style.FILL
             typeface = Typeface.createFromAsset(context.assets, "Inter-SemiBoldItalic.otf")
@@ -222,7 +223,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     }
 
     private fun alphaAnimation() {
-        ValueAnimator.ofInt(0, 204)
+        ValueAnimator.ofInt(0, mTotalUpTextAlpha)
             .apply {
                 duration = 1000
                 addUpdateListener {
