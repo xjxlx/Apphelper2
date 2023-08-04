@@ -59,7 +59,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         // mArcMaxSweepAngle / 100
         return@lazy mArcMaxSweepAngle / 100F
     }
-    private val mArcMaxDuration: Long = 3500
+    private val mArcMaxDuration: Long = 3000
     private val mArcDurationSpeed: Long by lazy {
         // s = v * t
         // s = mArcMaxDuration
@@ -85,7 +85,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         return@lazy (mMaxWidth - mTitleSize[0]) / 2
     }
     private val mTitleTop: Float by lazy {
-        return@lazy ResourcesUtil.toPx(56F)
+        return@lazy ResourcesUtil.toPx(60F)
     }
     private val mTitleBaseLine: Float by lazy {
         return@lazy CustomViewUtil.getBaseLine(mTitlePaint, mTitleContent)
@@ -112,7 +112,8 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     private val mTotalUpTextPaint: Paint by lazy {
         return@lazy Paint().apply {
             textSize = ResourcesUtil.toPx(24F)
-            color = Color.WHITE
+            // color = Color.parseColor("#CCFFFFFF")
+            color = Color.parseColor("#D9D9D9")
             style = Paint.Style.FILL
             typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
@@ -131,7 +132,8 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     private var mUpScoreValue: String = ""
     private val mUpScoreValuePaint: Paint by lazy {
         return@lazy Paint().apply {
-            color = Color.WHITE
+            // color = Color.parseColor("#CCFFFFFF")
+            color = Color.parseColor("#D9D9D9")
             textSize = ResourcesUtil.toPx(32F)
             style = Paint.Style.FILL
             typeface = Typeface.createFromAsset(context.assets, "Inter-SemiBoldItalic.otf")
@@ -154,13 +156,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
-        // oval :指定圆弧的外轮廓矩形区域。
-        // startAngle: 圆弧起始角度，单位为度。
-        // sweepAngle: 圆弧扫过的角度，顺时针方向，单位为度,从右中间开始为零度。
-        // useCenter:为True时，在绘制圆弧时将圆心包括在内，通常用来绘制扇形。
-        // paint: 绘制圆弧的画板属性
         canvas?.let {
-
             // 1: draw background arc
             it.drawArc(mArcRectF, mArcStartAngle, mArcMaxSweepAngle, false, mArcPaintBackground)
 
@@ -225,7 +221,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     }
 
     private fun alphaAnimation() {
-        ValueAnimator.ofInt(0, 255)
+        ValueAnimator.ofInt(0, 204)
             .apply {
                 duration = 1000
                 addUpdateListener {

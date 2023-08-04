@@ -98,7 +98,8 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private val mScoreText = "100  分"
     private val mScorePaint: Paint by lazy {
         return@lazy Paint().apply {
-            color = Color.parseColor("#B3FFFFFF")
+            // color = Color.parseColor("#B3FFFFFF")
+            color = Color.parseColor("#80FFFFFF")
             style = Paint.Style.FILL
             textSize = ResourcesUtil.toPx(14F)
             typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
@@ -155,12 +156,13 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     private var mBottomRectChartArray: FloatArray = FloatArray(mBottomTextArray.size)
     private val mBottomRectPaint: Paint by lazy {
         return@lazy Paint().apply {
-            color = Color.parseColor("#006FBF")
+            // color = Color.parseColor("#006FBF")
+            color = Color.parseColor("#005999")
             style = Paint.Style.FILL
         }
     }
     private var mBottomRectAnimationValue: Float = 0F
-    private val mBottomRectDelay: Long = 500L
+    private val mBottomRectDelay: Long = 100L
     private val mBottomRectArray: Array<RectF> by lazy {
         return@lazy Array<RectF>(mBottomTextArray.size) {
             RectF()
@@ -183,7 +185,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         }
     }
     private val mTopRectSpeed: Float by lazy {
-        val mTopRectMaxDuration = 2500L
+        val mTopRectMaxDuration = 1000L
         // s = v * t
         // s = mLineMaxSpace
         // t = mTopRectMaxDuration
@@ -191,7 +193,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy mLineMaxSpace / mTopRectMaxDuration
     }
 
-    private val mTopRectDelay: Long = 1000L
+    private val mTopRectDelay: Long = 500L
 
     private val mTopRectTextPaint: Paint by lazy {
         return@lazy Paint().apply {
@@ -213,8 +215,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
 
     private var mScoreArray: IntArray = IntArray(mBottomTextArray.size)
-
-    private val mScoreDelay: Long = 500L
+    private val mScoreDelay: Long = 100L
     private var mAnimationListener: AnimationListener? = null
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -322,7 +323,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         if (maxProgress != null) {
             ValueAnimator.ofFloat(0F, maxProgress)
                 .apply {
-                    duration = 2000L
+                    duration = 1000L
                     addUpdateListener {
                         mBottomRectAnimationValue = it.animatedValue as Float
                         if (temp != mBottomRectAnimationValue) {
