@@ -2,13 +2,14 @@ package com.android.apphelper2.base
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.viewbinding.ViewBinding
 import com.android.apphelper2.app.AppHelper2
 import com.android.apphelper2.interfaces.UiInterface
-import com.android.apphelper2.utils.ActivityManager
+import com.android.common.utils.ActivityManager
 import com.android.common.utils.LogUtil
 import com.android.common.utils.statusBar.StatusBarUtil
 
@@ -17,9 +18,7 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
     lateinit var mBinding: T
     lateinit var mActivity: FragmentActivity
     var statusBar: Int = 0
-
-    // 退出账号时,第一次点击的时间
-    private var firstTime: Long = 0
+    var showAppExit: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,12 +94,20 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
         startActivity(intent)
     }
 
-    // override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-    //    val onKeyDown = ActivityManager.onKeyDown(keyCode, event, 2000, "再按一次，退出线索!")
-    //    return if (onKeyDown) {
-    //        true
-    //    } else {
-    //        super.onKeyDown(keyCode, event)
-    //    }
-    // }
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (showAppExit) {
+            AppHelper2.getBuilder()
+                ?.let {
+                    val appExitTime = it.appExitTime
+                    val appExitToast = it.appExitToast
+                    val onKeyDown = ActivityManager.onKeyDown(keyCode, event, appExitTime, appExitToast)
+                    return if (onKeyDown) {
+                        true
+                    } else {
+                        super.onKeyDown(keyCode, event)
+                    }
+                }
+        }
+        return super.onKeyDown(keyCode, event)
+    }
 }

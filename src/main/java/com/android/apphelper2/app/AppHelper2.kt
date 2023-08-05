@@ -53,5 +53,8 @@ object AppHelper2 {
         var placeHolderRecycleErrorView: Int = R.layout.base_recycle_error
 
         var httpBaseUrl: String = ""
+
+        var appExitTime: Long = 0
+        var appExitToast: String = ""
     }
 }
