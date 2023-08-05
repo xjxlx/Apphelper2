@@ -42,7 +42,7 @@ object AppHelper2 {
         /**
          * status bar color
          */
-        var statusBarColor: Int = 0
+        var statusBarColor: Int = R.color.base_title_background_color
 
         /**
          * title bar view resource
