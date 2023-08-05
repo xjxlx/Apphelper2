@@ -53,6 +53,10 @@ dependencies {
     //协程依赖 - 基础
     //noinspection GradleDependency
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+    //noinspection GradleDependency
+    implementation 'androidx.activity:activity-ktx:1.2.4'
+    //noinspection GradleDependency
+    implementation 'androidx.fragment:fragment-ktx:1.2.5'
 
     // gson
     implementation 'com.google.code.gson:gson:2.10.1'
