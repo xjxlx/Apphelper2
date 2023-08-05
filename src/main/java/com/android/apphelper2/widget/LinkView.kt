@@ -18,6 +18,9 @@ class LinkView(context: Context, attributeSet: AttributeSet) : androidx.appcompa
 
     private val mSpannableBuilder = SpannableStringBuilder()
 
+    /**
+     * 注意，空格也算是一个字符，这里的设置规则是包前不包后，所以endIndex要比实际的角标大1，从第0个开始计算
+     */
     fun setColors(vararg params: Colors) {
         if (params.isNotEmpty()) {
             // Spanned.SPAN_EXCLUSIVE_EXCLUSIVE(前后都不包括)、
@@ -29,7 +32,7 @@ class LinkView(context: Context, attributeSet: AttributeSet) : androidx.appcompa
                 mSpannableBuilder.append(text)
                 params.forEach { colors ->
                     mSpannableBuilder.setSpan(SpanClick(colors.color, colors.listener), colors.startIndex, colors.endIndex,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
                 }
 
                 movementMethod = LinkMovementMethod.getInstance() // 这个一定要记得设置，不然点击不生效
