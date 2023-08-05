@@ -18,6 +18,9 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
     lateinit var mActivity: FragmentActivity
     var statusBar: Int = 0
 
+    // 退出账号时,第一次点击的时间
+    private var firstTime: Long = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mActivity = this
@@ -91,4 +94,13 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
         val intent = Intent(mActivity, activity)
         startActivity(intent)
     }
+
+    // override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+    //    val onKeyDown = ActivityManager.onKeyDown(keyCode, event, 2000, "再按一次，退出线索!")
+    //    return if (onKeyDown) {
+    //        true
+    //    } else {
+    //        super.onKeyDown(keyCode, event)
+    //    }
+    // }
 }

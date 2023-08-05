@@ -2,6 +2,10 @@ package com.android.apphelper2.utils
 
 import android.app.Activity
 import android.content.Context
+import android.text.TextUtils
+import android.view.KeyEvent
+import com.android.common.utils.LogUtil
+import com.android.common.utils.ToastUtil
 import java.util.*
 
 /**
@@ -112,5 +116,30 @@ object ActivityManager {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    // 退出账号时,第一次点击的时间
+    private var firstTime: Long = 0
+
+    fun onKeyDown(keyCode: Int, event: KeyEvent, targetTime: Long = 0, toast: String): Boolean {
+        try {
+            if (targetTime <= 0 || TextUtils.isEmpty(toast)) {
+                LogUtil.e("参数异常，请检查后再执行！")
+                return false
+            }
+            if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
+                val secondTime = System.currentTimeMillis()
+                if (secondTime - firstTime > targetTime) {
+                    ToastUtil.show(toast)
+                    firstTime = secondTime
+                    return true
+                } else {
+                    AppExit(currentActivity()!!)
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            LogUtil.e("退出应用异常：" + e.message)
+        }
+        return false
     }
 }
