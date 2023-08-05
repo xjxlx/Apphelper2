@@ -11,6 +11,9 @@ import android.util.AttributeSet
 import android.view.View
 import com.android.apphelper2.R
 
+/**
+ * 拓展 TextView，让他可以自定义变换颜色，并增加点击事件
+ */
 class LinkView(context: Context, attributeSet: AttributeSet) : androidx.appcompat.widget.AppCompatTextView(context, attributeSet) {
 
     private val mSpannableBuilder = SpannableStringBuilder()
