@@ -1,5 +1,6 @@
 package com.android.apphelper2.base
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -8,8 +9,8 @@ import androidx.viewbinding.ViewBinding
 import com.android.apphelper2.app.AppHelper2
 import com.android.apphelper2.interfaces.UiInterface
 import com.android.apphelper2.utils.ActivityManager
-import com.android.common.utils.statusBar.StatusBarUtil
 import com.android.common.utils.LogUtil
+import com.android.common.utils.statusBar.StatusBarUtil
 
 open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), UiInterface<T> {
 
@@ -84,5 +85,10 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
     override fun onResume() {
         super.onResume()
         mActivity = this
+    }
+
+    fun <T : FragmentActivity> startActivity(activity: Class<T>) {
+        val intent = Intent(mActivity, activity)
+        startActivity(intent)
     }
 }
