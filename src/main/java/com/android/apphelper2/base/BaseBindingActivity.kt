@@ -5,7 +5,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import androidx.viewbinding.ViewBinding
-import com.android.apphelper2.R
 import com.android.apphelper2.app.AppHelper2
 import com.android.apphelper2.interfaces.UiInterface
 import com.android.apphelper2.utils.ActivityManager
@@ -16,6 +15,7 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
 
     lateinit var mBinding: T
     lateinit var mActivity: FragmentActivity
+    var statusBar: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,20 +39,14 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
 
     override fun initStatusBar() {
         super.initStatusBar()
-
-        val builder = AppHelper2.getBuilder()
-        if (builder != null) {
-            val statusBarColor = builder.statusBarColor
-            if (statusBarColor > 0) {
-                StatusBarUtil.getInstance(this)
-                    .setStatusColor(statusBarColor)
-            } else {
-                StatusBarUtil.getInstance(this)
-                    .setStatusColor(R.color.base_title_background_color)
+        if (statusBar == 0) {
+            AppHelper2.getBuilder()?.statusBarColor?.let {
+                statusBar = it
             }
-        } else {
+        }
+        if (statusBar != 0) {
             StatusBarUtil.getInstance(this)
-                .setStatusColor(R.color.base_title_background_color)
+                .setStatusColor(statusBar)
         }
     }
 
