@@ -16,6 +16,7 @@ open abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterfa
     lateinit var mFragment: Fragment
     lateinit var mActivity: FragmentActivity
     var mBinding: T? = null
+    var mArguments: Bundle? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +24,7 @@ open abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterfa
         activity?.let {
             mActivity = it
         }
+        mArguments = arguments
         LogUtil.e("当前页面是：Fragment: " + javaClass.name)
     }
 
