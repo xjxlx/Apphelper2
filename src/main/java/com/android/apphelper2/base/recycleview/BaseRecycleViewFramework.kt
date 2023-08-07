@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.apphelper2.R
 import com.android.apphelper2.app.AppHelper2
 
-abstract class BaseRecycleViewFragment<T, E : BaseVH> : RecyclerView.Adapter<BaseVH>() {
+abstract class BaseRecycleViewFramework<T, E : BaseVH> : RecyclerView.Adapter<BaseVH>() {
 
     protected var mList: MutableList<T> = mutableListOf()
     protected lateinit var mContext: Context
