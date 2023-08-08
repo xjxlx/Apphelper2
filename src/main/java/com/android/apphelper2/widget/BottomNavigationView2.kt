@@ -64,19 +64,20 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
                     for (childIndex in 0 until childAt.size) {
                         val child = childAt[childIndex]
                         LogUtil.e("child:  $child")
-                        val width = child.width
-                        val height = child.height
 
                         var childLeft = 0
                         var childTop = 0
                         var childRight = 0
                         var childBottom = 0
 
-//                        if (child is ImageView) {
-//
-//                        } else if (child is TextView) {
-//
-//                        }
+                        if (child is ImageView) {
+
+                        } else if (child is TextView) {
+                            val width = child.width
+                            val height = child.height
+                            val measuredWidth = child.measuredWidth
+                            val measuredHeight = child.measuredHeight
+                        }
 
                         childLeft = (mMenuItemViewMaxWidth - width) / 2
                         childTop = 0
