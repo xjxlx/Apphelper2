@@ -11,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.view.get
+import androidx.core.view.size
 import androidx.fragment.app.FragmentActivity
 import com.android.apphelper2.R
 import com.android.common.utils.LogUtil
@@ -59,6 +60,32 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
                     childAt.layoutParams = LinearLayout.LayoutParams(mMenuItemViewMaxWidth, mMenuItemViewMaxHeight)
                     childAt.layout(itemLeft, itemTop, itemRight, itemBottom)
                     LogUtil.e("itemLeft: $itemLeft itemTop: $itemTop itemRight: $itemRight  itemBottom：$itemBottom")
+
+                    for (childIndex in 0 until childAt.size) {
+                        val child = childAt[childIndex]
+                        LogUtil.e("child:  $child")
+                        val width = child.width
+                        val height = child.height
+
+                        var childLeft = 0
+                        var childTop = 0
+                        var childRight = 0
+                        var childBottom = 0
+
+//                        if (child is ImageView) {
+//
+//                        } else if (child is TextView) {
+//
+//                        }
+
+                        childLeft = (mMenuItemViewMaxWidth - width) / 2
+                        childTop = 0
+                        childRight = childLeft + width
+                        childBottom = height
+                        child.layout(childLeft, childTop, childRight, childBottom)
+                        LogUtil.e("childLeft: $childLeft childTop: $childTop childRight: $childRight  childBottom：$childBottom")
+                    }
+
                     itemLeft += mMenuItemViewMaxWidth
                     itemRight += mMenuItemViewMaxWidth
                 }
@@ -87,13 +114,12 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
             root.orientation = LinearLayout.VERTICAL
 
             // add icon
-            root.addView(ImageView(mContext).also { image ->
-                val intrinsicWidth = icon.intrinsicWidth
-                val intrinsicHeight = icon.intrinsicHeight
-
-                image.layoutParams = LayoutParams(intrinsicWidth, intrinsicHeight)
-                image.setImageDrawable(icon)
-            })
+//            root.addView(ImageView(mContext).also { image ->
+//                val intrinsicWidth = icon.intrinsicWidth
+//                val intrinsicHeight = icon.intrinsicHeight
+//                image.layoutParams = LayoutParams(intrinsicWidth, intrinsicHeight)
+//                image.setImageDrawable(icon)
+//            })
 
             // add title
             root.addView(TextView(mContext).also { text ->
