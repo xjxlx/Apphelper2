@@ -1,3 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <declare-styleable name="BottomNavigationView">
+        <!--        菜单文件-->
+        <attr name="bnv_menu" format="reference" />
+    </declare-styleable>
 </resources>
