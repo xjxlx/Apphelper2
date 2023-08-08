@@ -10,7 +10,7 @@ import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.View
 import com.android.apphelper2.utils.CustomViewUtil
-import com.android.apphelper2.utils.ResourcesUtil
+import com.android.common.utils.ResourcesUtil
 
 class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 

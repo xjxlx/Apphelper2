@@ -8,8 +8,8 @@ import android.view.View
 import androidx.core.animation.addListener
 import com.android.apphelper2.interfaces.AnimationListener
 import com.android.apphelper2.utils.CustomViewUtil
-import com.android.apphelper2.utils.ResourcesUtil
 import com.android.common.utils.LogUtil
+import com.android.common.utils.ResourcesUtil
 import kotlinx.coroutines.*
 import kotlin.math.min
 
