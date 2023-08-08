@@ -88,7 +88,10 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
 
             // add icon
             root.addView(ImageView(mContext).also { image ->
-                image.layoutParams = LayoutParams(50, 50)
+                val intrinsicWidth = icon.intrinsicWidth
+                val intrinsicHeight = icon.intrinsicHeight
+
+                image.layoutParams = LayoutParams(intrinsicWidth, intrinsicHeight)
                 image.setImageDrawable(icon)
             })
 
