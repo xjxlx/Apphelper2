@@ -55,7 +55,7 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
         }
     }
 
-    override fun getContentView(): View {
+    open fun getContentView(): View {
         mBinding = getBinding(layoutInflater, null)
         return getRootView()
     }

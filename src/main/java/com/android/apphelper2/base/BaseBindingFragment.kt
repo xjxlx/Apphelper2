@@ -62,10 +62,6 @@ open abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterfa
         onCreateViewAfter()
     }
 
-    override fun getContentView(): View {
-        TODO("Not yet implemented")
-    }
-
     override fun initView() {
     }
 

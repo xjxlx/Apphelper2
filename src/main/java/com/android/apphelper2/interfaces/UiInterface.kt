@@ -18,8 +18,6 @@ interface UiInterface<T : ViewBinding?> {
      */
     fun onCreateViewBefore() {}
 
-    fun getContentView(): View
-
     fun initView()
 
     fun initView(rootView: View?)
