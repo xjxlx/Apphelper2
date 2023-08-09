@@ -41,41 +41,49 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
     private var mInterval: Float = 0F
     private var mPaddingBottom: Float = 0F
     private var mListener: ClickListener? = null
+    private var mMaxHeight = 134 // 默认的高度
 
     init {
         val array: TypedArray = context.obtainStyledAttributes(attSet, R.styleable.BottomNavigationView2)
-        val menuResource = array.getResourceId(R.styleable.BottomNavigationView2_navigation_menu, 0)
+
+        // menu
+        array.getResourceId(R.styleable.BottomNavigationView2_navigation_menu, 0)
+            .also {
+                if (mContext is FragmentActivity) {
+                    MenuBuilder(context).apply {
+                        mContext.menuInflater.inflate(it, this)
+                        mMenuBuilder = this
+                        mMenuItemSize = size()
+                    }
+                }
+            }
+
         mItemBackgroundColor = array.getColor(R.styleable.BottomNavigationView2_navigation_itemBackgroundColor, 0)
         mLineColor = array.getColor(R.styleable.BottomNavigationView2_navigation_lineColor, 0)
 
         // icon
         mIconColor = array.getColorStateList(R.styleable.BottomNavigationView2_navigation_itemIconTint)
-        val iconSize = array.getDimension(R.styleable.BottomNavigationView2_navigation_itemIconSize, 0F)
-        if (iconSize != 0F) {
-            mIconSize = iconSize
-        }
+        array.getDimension(R.styleable.BottomNavigationView2_navigation_itemIconSize, 0F)
+            .also {
+                if (it != 0F) {
+                    mIconSize = it
+                }
+            }
 
         // text
         mTextColor = array.getColorStateList(R.styleable.BottomNavigationView2_navigation_itemTextColor)
-        val textSize = array.getDimension(R.styleable.BottomNavigationView2_navigation_itemTextSize, 0F)
-        if (textSize != 0F) {
-            mTextSize = textSize
-        }
+        array.getDimension(R.styleable.BottomNavigationView2_navigation_itemTextSize, 0F)
+            .also {
+                if (it != 0F) {
+                    mTextSize = it
+                }
+            }
 
         // padding
         mPaddingTop = array.getDimension(R.styleable.BottomNavigationView2_navigation_paddingTop, 0F)
         mInterval = array.getDimension(R.styleable.BottomNavigationView2_navigation_interval, 0F)
         mPaddingBottom = array.getDimension(R.styleable.BottomNavigationView2_navigation_paddingBottom, 0F)
 
-        if (menuResource != 0) {
-            if (mContext is FragmentActivity) {
-                MenuBuilder(context).apply {
-                    mContext.menuInflater.inflate(menuResource, this)
-                    mMenuBuilder = this
-                    mMenuItemSize = size()
-                }
-            }
-        }
         array.recycle()
     }
 
