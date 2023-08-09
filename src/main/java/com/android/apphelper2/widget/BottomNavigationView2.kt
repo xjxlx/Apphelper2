@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.TypedArray
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -54,7 +55,7 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
         mTextColor = array.getColorStateList(R.styleable.BottomNavigationView2_bnv_itemTextColor)
         val textSize = array.getDimension(R.styleable.BottomNavigationView2_bnv_itemTextSize, 0F)
         if (textSize != 0F) {
-            mTextSize = textSize
+            mTextSize = textSize.toFloat()
         }
 
         // padding
@@ -112,9 +113,12 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
+        LogUtil.e("onLayout --->")
 
-        LogUtil.e("onLayout ---> right:$right left:$left size:$mMenuItemSize int:${right - left}")
-        mMenuItemViewMaxWidth = (right - left) / mMenuItemSize
+        if (mMenuItemSize > 0) {
+            mMenuItemViewMaxWidth = (right - left) / mMenuItemSize
+        }
+
 
         mMenuBuilder?.let {
             var itemLeft = 0
@@ -195,7 +199,8 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
             // add title
             root.addView(TextView(mContext).also { text ->
                 text.text = title.trim()
-                text.textSize = mTextSize
+                text.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTextSize)
+
                 mTextColor?.let {
                     text.setTextColor(it)
                 }
