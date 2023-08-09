@@ -55,7 +55,7 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
         mTextColor = array.getColorStateList(R.styleable.BottomNavigationView2_bnv_itemTextColor)
         val textSize = array.getDimension(R.styleable.BottomNavigationView2_bnv_itemTextSize, 0F)
         if (textSize != 0F) {
-            mTextSize = textSize.toFloat()
+            mTextSize = textSize
         }
 
         // padding
