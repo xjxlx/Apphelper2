@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.TypedArray
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
@@ -21,14 +22,14 @@ import com.android.common.utils.LogUtil
 import com.android.common.utils.ResourcesUtil
 import kotlin.math.max
 
-@SuppressLint("RestrictedApi", "UseCompatLoadingForColorStateLists")
+@SuppressLint("RestrictedApi")
 class BottomNavigationView2 constructor(private val mContext: Context, attSet: AttributeSet) : LinearLayout(mContext, attSet) {
 
-    private var mMenuBuilder: MenuBuilder? = null
     private var mMenuItemSize = 0
     private var mMenuItemViewMaxWidth: Int = 0
     private var mItemBackgroundColor = 0
-    private var mLineColor = 0
+    private var mShowLineFlag = false
+
     private val mLineHeight = ResourcesUtil.getDimension(mContext, com.apphelper.demens.R.dimen.dp_1)
 
     private var mIconColor: ColorStateList? = null
@@ -41,29 +42,29 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
     private var mInterval: Float = 0F
     private var mPaddingBottom: Float = 0F
     private var mListener: ClickListener? = null
-    private var mMaxHeight = 134 // 默认的高度
 
     init {
-        val array: TypedArray = context.obtainStyledAttributes(attSet, R.styleable.BottomNavigationView2)
+        this.orientation = VERTICAL
 
-        // menu
-        array.getResourceId(R.styleable.BottomNavigationView2_navigation_menu, 0)
-            .also {
-                if (mContext is FragmentActivity) {
-                    MenuBuilder(context).apply {
-                        mContext.menuInflater.inflate(it, this)
-                        mMenuBuilder = this
-                        mMenuItemSize = size()
-                    }
+        val typedArray: TypedArray = context.obtainStyledAttributes(attSet, R.styleable.BottomNavigationView2)
+
+        // item background color
+        mItemBackgroundColor = typedArray.getColor(R.styleable.BottomNavigationView2_navigation_itemBackgroundColor, 0)
+
+        // show line
+        typedArray.getColor(R.styleable.BottomNavigationView2_navigation_lineColor, 0)
+            .also { color ->
+                if (color != 0) {
+                    this.addView(FrameLayout(mContext).also { view ->
+                        view.setBackgroundColor(color)
+                        mShowLineFlag = true
+                    }, LayoutParams(LayoutParams.MATCH_PARENT, mLineHeight.toInt()))
                 }
             }
 
-        mItemBackgroundColor = array.getColor(R.styleable.BottomNavigationView2_navigation_itemBackgroundColor, 0)
-        mLineColor = array.getColor(R.styleable.BottomNavigationView2_navigation_lineColor, 0)
-
         // icon
-        mIconColor = array.getColorStateList(R.styleable.BottomNavigationView2_navigation_itemIconTint)
-        array.getDimension(R.styleable.BottomNavigationView2_navigation_itemIconSize, 0F)
+        mIconColor = typedArray.getColorStateList(R.styleable.BottomNavigationView2_navigation_itemIconTint)
+        typedArray.getDimension(R.styleable.BottomNavigationView2_navigation_itemIconSize, 0F)
             .also {
                 if (it != 0F) {
                     mIconSize = it
@@ -71,8 +72,8 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
             }
 
         // text
-        mTextColor = array.getColorStateList(R.styleable.BottomNavigationView2_navigation_itemTextColor)
-        array.getDimension(R.styleable.BottomNavigationView2_navigation_itemTextSize, 0F)
+        mTextColor = typedArray.getColorStateList(R.styleable.BottomNavigationView2_navigation_itemTextColor)
+        typedArray.getDimension(R.styleable.BottomNavigationView2_navigation_itemTextSize, 0F)
             .also {
                 if (it != 0F) {
                     mTextSize = it
@@ -80,90 +81,95 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
             }
 
         // padding
-        mPaddingTop = array.getDimension(R.styleable.BottomNavigationView2_navigation_paddingTop, 0F)
-        mInterval = array.getDimension(R.styleable.BottomNavigationView2_navigation_interval, 0F)
-        mPaddingBottom = array.getDimension(R.styleable.BottomNavigationView2_navigation_paddingBottom, 0F)
-
-        array.recycle()
-    }
-
-    override fun onFinishInflate() {
-        super.onFinishInflate()
-        LogUtil.e("onFinishInflate ---> ")
-        this.orientation = VERTICAL
-
-        // add line
-        if (mLineColor != 0) {
-            val view = FrameLayout(mContext).also {
-                it.setBackgroundColor(mLineColor)
+        typedArray.getDimension(R.styleable.BottomNavigationView2_navigation_paddingTop, 0F)
+            .also {
+                mPaddingTop = it
             }
-            this.addView(view, LayoutParams(LayoutParams.MATCH_PARENT, mLineHeight.toInt()))
-        }
-
-        mMenuBuilder?.also {
-            for (index in 0 until mMenuItemSize) {
-                addItemView(index, it)
+        typedArray.getDimension(R.styleable.BottomNavigationView2_navigation_interval, 0F)
+            .also {
+                mInterval = it
             }
-        }
+        typedArray.getDimension(R.styleable.BottomNavigationView2_navigation_paddingBottom, 0F)
+            .also {
+                mPaddingBottom = it
+            }
+
+        // menu
+        typedArray.getResourceId(R.styleable.BottomNavigationView2_navigation_menu, 0)
+            .also { resources ->
+                if (mContext is FragmentActivity) {
+                    MenuBuilder(mContext).also {
+                        mContext.menuInflater.inflate(resources, it)
+                        mMenuItemSize = it.size()
+                        for (index in 0 until mMenuItemSize) {
+                            addItemView(index, it)
+                        }
+                    }
+                }
+            }
+
+        typedArray.recycle()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         LogUtil.e("onMeasure ---> ")
-        var maxImageHeight = 0
-        var maxTextHeight = 0
 
-        for (rootIndex in 0 until childCount) {
-            val rootChild: View? = getChildAt(rootIndex)
-            if (rootChild != null && rootChild is LinearLayout) {
-                // 测量子view的宽高
-                for (childIndex in 0 until rootChild.childCount) {
-                    val child = rootChild[childIndex]
-                    if (child is ImageView) {
-                        maxImageHeight = max(maxImageHeight, child.measuredHeight)
-                    } else if (child is TextView) {
-                        maxTextHeight = max(maxTextHeight, child.measuredHeight)
+        var mMaxHeight = 134 // 默认数据
+
+        if (!isInEditMode) {
+            var maxImageHeight = 0
+            var maxTextHeight = 0
+
+            for (rootIndex in 0 until childCount) {
+                val rootChild: View? = getChildAt(rootIndex)
+                if (rootChild != null && rootChild is LinearLayout) {
+                    for (childIndex in 0 until rootChild.childCount) {
+                        val child = rootChild[childIndex]
+                        if (child is ImageView) {
+                            maxImageHeight = max(maxImageHeight, child.measuredHeight)
+                        } else if (child is TextView) {
+                            maxTextHeight = max(maxTextHeight, child.measuredHeight)
+                        }
                     }
                 }
             }
+
+            mMaxHeight = 0
+            if (mShowLineFlag) {
+                mMaxHeight += mLineHeight.toInt()
+            }
+            mMaxHeight += (maxImageHeight + maxTextHeight + mPaddingTop + mInterval + mPaddingBottom).toInt()
         }
-        var maxHeight = 0
-        if (mLineColor != 0) {
-            maxHeight += mLineHeight.toInt()
-        }
-        maxHeight += (maxImageHeight + maxTextHeight + mPaddingTop + mInterval + mPaddingBottom).toInt()
-        setMeasuredDimension(widthMeasureSpec, maxHeight)
+        setMeasuredDimension(widthMeasureSpec, mMaxHeight)
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
-        LogUtil.e("onLayout --->")
+        LogUtil.e("onLayout ---> mMenuItemSize: $mMenuItemSize")
 
         if (mMenuItemSize > 0) {
             mMenuItemViewMaxWidth = (right - left) / mMenuItemSize
-        }
 
-        mMenuBuilder?.let {
             var itemLeft = 0
-            val itemTop = 0
-            var itemRight = mMenuItemViewMaxWidth
-            val itemBottom = measuredHeight
-
-            val count = if (mLineColor != 0) {
-                mMenuItemSize + 1
-            } else {
-                mMenuItemSize
+            var itemTop = 0
+            var itemBottom = measuredHeight
+            if (mShowLineFlag) {
+                itemTop += mLineHeight.toInt()
+                itemBottom -= mLineHeight.toInt()
             }
+            var itemRight = mMenuItemViewMaxWidth
 
-            for (index in 0 until count) {
+            for (index in 0 until childCount) {
                 val rootView = getChildAt(index)
                 if (rootView is FrameLayout) {
                     rootView.layout(0, 0, rootView.measuredWidth, rootView.measuredHeight)
                 } else if (rootView is LinearLayout) {
+                    // root layout
                     rootView.layout(itemLeft, itemTop, itemRight, itemBottom)
                     LogUtil.e("rootIndex: $index  rootLeft: $itemLeft rootTop: $itemTop rootRight: $itemRight rootBottom：$itemBottom")
 
-                    var bottomImage = 0
+                    var imageBottom = 0
                     for (childIndex in 0 until rootView.childCount) {
                         val childView = rootView[childIndex]
 
@@ -171,24 +177,27 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
                             val imageWidth = childView.measuredWidth
                             val imageHeight = childView.measuredHeight
 
-                            val leftImage = (mMenuItemViewMaxWidth - imageWidth) / 2
-                            var topImage = 0
+                            val imageLeft = (mMenuItemViewMaxWidth - imageWidth) / 2
+                            var imageTop = 0
+                            if (mShowLineFlag) {
+                                imageTop += mLineHeight.toInt()
+                            }
                             if (mPaddingTop != 0F) {
-                                topImage = mPaddingTop.toInt()
+                                imageTop += mPaddingTop.toInt()
                             }
 
-                            val rightImage = leftImage + imageWidth
-                            bottomImage = (topImage + imageHeight)
+                            val imageRight = imageLeft + imageWidth
+                            imageBottom = (imageTop + imageHeight)
 
-                            childView.layout(leftImage, topImage, rightImage, bottomImage)
+                            childView.layout(imageLeft, imageTop, imageRight, imageBottom)
                             LogUtil.e(
-                                "image-index: $childIndex  leftImage: $leftImage topImage: $topImage rightImage: $rightImage  bottomImage：$bottomImage")
+                                "image-index: $childIndex  leftImage: $imageLeft topImage: $imageTop rightImage: $imageRight  bottomImage：$imageBottom")
                         } else if (childView is TextView) {
                             val textWidth = childView.measuredWidth
                             val textHeight = childView.measuredHeight
 
                             val leftText = (mMenuItemViewMaxWidth - textWidth) / 2
-                            val topText = (bottomImage + mInterval).toInt()
+                            val topText = (imageBottom + mInterval).toInt()
                             val rightText = (leftText + textWidth)
                             val bottomText = (topText + textHeight + mPaddingBottom).toInt()
                             childView.layout(leftText, topText, rightText, bottomText)
@@ -207,8 +216,6 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
         val title = menu[index].title
         val icon = menu[index].icon
 
-        LogUtil.e("title: $title itemId:$itemId icon:$icon")
-
         this.addView(LinearLayout(mContext).also { root ->
             root.id = itemId
             root.orientation = VERTICAL
@@ -216,7 +223,7 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
                 root.setBackgroundColor(mItemBackgroundColor)
             }
             root.setOnClickListener {
-                if (mLineColor != 0) {
+                if (mShowLineFlag) {
                     mListener?.onClick(index + 1, itemId, root)
                 } else {
                     mListener?.onClick(index, itemId, root)
@@ -232,19 +239,20 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
             }, LayoutParams(mIconSize.toInt(), mIconSize.toInt()))
 
             // add title
-            root.addView(TextView(mContext).also { text ->
-                text.text = title.trim()
-                text.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTextSize)
-
-                mTextColor?.let {
-                    text.setTextColor(it)
-                }
-            }, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+            if (!TextUtils.isEmpty(title)) {
+                root.addView(TextView(mContext).also { text ->
+                    text.text = title.trim()
+                    text.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTextSize)
+                    mTextColor?.let {
+                        text.setTextColor(it)
+                    }
+                }, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+            }
         }, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT))
     }
 
     fun checked(position: Int) {
-        val tempIndex = if (mLineColor != 0) {
+        val tempIndex = if (mShowLineFlag) {
             position + 1
         } else {
             position
