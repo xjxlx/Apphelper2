@@ -4,6 +4,7 @@
         <!--item文件-->
         <attr name="bnv_menu" format="reference" />
         <attr name="bnv_itemBackgroundColor" format="color" />
+        <attr name="bnv_lineColor" format="color" />
 
         <!--image的颜色-->
         <attr name="bnv_itemIconTint" format="color" />

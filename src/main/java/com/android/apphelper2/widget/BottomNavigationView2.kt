@@ -8,6 +8,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -27,6 +28,8 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
     private var mMenuItemSize = 0
     private var mMenuItemViewMaxWidth: Int = 0
     private var mItemBackgroundColor = 0
+    private var mLineColor = 0
+    private val mLineHeight = ResourcesUtil.getDimension(mContext, com.apphelper.demens.R.dimen.dp_1)
 
     private var mIconColor: ColorStateList? = null
     private var mIconSize = ResourcesUtil.getDimension(mContext, com.apphelper.demens.R.dimen.dp_10)
@@ -43,6 +46,7 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
         val array: TypedArray = context.obtainStyledAttributes(attSet, R.styleable.BottomNavigationView2)
         val menuResource = array.getResourceId(R.styleable.BottomNavigationView2_bnv_menu, 0)
         mItemBackgroundColor = array.getColor(R.styleable.BottomNavigationView2_bnv_itemBackgroundColor, 0)
+        mLineColor = array.getColor(R.styleable.BottomNavigationView2_bnv_lineColor, 0)
 
         // icon
         mIconColor = array.getColorStateList(R.styleable.BottomNavigationView2_bnv_itemIconTint)
@@ -78,7 +82,15 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
     override fun onFinishInflate() {
         super.onFinishInflate()
         LogUtil.e("onFinishInflate ---> ")
-        this.orientation = HORIZONTAL
+        this.orientation = VERTICAL
+
+        // add line
+        if (mLineColor != 0) {
+            val view = FrameLayout(mContext).also {
+                it.setBackgroundColor(mLineColor)
+            }
+            this.addView(view, LayoutParams(LayoutParams.MATCH_PARENT, mLineHeight.toInt()))
+        }
 
         mMenuBuilder?.also {
             for (index in 0 until mMenuItemSize) {
@@ -107,8 +119,12 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
                 }
             }
         }
-        val maxItemHeight = (maxImageHeight + maxTextHeight + mPaddingTop + mInterval + mPaddingBottom).toInt()
-        setMeasuredDimension(widthMeasureSpec, maxItemHeight)
+        var maxHeight = 0
+        if (mLineColor != 0) {
+            maxHeight += mLineHeight.toInt()
+        }
+        maxHeight += (maxImageHeight + maxTextHeight + mPaddingTop + mInterval + mPaddingBottom).toInt()
+        setMeasuredDimension(widthMeasureSpec, maxHeight)
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
@@ -119,16 +135,23 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
             mMenuItemViewMaxWidth = (right - left) / mMenuItemSize
         }
 
-
         mMenuBuilder?.let {
             var itemLeft = 0
             val itemTop = 0
             var itemRight = mMenuItemViewMaxWidth
             val itemBottom = measuredHeight
 
-            for (index in 0 until mMenuItemSize) {
+            val count = if (mLineColor != 0) {
+                mMenuItemSize + 1
+            } else {
+                mMenuItemSize
+            }
+
+            for (index in 0 until count) {
                 val rootView = getChildAt(index)
-                if (rootView is LinearLayout) {
+                if (rootView is FrameLayout) {
+                    rootView.layout(0, 0, rootView.measuredWidth, rootView.measuredHeight)
+                } else if (rootView is LinearLayout) {
                     rootView.layout(itemLeft, itemTop, itemRight, itemBottom)
                     LogUtil.e("rootIndex: $index  rootLeft: $itemLeft rootTop: $itemTop rootRight: $itemRight rootBottom：$itemBottom")
 
@@ -185,7 +208,11 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
                 root.setBackgroundColor(mItemBackgroundColor)
             }
             root.setOnClickListener {
-                mListener?.onClick(index, root)
+                if (mLineColor != 0) {
+                    mListener?.onClick(index + 1, itemId, root)
+                } else {
+                    mListener?.onClick(index, itemId, root)
+                }
             }
 
             // add icon
@@ -209,9 +236,14 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
     }
 
     fun checked(position: Int) {
+        val tempIndex = if (mLineColor != 0) {
+            position + 1
+        } else {
+            position
+        }
         for (index in 0 until childCount) {
             val childAt = getChildAt(index)
-            if (position == index) {
+            if (index == tempIndex) {
                 if (childAt is ViewGroup) {
                     childAt.forEach { child ->
                         child.isSelected = true
@@ -227,11 +259,11 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
         }
     }
 
-    fun setItemClickListener(listener: ClickListener) {
+    fun setNavigationItemClickListener(listener: ClickListener) {
         this.mListener = listener
     }
 
     interface ClickListener {
-        fun onClick(position: Int, view: View)
+        fun onClick(position: Int, itemId: Int, view: View)
     }
 }
