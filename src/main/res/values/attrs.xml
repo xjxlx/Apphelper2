@@ -2,22 +2,22 @@
 <resources>
     <declare-styleable name="BottomNavigationView2">
         <!--item文件-->
-        <attr name="bnv_menu" format="reference" />
-        <attr name="bnv_itemBackgroundColor" format="color" />
-        <attr name="bnv_lineColor" format="color" />
+        <attr name="navigation_menu" format="reference" />
+        <attr name="navigation_itemBackgroundColor" format="color" />
+        <attr name="navigation_lineColor" format="color" />
 
         <!--image的颜色-->
-        <attr name="bnv_itemIconTint" format="color" />
-        <attr name="bnv_itemIconSize" format="dimension" />
+        <attr name="navigation_itemIconTint" format="color" />
+        <attr name="navigation_itemIconSize" format="dimension" />
 
         <!--文本的颜色-->
-        <attr name="bnv_itemTextColor" format="color" />
-        <attr name="bnv_itemTextSize" format="dimension" />
+        <attr name="navigation_itemTextColor" format="color" />
+        <attr name="navigation_itemTextSize" format="dimension" />
 
         <!--padding-->
-        <attr name="bnv_paddingTop" format="dimension" />
-        <attr name="bnv_interval" format="dimension" />
-        <attr name="bnv_paddingBottom" format="dimension" />
+        <attr name="navigation_paddingTop" format="dimension" />
+        <attr name="navigation_interval" format="dimension" />
+        <attr name="navigation_paddingBottom" format="dimension" />
 
     </declare-styleable>
 </resources>

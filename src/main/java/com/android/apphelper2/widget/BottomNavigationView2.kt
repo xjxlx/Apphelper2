@@ -44,28 +44,28 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
 
     init {
         val array: TypedArray = context.obtainStyledAttributes(attSet, R.styleable.BottomNavigationView2)
-        val menuResource = array.getResourceId(R.styleable.BottomNavigationView2_bnv_menu, 0)
-        mItemBackgroundColor = array.getColor(R.styleable.BottomNavigationView2_bnv_itemBackgroundColor, 0)
-        mLineColor = array.getColor(R.styleable.BottomNavigationView2_bnv_lineColor, 0)
+        val menuResource = array.getResourceId(R.styleable.BottomNavigationView2_navigation_menu, 0)
+        mItemBackgroundColor = array.getColor(R.styleable.BottomNavigationView2_navigation_itemBackgroundColor, 0)
+        mLineColor = array.getColor(R.styleable.BottomNavigationView2_navigation_lineColor, 0)
 
         // icon
-        mIconColor = array.getColorStateList(R.styleable.BottomNavigationView2_bnv_itemIconTint)
-        val iconSize = array.getDimension(R.styleable.BottomNavigationView2_bnv_itemIconSize, 0F)
+        mIconColor = array.getColorStateList(R.styleable.BottomNavigationView2_navigation_itemIconTint)
+        val iconSize = array.getDimension(R.styleable.BottomNavigationView2_navigation_itemIconSize, 0F)
         if (iconSize != 0F) {
             mIconSize = iconSize
         }
 
         // text
-        mTextColor = array.getColorStateList(R.styleable.BottomNavigationView2_bnv_itemTextColor)
-        val textSize = array.getDimension(R.styleable.BottomNavigationView2_bnv_itemTextSize, 0F)
+        mTextColor = array.getColorStateList(R.styleable.BottomNavigationView2_navigation_itemTextColor)
+        val textSize = array.getDimension(R.styleable.BottomNavigationView2_navigation_itemTextSize, 0F)
         if (textSize != 0F) {
             mTextSize = textSize
         }
 
         // padding
-        mPaddingTop = array.getDimension(R.styleable.BottomNavigationView2_bnv_paddingTop, 0F)
-        mInterval = array.getDimension(R.styleable.BottomNavigationView2_bnv_interval, 0F)
-        mPaddingBottom = array.getDimension(R.styleable.BottomNavigationView2_bnv_paddingBottom, 0F)
+        mPaddingTop = array.getDimension(R.styleable.BottomNavigationView2_navigation_paddingTop, 0F)
+        mInterval = array.getDimension(R.styleable.BottomNavigationView2_navigation_interval, 0F)
+        mPaddingBottom = array.getDimension(R.styleable.BottomNavigationView2_navigation_paddingBottom, 0F)
 
         if (menuResource != 0) {
             if (mContext is FragmentActivity) {
