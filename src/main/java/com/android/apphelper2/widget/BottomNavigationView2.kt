@@ -18,7 +18,6 @@ import androidx.core.view.forEach
 import androidx.core.view.get
 import androidx.fragment.app.FragmentActivity
 import com.android.apphelper2.R
-import com.android.common.utils.LogUtil
 import com.android.common.utils.ResourcesUtil
 import kotlin.math.max
 
@@ -113,7 +112,6 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        LogUtil.e("onMeasure ---> ")
 
         var mMaxHeight = 134 // 默认数据
 
@@ -146,7 +144,6 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
-        LogUtil.e("onLayout ---> mMenuItemSize: $mMenuItemSize")
 
         if (mMenuItemSize > 0) {
             mMenuItemViewMaxWidth = (right - left) / mMenuItemSize
@@ -167,7 +164,7 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
                 } else if (rootView is LinearLayout) {
                     // root layout
                     rootView.layout(itemLeft, itemTop, itemRight, itemBottom)
-                    LogUtil.e("rootIndex: $index  rootLeft: $itemLeft rootTop: $itemTop rootRight: $itemRight rootBottom：$itemBottom")
+                    // LogUtil.e("rootIndex: $index  rootLeft: $itemLeft rootTop: $itemTop rootRight: $itemRight rootBottom：$itemBottom")
 
                     var imageBottom = 0
                     for (childIndex in 0 until rootView.childCount) {
@@ -190,8 +187,7 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
                             imageBottom = (imageTop + imageHeight)
 
                             childView.layout(imageLeft, imageTop, imageRight, imageBottom)
-                            LogUtil.e(
-                                "image-index: $childIndex  leftImage: $imageLeft topImage: $imageTop rightImage: $imageRight  bottomImage：$imageBottom")
+                            // LogUtil.e("image-index: $childIndex  leftImage: $imageLeft topImage: $imageTop rightImage: $imageRight  bottomImage：$imageBottom")
                         } else if (childView is TextView) {
                             val textWidth = childView.measuredWidth
                             val textHeight = childView.measuredHeight
@@ -201,7 +197,7 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
                             val rightText = (leftText + textWidth)
                             val bottomText = (topText + textHeight + mPaddingBottom).toInt()
                             childView.layout(leftText, topText, rightText, bottomText)
-                            LogUtil.e("leftText: $leftText topText: $topText rightText: $rightText  bottomText：$bottomText")
+                            // LogUtil.e("leftText: $leftText topText: $topText rightText: $rightText  bottomText：$bottomText")
                         }
                     }
                     itemLeft += mMenuItemViewMaxWidth

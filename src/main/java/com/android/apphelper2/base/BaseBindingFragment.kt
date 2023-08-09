@@ -55,6 +55,7 @@ open abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterfa
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initStatusBar()
         onCreateViewBefore()
         initView(view)
         initListener()
@@ -66,6 +67,9 @@ open abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterfa
     }
 
     override fun initListener() {
+    }
+
+    override fun initStatusBar() {
     }
 
     override fun getRootView(): View {
