@@ -84,7 +84,6 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
                     val bitmapWidth = scaleBitmap.width
                     val bitmapHeight = scaleBitmap.height
 
-
                     if (bitmapWidth > targetWidth) {
                         // left = (bitmap.width - view.width) / 2, this.value > 0
                         mBitmapSrc.left = (bitmapWidth - targetWidth) / 2
@@ -126,12 +125,10 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
                 // 7：还原
                 canvas.restore()
             }
-            // 8: 绘制描边
 
-            canvas.let {
-                if (strokeWidth > 0) {
-                    it.drawCircle(centreX, centreY, centreRadius, mPaintStroke)
-                }
+            // 8: 绘制描边
+            if (strokeWidth > 0) {
+                canvas.drawCircle(centreX, centreY, centreRadius, mPaintStroke)
             }
         }
     }
