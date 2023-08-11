@@ -6,6 +6,7 @@ import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.util.AttributeSet
 import com.android.common.utils.BitmapUtil
+import com.android.common.utils.LogUtil
 import com.android.common.utils.ResourcesUtil
 
 class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcompat.widget.AppCompatImageView(context, attributeSet) {
@@ -22,7 +23,6 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
     }
     private val mSrc = Rect()
     private val mDes = Rect()
-    private val mDrawMatrix: Matrix = Matrix()
 
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
@@ -30,27 +30,27 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
         // super.onDraw(canvas)
 
         if (width > 0 && drawable != null && canvas != null) {
+            //  既然是绘制圆形，那么宽和高必须是相同的，这里取宽的高度，或者高的高度，都是一样的，这里就直接取值宽的高度了
             val radius = (width / 2).toFloat()
             if (radius > 0) {
                 // 2：保存当前的状态
                 canvas.save()
-                /**
-                 * 既然是绘制圆形，那么宽和高必须是相同的，这里取宽的高度，或者高的高度，都是一样的，这里就直接取值宽的高度了
-                 */
                 // 3：绘制圆形的path路径
                 mPath.addCircle(radius, radius, radius, Path.Direction.CW)
                 // 4：将当前剪切与指定的路径相交,可以理解是在裁剪画布
                 canvas.clipPath(mPath)
 
-                // 5: 绘制图片
                 if (drawable is BitmapDrawable) {
                     val bitmap = (drawable as BitmapDrawable).bitmap
+                    // 5: 缩放图片的比例，重新生成一个bitmap，避免图片过大，只能取值到一部分图片
                     val scaleBitmap = BitmapUtil.getScaleBitmap(bitmap, width, height)
+                    if (scaleBitmap == null) {
+                        LogUtil.e("scaleBitmap is null !")
+                        return
+                    }
 
-                    val bitmapWidth = scaleBitmap!!.width
-                    val bitmapHeight = scaleBitmap!!.height
-
-//                    // 6: 缩放图片的比例，重新生成一个bitmap，避免只能取值到一部分图片
+                    val bitmapWidth = scaleBitmap.width
+                    val bitmapHeight = scaleBitmap.height
 
                     if (bitmapWidth > width) {
                         // left = (bitmap.width - view.width) / 2, this.value > 0
@@ -72,12 +72,6 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
                         mSrc.top = (height - bitmapHeight) / 2
                     }
 
-//                    mSrc.left =0
-//                    mSrc.top =0
-//                    mSrc.right =scaleBitmap!!.width
-//                    mSrc.bottom =scaleBitmap!!.height
-
-
                     mSrc.right = mSrc.left + width
                     mSrc.bottom = mSrc.top + height
 
@@ -86,17 +80,10 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
                     mDes.right = mDes.left + width
                     mDes.bottom = mDes.top + height
 
-                    canvas.drawBitmap(scaleBitmap!!, mSrc, mDes, mPaint)
-//                    canvas?.clipRect(mSrc.left,mSrc.top,mSrc.right,mSrc.bottom)
-
-//                    getImageMatrix
-
-//                    drawable?.draw(canvas)
-
-//                    mDrawMatrix
-
-                    // canvas?.drawBitmap(bitmap, 0F, (0F).toFloat(), mPaint)
+                    // 6：绘制drawable
+                    canvas.drawBitmap(scaleBitmap, mSrc, mDes, mPaint)
                 }
+
                 // 7：还原
                 canvas.restore()
             }
