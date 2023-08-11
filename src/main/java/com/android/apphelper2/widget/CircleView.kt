@@ -10,6 +10,10 @@ import com.android.apphelper2.R
 import com.android.common.utils.BitmapUtil
 import com.android.common.utils.LogUtil
 
+/**
+ * 绘制一个圆形的view
+ *  注意：在使用描边的时候，宽度是经过屏幕计算的，只能传递4dp这种基础的值，不能传递@dimen这类型计算过的值，不然会描边宽度会异常
+ */
 class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcompat.widget.AppCompatImageView(context, attributeSet) {
 
     private val mPath: Path by lazy {
