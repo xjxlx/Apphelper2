@@ -50,19 +50,21 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
         // 1：避免重复性绘制
         // super.onDraw(canvas)
 
-        val strokeWidth = mPaintStroke.strokeWidth
+        if (width > 0 && canvas != null) {
+            val strokeWidth = mPaintStroke.strokeWidth.toInt()
+            val centreX = (width / 2).toFloat()
+            val centreY = (width / 2).toFloat()
+            val centreRadius = ((width - (strokeWidth)) / 2).toFloat()
 
-        if (width > 0 && drawable != null && canvas != null) {
-            //  既然是绘制圆形，那么宽和高必须是相同的，这里取宽的高度，或者高的高度，都是一样的，这里就直接取值宽的高度了
-            val targetWidth = width - (strokeWidth * 2).toInt()
-            val targetHeight = height - (strokeWidth * 2).toInt()
+            if (drawable != null) {
+                // 既然是绘制圆形，那么宽和高必须是相同的，这里取宽的高度，或者高的高度，都是一样的，这里就直接取值宽的高度了
+                val targetWidth = width - (strokeWidth * 2)
+                val targetHeight = height - (strokeWidth * 2)
 
-            val radius = (targetWidth / 2).toFloat()
-            if (radius > 0) {
                 // 2：保存当前的状态
                 canvas.save()
                 // 3：绘制圆形的path路径
-                mPath.addCircle(radius, radius, radius, Path.Direction.CW)
+                mPath.addCircle(centreX, centreY, centreRadius, Path.Direction.CW)
                 // 4：将当前剪切与指定的路径相交,可以理解是在裁剪画布
                 canvas.clipPath(mPath)
 
@@ -78,6 +80,7 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
                     val bitmapWidth = scaleBitmap.width
                     val bitmapHeight = scaleBitmap.height
 
+
                     if (bitmapWidth > targetWidth) {
                         // left = (bitmap.width - view.width) / 2, this.value > 0
                         mBitmapSrc.left = (bitmapWidth - targetWidth) / 2
@@ -85,9 +88,8 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
                         mBitmapSrc.left = 0
                     } else {
                         // (view.width - bitmap.with) / 2, this.value > 0
-                        mBitmapSrc.left = 0
+                        mBitmapSrc.left = (targetWidth - bitmapWidth) / 2
                     }
-
                     if (bitmapHeight > targetHeight) {
                         // top = (bitmap.top - view.top)/ 2
                         mBitmapSrc.top = (bitmapHeight - targetHeight) / 2
@@ -97,40 +99,35 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
                         // (view.height - bitmap.height) / 2
                         mBitmapSrc.top = (targetHeight - bitmapHeight) / 2
                     }
-
                     mBitmapSrc.right = mBitmapSrc.left + targetWidth
                     mBitmapSrc.bottom = mBitmapSrc.top + targetHeight
 
-//                    mBitmapDes.left = if (strokeWidth > 0) {
-//                        strokeWidth
-//                    } else {
-//                        0
-//                    }
-//                    mBitmapDes.top = if (strokeWidth > 0) {
-//                        strokeWidth
-//                    } else {
-//                        0
-//                    }
+                    mBitmapDes.left = if (strokeWidth > 0) {
+                        strokeWidth
+                    } else {
+                        0
+                    }
+                    mBitmapDes.top = if (strokeWidth > 0) {
+                        strokeWidth
+                    } else {
+                        0
+                    }
                     mBitmapDes.right = mBitmapDes.left + targetWidth
                     mBitmapDes.bottom = mBitmapDes.top + targetHeight
 
                     // 6：绘制drawable
-//                    canvas.drawBitmap(scaleBitmap, mBitmapSrc, mBitmapDes, mPaintBitmap)
+                    canvas.drawBitmap(scaleBitmap, mBitmapSrc, mBitmapDes, mPaintBitmap)
                 }
 
                 // 7：还原
                 canvas.restore()
             }
-        }
+            // 8: 绘制描边
 
-        // 8: 绘制描边
-        canvas?.let {
-            if (strokeWidth > 0) {
-                val circleX = (width / 2).toFloat()
-                val circleY = (width / 2).toFloat()
-                val radius = ((width - (strokeWidth * 2)) / 2)
-
-                it.drawCircle(circleX, circleY, radius, mPaintStroke)
+            canvas.let {
+                if (strokeWidth > 0) {
+                    it.drawCircle(centreX, centreY, centreRadius, mPaintStroke)
+                }
             }
         }
     }
