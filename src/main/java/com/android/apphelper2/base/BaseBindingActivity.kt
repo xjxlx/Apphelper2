@@ -51,7 +51,6 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
             StatusBarUtil.getInstance(this)
                 .setStatusFontColor(true)
                 .setStatusColor(statusBar)
-                .setStatusFontColor(true)
         }
     }
 
