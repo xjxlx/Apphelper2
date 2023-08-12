@@ -22,7 +22,10 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
             if (field != 0) {
                 return field
             }
-            return AppHelper2.getBuilder()?.statusBarColor!!
+            AppHelper2.getBuilder()?.statusBarColor?.let {
+                return it
+            }
+            return 0
         }
     var showAppExit: Boolean = false
 
