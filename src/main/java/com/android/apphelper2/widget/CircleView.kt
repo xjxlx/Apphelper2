@@ -16,9 +16,14 @@ import com.android.common.utils.LogUtil
  */
 class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcompat.widget.AppCompatImageView(context, attributeSet) {
 
+    private var mPaintBlur: Paint? = null
+    private var mBlurWidth = 0F
+    private var mPaintStroke: Paint? = null
+    private var mStrokeWidth = 0F
     private val mPath: Path by lazy {
         return@lazy Path()
     }
+
     private val mPaintBitmap: Paint by lazy {
         return@lazy Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.FILL
@@ -26,26 +31,64 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
     }
     private val mBitmapSrc = Rect()
     private val mBitmapDes = Rect()
-    private val mPaintStroke: Paint by lazy {
-        return@lazy Paint().also {
-            it.style = Paint.Style.STROKE
-        }
+
+    private val mPaintTempbackground = Paint().also {
+        it.strokeWidth = 1F
+        it.style = Paint.Style.STROKE
+        it.color = Color.RED
+    }
+    private val mPaintTempBlur = Paint().also {
+        it.strokeWidth = 1F
+        it.style = Paint.Style.STROKE
+        it.color = Color.BLACK
+    }
+    private val mPaintTempStroke = Paint().also {
+        it.strokeWidth = 1F
+        it.style = Paint.Style.STROKE
+        it.color = Color.YELLOW
+    }
+    private val mPaintTempBitmap = Paint().also {
+        it.strokeWidth = 1F
+        it.style = Paint.Style.STROKE
+        it.color = Color.BLUE
     }
 
     init {
         val typedArray: TypedArray = context.obtainStyledAttributes(attributeSet, R.styleable.CircleView)
-        typedArray.getColor(R.styleable.CircleView_stroke_color, 0)
-            .also {
-                if (it != 0) {
-                    mPaintStroke.color = it
-                }
-            }
+
+        // 描边
         typedArray.getDimension(R.styleable.CircleView_stroke_width, 0F)
             .also {
                 if (it != 0F) {
-                    mPaintStroke.strokeWidth = it
+                    val strokeColor = typedArray.getColor(R.styleable.CircleView_stroke_color, 0)
+                    if (strokeColor != 0) {
+                        mPaintStroke = Paint().also { paint ->
+                            paint.style = Paint.Style.STROKE
+                            paint.color = strokeColor
+                            paint.strokeWidth = it
+                            mStrokeWidth = it
+                        }
+                    }
                 }
             }
+
+        // 模糊
+        typedArray.getDimension(R.styleable.CircleView_blur_width, 0F)
+            .also {
+                if (it != 0F) {
+                    val blurColor = typedArray.getColor(R.styleable.CircleView_blur_color, 0)
+                    if (blurColor != 0) {
+                        mPaintBlur = Paint().also { paint ->
+                            paint.style = Paint.Style.FILL
+                            paint.color = Color.WHITE
+                            paint.strokeWidth = it
+                            paint.setShadowLayer(it, 0F, 0F, blurColor);
+                            mBlurWidth = it
+                        }
+                    }
+                }
+            }
+
         typedArray.recycle()
     }
 
@@ -55,26 +98,54 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
         // super.onDraw(canvas)
 
         if (width > 0 && canvas != null) {
-            val strokeWidth = mPaintStroke.strokeWidth.toInt()
-            val centreX = (width / 2).toFloat()
-            val centreY = (width / 2).toFloat()
-            val centreRadius = ((width - (strokeWidth)) / 2).toFloat()
+            val centerX = (width / 2).toFloat()
+            val centerY = (height / 2).toFloat()
+            val radius = (width / 2)
 
+            // 1：绘制模糊效果
+            mPaintBlur?.let {
+                canvas.drawCircle(centerX, centerY, radius - mBlurWidth, it)
+            }
+
+            // 2：绘制描边
+            mPaintStroke?.let {
+                /**
+                 * stroke.width : 扩散的时候是从中心往外扩散的，值 = 直径，使用的时候要使用半径才可以保证位置
+                 */
+                val strokeCenterRadius: Float
+                if (mBlurWidth > 0) {
+                    strokeCenterRadius = radius - mBlurWidth - mStrokeWidth / 2
+                } else {
+                    strokeCenterRadius = radius - mStrokeWidth / 2
+                }
+                canvas.drawCircle(centerX, centerY, strokeCenterRadius, it)
+            }
+
+            // bitmap.radius = view.radius - blur.width - stroke.width
+            var bitmapRadius: Float = radius.toFloat()
+            if (mBlurWidth > 0) {
+                bitmapRadius -= mBlurWidth
+            }
+            if (mStrokeWidth > 0) {
+                bitmapRadius -= mStrokeWidth
+            }
+
+            // 3：绘制bitmap
             if (drawable != null) {
                 // 既然是绘制圆形，那么宽和高必须是相同的，这里取宽的高度，或者高的高度，都是一样的，这里就直接取值宽的高度了
-                val targetWidth = width - (strokeWidth * 2)
-                val targetHeight = height - (strokeWidth * 2)
+                val targetWidth = (bitmapRadius * 2).toInt()
+                val targetHeight = (bitmapRadius * 2).toInt()
 
-                // 2：保存当前的状态
+                // 3.1：保存当前的状态
                 canvas.save()
-                // 3：绘制圆形的path路径
-                mPath.addCircle(centreX, centreY, centreRadius, Path.Direction.CW)
-                // 4：将当前剪切与指定的路径相交,可以理解是在裁剪画布
+                // 3.2：绘制圆形的path路径
+                mPath.addCircle(centerX, centerY, bitmapRadius, Path.Direction.CW)
+                // 3.3：将当前剪切与指定的路径相交,可以理解是在裁剪画布
                 canvas.clipPath(mPath)
 
                 if (drawable is BitmapDrawable) {
                     val bitmap = (drawable as BitmapDrawable).bitmap
-                    // 5: 缩放图片的比例，重新生成一个bitmap，避免图片过大，只能取值到一部分图片
+                    // 3.4: 缩放图片的比例，重新生成一个bitmap，避免图片过大，只能取值到一部分图片
                     val scaleBitmap = BitmapUtil.getScaleBitmap(bitmap, targetWidth, targetHeight)
                     if (scaleBitmap == null) {
                         LogUtil.e("scaleBitmap is null !")
@@ -105,30 +176,15 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
                     mBitmapSrc.right = mBitmapSrc.left + targetWidth
                     mBitmapSrc.bottom = mBitmapSrc.top + targetHeight
 
-                    mBitmapDes.left = if (strokeWidth > 0) {
-                        strokeWidth
-                    } else {
-                        0
-                    }
-                    mBitmapDes.top = if (strokeWidth > 0) {
-                        strokeWidth
-                    } else {
-                        0
-                    }
+                    mBitmapDes.left = (mBlurWidth + mStrokeWidth).toInt()
+                    mBitmapDes.top = (mBlurWidth + mStrokeWidth).toInt()
                     mBitmapDes.right = mBitmapDes.left + targetWidth
                     mBitmapDes.bottom = mBitmapDes.top + targetHeight
-
-                    // 6：绘制drawable
+                    // 3.5：绘制drawable
                     canvas.drawBitmap(scaleBitmap, mBitmapSrc, mBitmapDes, mPaintBitmap)
                 }
-
-                // 7：还原
+                // 3.6：还原
                 canvas.restore()
-            }
-
-            // 8: 绘制描边
-            if (strokeWidth > 0) {
-                canvas.drawCircle(centreX, centreY, centreRadius, mPaintStroke)
             }
         }
     }
