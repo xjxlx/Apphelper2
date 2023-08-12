@@ -23,7 +23,6 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
     private val mPath: Path by lazy {
         return@lazy Path()
     }
-
     private val mPaintBitmap: Paint by lazy {
         return@lazy Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.FILL
@@ -31,27 +30,6 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
     }
     private val mBitmapSrc = Rect()
     private val mBitmapDes = Rect()
-
-    private val mPaintTempbackground = Paint().also {
-        it.strokeWidth = 1F
-        it.style = Paint.Style.STROKE
-        it.color = Color.RED
-    }
-    private val mPaintTempBlur = Paint().also {
-        it.strokeWidth = 1F
-        it.style = Paint.Style.STROKE
-        it.color = Color.BLACK
-    }
-    private val mPaintTempStroke = Paint().also {
-        it.strokeWidth = 1F
-        it.style = Paint.Style.STROKE
-        it.color = Color.YELLOW
-    }
-    private val mPaintTempBitmap = Paint().also {
-        it.strokeWidth = 1F
-        it.style = Paint.Style.STROKE
-        it.color = Color.BLUE
-    }
 
     init {
         val typedArray: TypedArray = context.obtainStyledAttributes(attributeSet, R.styleable.CircleView)
@@ -88,7 +66,6 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
                     }
                 }
             }
-
         typedArray.recycle()
     }
 
