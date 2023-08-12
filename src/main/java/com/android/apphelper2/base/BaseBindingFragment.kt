@@ -66,6 +66,9 @@ open abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterfa
     override fun initView() {
     }
 
+    override fun initView(rootView: View?) {
+    }
+
     override fun initListener() {
     }
 
