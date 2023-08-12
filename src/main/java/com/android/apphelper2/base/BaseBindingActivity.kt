@@ -18,6 +18,12 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
     lateinit var mBinding: T
     lateinit var mActivity: FragmentActivity
     var statusBar: Int = 0
+        get() {
+            if (field != 0) {
+                return field
+            }
+            return AppHelper2.getBuilder()?.statusBarColor!!
+        }
     var showAppExit: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,11 +48,6 @@ open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), 
 
     override fun initStatusBar() {
         super.initStatusBar()
-        if (statusBar == 0) {
-            AppHelper2.getBuilder()?.statusBarColor?.let {
-                statusBar = it
-            }
-        }
         if (statusBar != 0) {
             StatusBarUtil.getInstance(this)
                 .setStatusFontColor(true)
