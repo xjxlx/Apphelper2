@@ -17,7 +17,9 @@ import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
+import androidx.core.view.marginBottom
 import com.android.apphelper2.R
+import com.android.common.utils.LogUtil
 import com.android.common.utils.ResourcesUtil
 
 class SearchView(private val context: Context, private val attributeSet: AttributeSet) : LinearLayout(context, attributeSet) {
@@ -49,6 +51,21 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
     init {
         this.orientation = HORIZONTAL
         initView()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        var maxHeight = 0
+
+        for (index in 0 until childCount) {
+            val childAt = getChildAt(index)
+            val paddingTop = childAt.paddingTop
+            val marginBottom = childAt.marginBottom
+            val measuredHeight = childAt.measuredHeight
+            LogUtil.e("view:" + getChildAt(index))
+//            maxHeight = max(maxHeight, (paddingTop + marginBottom + measuredHeight))
+        }
+//        setMeasuredDimension(measuredWidth, maxHeight)
     }
 
     fun setBackground(@DrawableRes resource: Int) {
@@ -246,6 +263,8 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
             params.width = mSearchButtonWidth.toInt()
             params.height = mSearchButtonHeight.toInt()
         })
+
+        requestLayout()
     }
 
     fun setSearchListener(listener: SearchListener) {
