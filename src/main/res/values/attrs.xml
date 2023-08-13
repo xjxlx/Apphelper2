@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="BottomNavigationView2">
+    <declare-styleable name="BottomNavigationView">
         <!--item文件-->
         <attr name="navigation_menu" format="reference" />
         <attr name="navigation_itemBackgroundColor" format="color" />

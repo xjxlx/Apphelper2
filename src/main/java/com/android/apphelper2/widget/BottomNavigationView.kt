@@ -22,7 +22,7 @@ import com.android.common.utils.ResourcesUtil
 import kotlin.math.max
 
 @SuppressLint("RestrictedApi")
-class BottomNavigationView2 constructor(private val mContext: Context, attSet: AttributeSet) : LinearLayout(mContext, attSet) {
+class BottomNavigationView constructor(private val mContext: Context, attSet: AttributeSet) : LinearLayout(mContext, attSet) {
 
     private val tag = "BottomNavigationView2"
     private var mMenuItemSize = 0
@@ -48,13 +48,13 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
     init {
         this.orientation = VERTICAL
 
-        val typedArray: TypedArray = context.obtainStyledAttributes(attSet, R.styleable.BottomNavigationView2)
+        val typedArray: TypedArray = context.obtainStyledAttributes(attSet, R.styleable.BottomNavigationView)
 
         // item background color
-        mItemBackgroundColor = typedArray.getColor(R.styleable.BottomNavigationView2_navigation_itemBackgroundColor, 0)
+        mItemBackgroundColor = typedArray.getColor(R.styleable.BottomNavigationView_navigation_itemBackgroundColor, 0)
 
         // show line
-        typedArray.getColor(R.styleable.BottomNavigationView2_navigation_lineColor, 0)
+        typedArray.getColor(R.styleable.BottomNavigationView_navigation_lineColor, 0)
             .also { color ->
                 if (color != 0) {
                     this.addView(FrameLayout(mContext).also { view ->
@@ -65,8 +65,8 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
             }
 
         // icon
-        mIconColor = typedArray.getColorStateList(R.styleable.BottomNavigationView2_navigation_itemIconTint)
-        typedArray.getDimension(R.styleable.BottomNavigationView2_navigation_itemIconSize, 0F)
+        mIconColor = typedArray.getColorStateList(R.styleable.BottomNavigationView_navigation_itemIconTint)
+        typedArray.getDimension(R.styleable.BottomNavigationView_navigation_itemIconSize, 0F)
             .also {
                 if (it != 0F) {
                     mIconSize = it
@@ -74,8 +74,8 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
             }
 
         // text
-        mTextColor = typedArray.getColorStateList(R.styleable.BottomNavigationView2_navigation_itemTextColor)
-        typedArray.getDimension(R.styleable.BottomNavigationView2_navigation_itemTextSize, 0F)
+        mTextColor = typedArray.getColorStateList(R.styleable.BottomNavigationView_navigation_itemTextColor)
+        typedArray.getDimension(R.styleable.BottomNavigationView_navigation_itemTextSize, 0F)
             .also {
                 if (it != 0F) {
                     mTextSize = it
@@ -83,21 +83,21 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
             }
 
         // padding
-        typedArray.getDimension(R.styleable.BottomNavigationView2_navigation_paddingTop, 0F)
+        typedArray.getDimension(R.styleable.BottomNavigationView_navigation_paddingTop, 0F)
             .also {
                 mPaddingTop = it
             }
-        typedArray.getDimension(R.styleable.BottomNavigationView2_navigation_interval, 0F)
+        typedArray.getDimension(R.styleable.BottomNavigationView_navigation_interval, 0F)
             .also {
                 mInterval = it
             }
-        typedArray.getDimension(R.styleable.BottomNavigationView2_navigation_paddingBottom, 0F)
+        typedArray.getDimension(R.styleable.BottomNavigationView_navigation_paddingBottom, 0F)
             .also {
                 mPaddingBottom = it
             }
 
         // menu
-        typedArray.getResourceId(R.styleable.BottomNavigationView2_navigation_menu, 0)
+        typedArray.getResourceId(R.styleable.BottomNavigationView_navigation_menu, 0)
             .also { resources ->
                 if (mContext is FragmentActivity) {
                     MenuBuilder(mContext).also {
