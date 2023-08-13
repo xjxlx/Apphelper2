@@ -15,7 +15,7 @@ open abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterfa
 
     lateinit var mFragment: Fragment
     lateinit var mActivity: FragmentActivity
-    var mBinding: T? = null
+    lateinit var mBinding: T
     var mArguments: Bundle? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +33,8 @@ open abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterfa
         activity?.let {
             mActivity = it
         }
-        return getBinding(inflater, container, false).root
+        mBinding = getBinding(inflater, container, false)
+        return getRootView()
     }
 
     override fun onAttach(context: Context) {
@@ -76,11 +77,7 @@ open abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterfa
     }
 
     override fun getRootView(): View {
-        return mBinding!!.root
+        return mBinding.root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mBinding = null
-    }
 }
