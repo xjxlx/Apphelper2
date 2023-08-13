@@ -17,4 +17,8 @@
     <color name="statusBar_background_color">#222222</color>
     <color name="base_title_background_color">#222222</color>
 
+    <color name="search_background">#F0F1F5</color>
+    <color name="search_hint_color">#ffc1c1c1</color>
+    <color name="search_color">#222222</color>
+
 </resources>
