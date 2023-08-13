@@ -79,7 +79,6 @@ object ScreenUtil {
     //        if (statusBarHeight > 0) {
     //            // 把状态栏高度存入到sp中
     //            SpUtil.putInt(CommonConstants.KEY_STATUS_BAR_HEIGHT, statusBarHeight);
-    //            LogUtil.e("获取状态栏的高度为：【1】--->" + statusBarHeight);
     //        } else {
     //            // 第二种方法
     //            if (activity instanceof Activity) {
