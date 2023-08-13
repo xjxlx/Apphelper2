@@ -24,6 +24,7 @@ import kotlin.math.max
 @SuppressLint("RestrictedApi")
 class BottomNavigationView2 constructor(private val mContext: Context, attSet: AttributeSet) : LinearLayout(mContext, attSet) {
 
+    private val tag = "BottomNavigationView2"
     private var mMenuItemSize = 0
     private var mMenuItemViewMaxWidth: Int = 0
     private var mItemBackgroundColor = 0
@@ -41,7 +42,8 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
     private var mInterval: Float = 0F
     private var mPaddingBottom: Float = 0F
     private var mListener: ClickListener? = null
-    private var mOldPosition = -1
+    private var mOldPosition: Int = -1
+    private var currentPosition = 0
 
     init {
         this.orientation = VERTICAL
@@ -104,10 +106,11 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
                         for (index in 0 until mMenuItemSize) {
                             addItemView(index, it)
                         }
+                        // default selector item
+                        checked(currentPosition)
                     }
                 }
             }
-
         typedArray.recycle()
     }
 
@@ -219,19 +222,6 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
             if (mItemBackgroundColor != 0) {
                 root.setBackgroundColor(mItemBackgroundColor)
             }
-            root.setOnClickListener {
-                val position: Int
-                if (mShowLineFlag) {
-                    position = index + 1
-                } else {
-                    position = index
-                }
-                if (mOldPosition != position) {
-                    mListener?.onClick(position, itemId, root)
-                    mOldPosition = position
-                }
-            }
-
             // add icon
             root.addView(ImageView(mContext).also { image ->
                 image.setImageDrawable(icon)
@@ -250,6 +240,11 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
                     }
                 }, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
             }
+
+            // click item
+            root.setOnClickListener {
+                checked(index)
+            }
         }, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT))
     }
 
@@ -267,12 +262,33 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
                         child.isSelected = true
                     }
                 }
+                clickItem(childAt, childAt.id, position)
             } else {
                 if (childAt is ViewGroup) {
                     childAt.forEach { child ->
                         child.isSelected = false
                     }
                 }
+            }
+        }
+    }
+
+    fun currentItem(): Int {
+        return currentPosition
+    }
+
+    private fun clickItem(view: View, itemId: Int, index: Int) {
+        // LogUtil.e(tag, "clickItem index:$index listener: $mListener")
+        val position = if (mShowLineFlag) {
+            index + 1
+        } else {
+            index
+        }
+        mListener?.let {
+            if (mOldPosition != position) {
+                it.onClick(position, itemId, view)
+                mOldPosition = position
+                currentPosition = position
             }
         }
     }
