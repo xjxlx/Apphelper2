@@ -41,6 +41,7 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
     private var mInterval: Float = 0F
     private var mPaddingBottom: Float = 0F
     private var mListener: ClickListener? = null
+    private var mOldPosition = -1
 
     init {
         this.orientation = VERTICAL
@@ -219,10 +220,15 @@ class BottomNavigationView2 constructor(private val mContext: Context, attSet: A
                 root.setBackgroundColor(mItemBackgroundColor)
             }
             root.setOnClickListener {
+                val position: Int
                 if (mShowLineFlag) {
-                    mListener?.onClick(index + 1, itemId, root)
+                    position = index + 1
                 } else {
-                    mListener?.onClick(index, itemId, root)
+                    position = index
+                }
+                if (mOldPosition != position) {
+                    mListener?.onClick(position, itemId, root)
+                    mOldPosition = position
                 }
             }
 
