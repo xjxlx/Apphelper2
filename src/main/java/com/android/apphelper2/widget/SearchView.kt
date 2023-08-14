@@ -7,7 +7,6 @@ import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.AttributeSet
-import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.EditText
@@ -15,13 +14,15 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.ColorRes
-import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
-import androidx.core.view.marginBottom
 import com.android.apphelper2.R
-import com.android.common.utils.LogUtil
 import com.android.common.utils.ResourcesUtil
 
+/**
+ * 搜索的View
+ * 1：默认的是有设置的宽高的，如果自定义了宽高，需要重新调用方法 # initView()
+ * 2：如果要监听搜索的输入内容，需要调用方法 # setSearchListener(SearchListener)
+ */
 class SearchView(private val context: Context, private val attributeSet: AttributeSet) : LinearLayout(context, attributeSet) {
 
     private var mBackground: Drawable? = ResourcesUtil.getDrawable(context, R.drawable.shape_round_4_search_background)
@@ -29,23 +30,22 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
     private var mLeftText: TextView? = null
     private var mLeftShow = true
     private var mLeftContent: String = "搜索"
-    private var mLeftSize: Float = ResourcesUtil.getDimension(context, com.apphelper.demens.R.dimen.sp_17)
+    private var mLeftSize: Float = 17F
     private var mLeftColor: Int = ResourcesUtil.getColor(context, R.color.search_hint_color)
-    private var mLeftStart = ResourcesUtil.getDimension(context, com.apphelper.demens.R.dimen.dp_17)
-    private var mLeftEnd = ResourcesUtil.getDimension(context, com.apphelper.demens.R.dimen.dp_10)
+    private var mLeftStart = ResourcesUtil.toDp(17F)
 
     private var mSearch: EditText? = null
     private var mSearchContent: String = ""
-    private var mSearchSize: Float = ResourcesUtil.getDimension(context, com.apphelper.demens.R.dimen.sp_17)
-    private var mSearchLeft: Float = ResourcesUtil.getDimension(context, com.apphelper.demens.R.dimen.dp_10)
-    private var mSearchMarginVertical = ResourcesUtil.getDimension(context, com.apphelper.demens.R.dimen.dp_12)
+    private var mSearchSize: Float = 17F
+    private var mSearchLeft: Float = ResourcesUtil.toDp(12F)
+    private var mSearchMarginVertical: Float = ResourcesUtil.toPx(12F)
 
     private var mRightImage: ImageView? = null
     private var mSearchButton: Int = R.drawable.icon_search_button
-    private var mSearchButtonWidth: Float = ResourcesUtil.getDimension(context, com.apphelper.demens.R.dimen.dp_20)
-    private var mSearchButtonHeight: Float = ResourcesUtil.getDimension(context, com.apphelper.demens.R.dimen.dp_20)
-    private var mSearchButtonLeft: Float = ResourcesUtil.getDimension(context, com.apphelper.demens.R.dimen.dp_10)
-    private var mSearchButtonRight: Float = ResourcesUtil.getDimension(context, com.apphelper.demens.R.dimen.dp_18)
+    private var mSearchButtonWidth: Float = ResourcesUtil.toDp(20F)
+    private var mSearchButtonHeight: Float = ResourcesUtil.toDp(20F)
+    private var mSearchButtonLeft: Float = ResourcesUtil.toDp(10F)
+    private var mSearchButtonRight: Float = ResourcesUtil.toDp(18F)
     private var mSearchListener: SearchListener? = null
 
     init {
@@ -59,13 +59,15 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
 
         for (index in 0 until childCount) {
             val childAt = getChildAt(index)
-            val paddingTop = childAt.paddingTop
-            val marginBottom = childAt.marginBottom
-            val measuredHeight = childAt.measuredHeight
-            LogUtil.e("view:" + getChildAt(index))
-//            maxHeight = max(maxHeight, (paddingTop + marginBottom + measuredHeight))
+            if (childAt is EditText) {
+                val paddingTop = childAt.paddingTop
+                val marginBottom = childAt.paddingBottom
+                val measuredHeight = childAt.measuredHeight
+                maxHeight = maxHeight.coerceAtLeast((paddingTop + measuredHeight + marginBottom))
+                // LogUtil.e("child: $childAt paddingTop: $paddingTop marginBottom: $marginBottom measuredHeight: $measuredHeight")
+            }
         }
-//        setMeasuredDimension(measuredWidth, maxHeight)
+        setMeasuredDimension(measuredWidth, maxHeight)
     }
 
     fun setBackground(@DrawableRes resource: Int) {
@@ -92,10 +94,13 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
         return this
     }
 
-    fun setLeftSize(@DimenRes size: Int = 0): SearchView {
-        if (size != 0) {
-            this.mLeftSize = ResourcesUtil.getDimension(context, size)
-            this.mLeftText?.setTextSize(TypedValue.COMPLEX_UNIT_PX, mLeftSize)
+    /**
+     * 只能设置具体的数字，不能设置@DimenRes的值
+     */
+    fun setLeftSize(size: Float = 0F): SearchView {
+        if (size != 0F) {
+            this.mLeftSize = size
+            this.mLeftText?.textSize = mLeftSize
         }
         return this
     }
@@ -108,25 +113,23 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
         return this
     }
 
-    fun setLeftStart(@DimenRes left: Int = 0): SearchView {
-        if (left != 0) {
-            this.mLeftStart = ResourcesUtil.getDimension(context, left)
-            this.mLeftText?.setPadding(mLeftStart.toInt(), mSearchMarginVertical.toInt(), mLeftEnd.toInt(), mSearchMarginVertical.toInt())
+    /**
+     * 只能设置具体的数字，不能设置@DimenRes的值
+     */
+    fun setLeftStart(left: Float = 0F): SearchView {
+        if (left != 0F) {
+            this.mLeftStart = ResourcesUtil.toDp(left)
+            this.mLeftText?.setPadding(mLeftStart.toInt(), 0, 0, 0)
         }
         return this
     }
 
-    fun setLeftEnd(@DimenRes right: Int = 0): SearchView {
-        if (right != 0) {
-            this.mLeftEnd = ResourcesUtil.getDimension(context, right)
-            this.mLeftText?.setPadding(mLeftStart.toInt(), mSearchMarginVertical.toInt(), mLeftEnd.toInt(), mSearchMarginVertical.toInt())
-        }
-        return this
-    }
-
-    fun setLeftMarginVertical(@DimenRes marginVertical: Int = 0): SearchView {
-        if (marginVertical != 0) {
-            this.mSearchMarginVertical = ResourcesUtil.getDimension(context, marginVertical)
+    /**
+     * 只能设置具体的数字，不能设置@DimenRes的值
+     */
+    fun setSearchMarginVertical(marginVertical: Float = 0F): SearchView {
+        if (marginVertical != 0F) {
+            this.mSearchMarginVertical = ResourcesUtil.toPx(marginVertical)
         }
         return this
     }
@@ -138,25 +141,34 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
         return this
     }
 
-    fun setSearchTextSize(@DimenRes size: Int = 0): SearchView {
-        if (size != 0) {
-            this.mSearchSize = ResourcesUtil.getDimension(context, size)
-            this.mSearch?.setTextSize(TypedValue.COMPLEX_UNIT_PX, mSearchSize)
+    /**
+     * 只能设置具体的数字，不能设置@DimenRes的值
+     */
+    fun setSearchTextSize(size: Float = 0F): SearchView {
+        if (size != 0F) {
+            this.mSearchSize = size
+            this.mSearch?.textSize = mSearchSize
         }
         return this
     }
 
-    fun setSearchLeft(@DimenRes left: Int = 0): SearchView {
-        if (left != 0) {
-            this.mSearchLeft = ResourcesUtil.getDimension(context, left)
+    /**
+     * 只能设置具体的数字，不能设置@DimenRes的值
+     */
+    fun setSearchLeft(left: Float = 0F): SearchView {
+        if (left != 0F) {
+            this.mSearchLeft = ResourcesUtil.toDp(left)
             this.mSearch?.setPadding(mSearchLeft.toInt(), mSearchMarginVertical.toInt(), 0, mSearchMarginVertical.toInt())
         }
         return this
     }
 
-    fun setRightEnd(@DimenRes right: Int = 0): SearchView {
-        if (right != 0) {
-            this.mSearchButtonRight = ResourcesUtil.getDimension(context, right)
+    /**
+     * 只能设置具体的数字，不能设置@DimenRes的值
+     */
+    fun setRightEnd(right: Float = 0F): SearchView {
+        if (right != 0F) {
+            this.mSearchButtonRight = ResourcesUtil.toDp(right)
             this.mRightImage?.layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also {
                 it.rightMargin = this.mSearchButtonRight.toInt()
             }
@@ -164,9 +176,12 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
         return this
     }
 
-    fun setRightStart(@DimenRes left: Int = 0): SearchView {
-        if (left != 0) {
-            this.mSearchButtonLeft = ResourcesUtil.getDimension(context, left)
+    /**
+     * 只能设置具体的数字，不能设置@DimenRes的值
+     */
+    fun setRightStart(left: Float = 0F): SearchView {
+        if (left != 0F) {
+            this.mSearchButtonLeft = ResourcesUtil.toDp(left)
             this.mRightImage?.layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also {
                 it.leftMargin = this.mSearchButtonLeft.toInt()
             }
@@ -174,9 +189,12 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
         return this
     }
 
-    fun setRightHeight(@DimenRes height: Int = 0): SearchView {
-        if (height != 0) {
-            this.mSearchButtonHeight = ResourcesUtil.getDimension(context, height)
+    /**
+     * 只能设置具体的数字，不能设置@DimenRes的值
+     */
+    fun setRightHeight(height: Float = 0F): SearchView {
+        if (height != 0F) {
+            this.mSearchButtonHeight = ResourcesUtil.toDp(height)
             this.mRightImage?.layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also {
                 it.height = this.mSearchButtonHeight.toInt()
             }
@@ -185,9 +203,12 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
         return this
     }
 
-    fun setRightWidth(@DimenRes width: Int = 0): SearchView {
-        if (width != 0) {
-            this.mSearchButtonWidth = ResourcesUtil.getDimension(context, width)
+    /**
+     * 只能设置具体的数字，不能设置@DimenRes的值
+     */
+    fun setRightWidth(width: Float = 0F): SearchView {
+        if (width != 0F) {
+            this.mSearchButtonWidth = ResourcesUtil.toDp(width)
             this.mRightImage?.layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also {
                 it.width = this.mSearchButtonWidth.toInt()
             }
@@ -214,12 +235,13 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
             this.mLeftText = it
             if (mLeftShow) {
                 it.text = mLeftContent
-                it.setTextSize(TypedValue.COMPLEX_UNIT_PX, mLeftSize)
+                it.textSize = mLeftSize
                 it.setTextColor(mLeftColor)
-                it.setPadding(mLeftStart.toInt(), mSearchMarginVertical.toInt(), mLeftEnd.toInt(), mSearchMarginVertical.toInt())
-                it.gravity = Gravity.CENTER_VERTICAL
+                it.setPadding(mLeftStart.toInt(), 0, 0, 0)
             }
-        }, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+        }, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also { params ->
+            params.gravity = Gravity.CENTER_VERTICAL
+        })
 
         // add editText
         addView(EditText(context, attributeSet).also {
@@ -227,7 +249,7 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
             it.background = null
             it.isSingleLine = true
             it.maxLines = 1
-            it.setTextSize(TypedValue.COMPLEX_UNIT_PX, mSearchSize)
+            it.textSize = mSearchSize
             it.setPadding(mSearchLeft.toInt(), mSearchMarginVertical.toInt(), 0, mSearchMarginVertical.toInt())
             it.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -246,6 +268,8 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
             })
         }, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT).also { params ->
             params.width = 0
+            params.gravity = Gravity.CENTER_VERTICAL
+            params.height = LayoutParams.WRAP_CONTENT
             params.weight = 1F
         })
 
@@ -256,6 +280,7 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
             it.setOnClickListener {
                 mSearchListener?.search(mSearchContent)
             }
+            it.adjustViewBounds = true
         }, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also { params ->
             params.gravity = Gravity.CENTER_VERTICAL
             params.leftMargin = mSearchButtonLeft.toInt()
