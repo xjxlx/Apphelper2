@@ -8,14 +8,18 @@ import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
+import androidx.fragment.app.FragmentActivity
 import com.android.apphelper2.R
+import com.android.common.utils.KeyBoardUtil
 import com.android.common.utils.ResourcesUtil
 
 /**
@@ -48,9 +52,18 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
     private var mSearchButtonRight: Float = ResourcesUtil.toDp(18F)
     private var mSearchListener: SearchListener? = null
 
+    private val mKeyBoardUtil: KeyBoardUtil? by lazy {
+        if (context is FragmentActivity) {
+            return@lazy KeyBoardUtil(context)
+        }
+        return@lazy null
+    }
+
     init {
         this.orientation = HORIZONTAL
-        initView()
+        if (isInEditMode) {
+            initView()
+        }
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -231,7 +244,7 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
         background = mBackground
 
         // add search hint text
-        addView(TextView(context).also {
+        this.addView(TextView(context).also {
             this.mLeftText = it
             if (mLeftShow) {
                 it.text = mLeftContent
@@ -244,11 +257,13 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
         })
 
         // add editText
-        addView(EditText(context, attributeSet).also {
+        addView(EditText(context).also {
             this.mSearch = it
             it.background = null
             it.isSingleLine = true
             it.maxLines = 1
+            // 把 enter 按钮修改为 搜索
+            it.imeOptions = EditorInfo.IME_ACTION_SEARCH
             it.textSize = mSearchSize
             it.setPadding(mSearchLeft.toInt(), mSearchMarginVertical.toInt(), 0, mSearchMarginVertical.toInt())
             it.addTextChangedListener(object : TextWatcher {
@@ -266,6 +281,19 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
                     }
                 }
             })
+
+            // 监听按键
+            it.setOnKeyListener { v, keyCode, event ->
+                if (event.action == KeyEvent.ACTION_DOWN) {
+                    if (keyCode == KeyEvent.KEYCODE_SEARCH || keyCode == KeyEvent.KEYCODE_ENTER) {
+                        mSearchListener?.search(mSearchContent)
+                        mKeyBoardUtil?.hideEditText()
+                        return@setOnKeyListener true
+                    }
+                }
+                return@setOnKeyListener false
+            }
+
         }, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT).also { params ->
             params.width = 0
             params.gravity = Gravity.CENTER_VERTICAL
@@ -274,13 +302,13 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
         })
 
         // add search icon
-        addView(ImageView(context, attributeSet).also {
+        this.addView(ImageView(context).also {
             this.mRightImage = it
             it.setImageResource(mSearchButton)
+            it.adjustViewBounds = true
             it.setOnClickListener {
                 mSearchListener?.search(mSearchContent)
             }
-            it.adjustViewBounds = true
         }, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also { params ->
             params.gravity = Gravity.CENTER_VERTICAL
             params.leftMargin = mSearchButtonLeft.toInt()
