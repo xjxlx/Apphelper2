@@ -1,13 +1,19 @@
 package com.android.apphelper2.widget
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.View
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.core.view.size
 import com.android.apphelper2.R
+import com.android.apphelper2.utils.CustomViewUtil
+import com.android.common.utils.LogUtil
 import com.android.common.utils.ResourcesUtil
 import kotlin.math.max
 import kotlin.random.Random
@@ -20,6 +26,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
 
     private val mItemTitleArray: Array<String> = arrayOf("线索", "需求", "商场", "我的")
     private val mInterval = 30
+    private val mTabIndicatorTag = "indicator"
     private val mRootView = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
         tag = "root"
@@ -29,7 +36,13 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         tag = "title-array"
     }
 
-    private var mMaxItemCount = 4
+    private val mMaxItemCount = 4
+    private val mTabIndicator = View(context).also {
+        it.setBackgroundColor(Color.RED)
+        it.tag = mTabIndicatorTag
+    }
+    private var mTabIndicatorWidth = ResourcesUtil.toDp(2F)
+    private val mTitleWidthMap = mutableMapOf<Int, Point>()
 
     fun initData() {
         removeAllViews()
@@ -41,9 +54,13 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         mRootView.addView(mTitleArrayView,
             LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
 
+        // add item
         mItemTitleArray.forEachIndexed { index, s ->
             addItem(index, s)
         }
+
+        // add tabIndicator
+        addView(mTabIndicator, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
         requestLayout()
     }
 
@@ -56,8 +73,8 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         val r = Random.nextInt(0, 255)
         val g = Random.nextInt(0, 255)
         val b = Random.nextInt(0, 255)
-
         textView.setBackgroundColor(Color.rgb(r, g, b))
+
         textView.gravity = Gravity.CENTER
 
         val layoutParams: LinearLayout.LayoutParams =
@@ -71,14 +88,17 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                     }
                 }
         mTitleArrayView.addView(textView, layoutParams)
+        textView.setOnClickListener {
+            it as TextView
+            LogUtil.e("item:" + it.text)
+        }
     }
 
+    @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-
         var mTotalWidth = 0F
         var mTotalHeight = 0
-
         // 遍历求出最大的宽和高
 
         // 第一层view = root
@@ -105,27 +125,41 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         setMeasuredDimension(mTotalWidth.toInt(), mTotalHeight)
     }
 
-//    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-//        super.onLayout(changed, l, t, r, b)
-//        var left = 0
-//        var top = 0
-//        var right = 0
-//        var bottom = 0
-//
-//        val rootView = getChildAt(0) as LinearLayout
-//        val titleArrayView = rootView.getChildAt(0) as LinearLayout
-//
-//        for (index in 0 until titleArrayView.childCount) {
-//            val itemView = titleArrayView.getChildAt(index)
-//            val itemWidth = itemView.width
-//            val itemHeight = itemView.height
-//
-//            right = (left + itemWidth)
-//            bottom = itemHeight
-//            itemView.layout(left, top, right, bottom)
-//            LogUtil.e("left: $left top: $top right: $right bottom: $bottom")
-////            left += (itemWidth + mInterval)
-//            left += (itemWidth)
-//        }
-//    }
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        super.onLayout(changed, l, t, r, b)
+        getChildAt(1)?.let { indicator ->
+            if (TextUtils.equals(indicator.tag.toString(), mTabIndicatorTag)) {
+                getChildAt(0)?.let { root ->
+                    if (root is LinearLayout) {
+                        root.getChildAt(0)
+                            ?.let { titleArray ->
+                                if (titleArray is LinearLayout) {
+                                    // mTitleWidthMap[index] = Point(itemWidth.toInt(), itemHeight, itemView)
+                                    for (index in 0..titleArray.size) {
+                                        titleArray.getChildAt(index)
+                                            ?.let { item ->
+                                                if (item is TextView) {
+                                                    val itemWidth = CustomViewUtil.getTextWidth(item.paint!!, item.text.toString())
+                                                    val itemHeight = item.height
+                                                    mTitleWidthMap[index] = Point(itemWidth.toInt(), itemHeight, item.left, item.right)
+                                                }
+                                            }
+                                    }
+                                }
+                            }
+
+                        // tabIndicator layout
+                        mTitleWidthMap[0]?.let { item ->
+                            val left = (((item.right - item.left) - item.width) / 2)
+                            val top = (item.height - mTabIndicatorWidth).toInt()
+                            val right = (left + item.width)
+                            indicator.layout(left, top, right, item.height)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    data class Point(var width: Int, var height: Int, var left: Int, var right: Int)
 }
