@@ -1,5 +1,6 @@
 package com.android.apphelper2.widget
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
@@ -10,6 +11,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.core.animation.addListener
 import androidx.core.view.size
 import com.android.apphelper2.R
 import com.android.apphelper2.utils.CustomViewUtil
@@ -41,8 +43,9 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         it.setBackgroundColor(Color.RED)
         it.tag = mTabIndicatorTag
     }
-    private var mTabIndicatorWidth = ResourcesUtil.toDp(2F)
-    private val mTitleWidthMap = mutableMapOf<Int, Point>()
+    private var mTabIndicatorHeight = ResourcesUtil.toDp(2F)
+    private val mTitleMap = mutableMapOf<Int, Point>()
+    private var mDefaultItem = 0
 
     fun initData() {
         removeAllViews()
@@ -73,7 +76,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         val r = Random.nextInt(0, 255)
         val g = Random.nextInt(0, 255)
         val b = Random.nextInt(0, 255)
-        textView.setBackgroundColor(Color.rgb(r, g, b))
+        // textView.setBackgroundColor(Color.rgb(r, g, b))
 
         textView.gravity = Gravity.CENTER
 
@@ -91,10 +94,10 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         textView.setOnClickListener {
             it as TextView
             LogUtil.e("item:" + it.text)
+            clickItem(index)
         }
     }
 
-    @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         var mTotalWidth = 0F
@@ -125,6 +128,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         setMeasuredDimension(mTotalWidth.toInt(), mTotalHeight)
     }
 
+    @SuppressLint("DrawAllocation")
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         super.onLayout(changed, l, t, r, b)
         getChildAt(1)?.let { indicator ->
@@ -141,7 +145,8 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                                                 if (item is TextView) {
                                                     val itemWidth = CustomViewUtil.getTextWidth(item.paint!!, item.text.toString())
                                                     val itemHeight = item.height
-                                                    mTitleWidthMap[index] = Point(itemWidth.toInt(), itemHeight, item.left, item.right)
+                                                    mTitleMap[index] =
+                                                        Point(item.width, itemWidth.toInt(), itemHeight, item.left, item.right)
                                                 }
                                             }
                                     }
@@ -149,9 +154,9 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                             }
 
                         // tabIndicator layout
-                        mTitleWidthMap[0]?.let { item ->
+                        mTitleMap[mDefaultItem]?.let { item ->
                             val left = (((item.right - item.left) - item.width) / 2)
-                            val top = (item.height - mTabIndicatorWidth).toInt()
+                            val top = (item.height - mTabIndicatorHeight).toInt()
                             val right = (left + item.width)
                             indicator.layout(left, top, right, item.height)
                         }
@@ -161,5 +166,43 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         }
     }
 
-    data class Point(var width: Int, var height: Int, var left: Int, var right: Int)
+    private fun clickItem(clickIndex: Int) {
+        val defaultPoint = mTitleMap[mDefaultItem]
+        val clickPoint = mTitleMap[clickIndex]
+        if (defaultPoint != null && clickPoint != null) {
+            var fromLeft = (defaultPoint.right - defaultPoint.left - defaultPoint.width) / 2
+            for (index in 0 until mDefaultItem) {
+                mTitleMap[index]?.let {
+                    fromLeft += it.measureWidth
+                }
+            }
+
+            var toLeft = (clickPoint.right - clickPoint.left - clickPoint.width) / 2
+            for (index in 0 until clickIndex) {
+                mTitleMap[index]?.let {
+                    toLeft += it.measureWidth
+                }
+            }
+
+            LogUtil.e(
+                "mDefaultItem: $mDefaultItem clickIndex:  $clickIndex default:$defaultPoint click: $clickPoint from: $fromLeft to: $toLeft")
+            ValueAnimator.ofInt(fromLeft, toLeft)
+                .apply {
+                    duration = 500
+                    addUpdateListener {
+                        val left = it.animatedValue as Int
+                        val top = clickPoint.height - mTabIndicatorHeight
+                        val right = left + clickPoint.width
+                        val bottom = clickPoint.height
+                        mTabIndicator.layout(left, top.toInt(), right, bottom)
+                    }
+                    addListener(onEnd = {
+                        mDefaultItem = clickIndex
+                    })
+                    start()
+                }
+        }
+    }
+
+    data class Point(var measureWidth: Int, var width: Int, var height: Int, var left: Int, var right: Int)
 }
