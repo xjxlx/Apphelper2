@@ -17,6 +17,7 @@ import com.android.apphelper2.R
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.common.utils.LogUtil
 import com.android.common.utils.ResourcesUtil
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.random.Random
 
@@ -46,6 +47,10 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     private var mTabIndicatorHeight = ResourcesUtil.toDp(2F)
     private val mTitleMap = mutableMapOf<Int, Point>()
     private var mDefaultItem = 0
+    private val mAnimationMaxDuration = 1000
+    private val mAnimationSpeed: Long by lazy {
+        return@lazy (mAnimationMaxDuration / mItemTitleArray.size).toLong()
+    }
 
     fun initData() {
         removeAllViews()
@@ -188,7 +193,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                 "mDefaultItem: $mDefaultItem clickIndex:  $clickIndex default:$defaultPoint click: $clickPoint from: $fromLeft to: $toLeft")
             ValueAnimator.ofInt(fromLeft, toLeft)
                 .apply {
-                    duration = 500
+                    duration = abs((mAnimationSpeed * (clickIndex - mDefaultItem)))
                     addUpdateListener {
                         val left = it.animatedValue as Int
                         val top = clickPoint.height - mTabIndicatorHeight
