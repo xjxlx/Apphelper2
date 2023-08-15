@@ -1,24 +1,25 @@
 package com.android.apphelper2.widget
 
 import android.content.Context
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.Gravity
-import android.view.ViewGroup
-import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
 import com.android.apphelper2.R
 import com.android.common.utils.ResourcesUtil
 import kotlin.math.max
+import kotlin.random.Random
 
 /**
  * 1：小于等于4个，就占据全部的区域
  * 2：大于4，就加上间隔，然后自动延伸
  */
-class TabLayout(context: Context, attributeSet: AttributeSet) : HorizontalScrollView(context, attributeSet) {
+class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(context, attributeSet) {
 
     private val mItemTitleArray: Array<String> = arrayOf("线索", "需求", "商场", "我的")
-    private val mInterval = 100
+    private val mInterval = 30
     private val mRootView = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
         tag = "root"
@@ -28,22 +29,17 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : HorizontalScroll
         tag = "title-array"
     }
 
-    private var mMax = 4
-
-    init {
-        if (!isInEditMode) {
-            initData()
-        }
-    }
+    private var mMaxItemCount = 4
 
     fun initData() {
         removeAllViews()
 
         // add root
-        addView(mRootView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+        addView(mRootView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
 
         // add title array
-        mRootView.addView(mTitleArrayView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+        mRootView.addView(mTitleArrayView,
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
 
         mItemTitleArray.forEachIndexed { index, s ->
             addItem(index, s)
@@ -56,22 +52,25 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : HorizontalScroll
         textView.textSize = 25F
         textView.setTextColor(ResourcesUtil.getColor(context, R.color.black))
         textView.text = title
-        textView.tag = "title - index: $title"
+        textView.tag = "title - index: $index title:$title"
+        val r = Random.nextInt(0, 255)
+        val g = Random.nextInt(0, 255)
+        val b = Random.nextInt(0, 255)
 
-        val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-            .also {
-                if (mItemTitleArray.size <= 4) {
-                    it.width = 0
-                    it.height = LinearLayout.LayoutParams.WRAP_CONTENT
-                    it.weight = 1F
-                    it.gravity = Gravity.CENTER
-                } else {
-                    if (index < mItemTitleArray.size) {
+        textView.setBackgroundColor(Color.rgb(r, g, b))
+        textView.gravity = Gravity.CENTER
+
+        val layoutParams: LinearLayout.LayoutParams =
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                .also {
+                    if (mItemTitleArray.size <= mMaxItemCount) {
+                        it.width = 0
+                        it.weight = 1F
+                    } else {
                         it.marginEnd = mInterval
                     }
                 }
-            }
-        mTitleArrayView.addView(textView, params)
+        mTitleArrayView.addView(textView, layoutParams)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -79,6 +78,9 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : HorizontalScroll
 
         var mTotalWidth = 0F
         var mTotalHeight = 0
+
+        // 遍历求出最大的宽和高
+
         // 第一层view = root
         getChildAt(0)?.let { root ->
             if (root is LinearLayout) {
@@ -97,8 +99,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : HorizontalScroll
             }
         }
 
-
-        if (mItemTitleArray.size <= 4) {
+        if (mItemTitleArray.size <= mMaxItemCount) {
             mTotalWidth = measuredWidth.toFloat()
         }
         setMeasuredDimension(mTotalWidth.toInt(), mTotalHeight)
