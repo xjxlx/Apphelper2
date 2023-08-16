@@ -13,6 +13,11 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.core.animation.addListener
 import androidx.core.view.size
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.viewpager2.widget.ViewPager2
 import com.android.apphelper2.R
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.common.utils.LogUtil
@@ -27,7 +32,7 @@ import kotlin.random.Random
  */
 class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(context, attributeSet) {
 
-    private val mItemTitleArray: Array<String> = arrayOf("线索", "需求", "商场", "我的")
+    private val mItemTitleArray: Array<String> = arrayOf("线索", "需求", "商场111111", "我的")
     private val mInterval = 30
     private val mTabIndicatorTag = "indicator"
     private val mRootView = LinearLayout(context).apply {
@@ -51,6 +56,83 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     private val mAnimationSpeed: Long by lazy {
         return@lazy (mAnimationMaxDuration / mItemTitleArray.size).toLong()
     }
+    private val mItemTextSize = 15F
+
+    private val mPageChangeListener = object : ViewPager2.OnPageChangeCallback() {
+        private var mCurrentPoint: Point? = null
+        private var mScrollPoint: Point? = null
+        private var mOldPercent = 0F
+        private var mItemWidthDifferenceValue = -1
+
+        override fun onPageScrollStateChanged(state: Int) {
+            super.onPageScrollStateChanged(state)
+            when (state) {
+                ViewPager2.SCROLL_STATE_IDLE -> {
+                    // LogUtil.e("scroll", "停止！")
+                    mCurrentPoint = null
+                    mScrollPoint = null
+                    mOldPercent = 0F
+                    mItemWidthDifferenceValue = -1
+                }
+                ViewPager2.SCROLL_STATE_DRAGGING -> {
+                    LogUtil.e("scroll", "正在拖动 ！")
+                }
+                ViewPager2.SCROLL_STATE_SETTLING -> {
+                    // LogUtil.e("scroll", "快到结束了！")
+                }
+            }
+        }
+
+        override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+            super.onPageScrolled(position, positionOffset, positionOffsetPixels)
+            // 置空对象，重新开始判定
+            if (positionOffset == 0F) {
+                mCurrentPoint = null
+                mScrollPoint = null
+            }
+
+            /**
+             * 1: 必须是在产生了具体的偏移值的时候才可以去计算
+             * 2：判定对象不为空
+             * 3：偏移值归零的时候，置空，然后重新去测量
+             */
+            if ((positionOffset != 0F) && (mCurrentPoint == null || mScrollPoint == null)) {
+                /**
+                 * 1:左滑的百分比是从1~0，右滑的参数是1~0
+                 * 2:左滑的值，越来越大，右滑的值越来越小
+                 * 3: 真正判断方向的时候，需要取反反向
+                 */
+                val isLeft = mOldPercent < positionOffset
+                LogUtil.e("isLeft", isLeft)
+                mOldPercent = positionOffset
+                LogUtil.e("position: $position positionOffset: $positionOffset positionOffsetPixels: $positionOffsetPixels")
+
+                LogUtil.e("重新获取方向，当前方向是：$isLeft")
+                mCurrentPoint = mTitleMap[position]
+                // 需要计算是向左还是向右，向左 计算下一个，向右计算上一个
+                mScrollPoint = if (isLeft) {
+                    mTitleMap[position + 1]
+                } else {
+                    mTitleMap[position - 1]
+                }
+
+                // 计算出文字的差值
+                if (mCurrentPoint != null && mScrollPoint != null) {
+                    mItemWidthDifferenceValue = (mScrollPoint!!.textWidth) - (mCurrentPoint!!.textWidth)
+                }
+            }
+
+            if ((mCurrentPoint != null) && (mScrollPoint != null) && (mItemWidthDifferenceValue != -1)) {
+                scrollPosition(positionOffset, mCurrentPoint!!, mScrollPoint!!, mItemWidthDifferenceValue)
+            }
+        }
+
+        override fun onPageSelected(position: Int) {
+            super.onPageSelected(position)
+            mDefaultItem = position
+            clickItem(position)
+        }
+    }
 
     fun initData() {
         removeAllViews()
@@ -72,9 +154,23 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         requestLayout()
     }
 
+    fun withViewPager2(viewPager2: ViewPager2) {
+        viewPager2.registerOnPageChangeCallback(mPageChangeListener)
+        val context = viewPager2.context
+        if (context != null && context is FragmentActivity) {
+            context.lifecycle.addObserver(object : LifecycleEventObserver {
+                override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+                    if (event == Lifecycle.Event.ON_DESTROY) {
+                        viewPager2.unregisterOnPageChangeCallback(mPageChangeListener)
+                    }
+                }
+            })
+        }
+    }
+
     private fun addItem(index: Int, title: String) {
         val textView = TextView(context)
-        textView.textSize = 25F
+        textView.textSize = mItemTextSize
         textView.setTextColor(ResourcesUtil.getColor(context, R.color.black))
         textView.text = title
         textView.tag = "title - index: $index title:$title"
@@ -102,6 +198,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             clickItem(index)
         }
     }
+
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -160,9 +257,9 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
 
                         // tabIndicator layout
                         mTitleMap[mDefaultItem]?.let { item ->
-                            val left = (((item.right - item.left) - item.width) / 2)
+                            val left = (((item.right - item.left) - item.textWidth) / 2)
                             val top = (item.height - mTabIndicatorHeight).toInt()
-                            val right = (left + item.width)
+                            val right = (left + item.textWidth)
                             indicator.layout(left, top, right, item.height)
                         }
                     }
@@ -175,17 +272,17 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         val defaultPoint = mTitleMap[mDefaultItem]
         val clickPoint = mTitleMap[clickIndex]
         if (defaultPoint != null && clickPoint != null) {
-            var fromLeft = (defaultPoint.right - defaultPoint.left - defaultPoint.width) / 2
+            var fromLeft = (defaultPoint.right - defaultPoint.left - defaultPoint.textWidth) / 2
             for (index in 0 until mDefaultItem) {
                 mTitleMap[index]?.let {
-                    fromLeft += it.measureWidth
+                    fromLeft += it.itemWidth
                 }
             }
 
-            var toLeft = (clickPoint.right - clickPoint.left - clickPoint.width) / 2
+            var toLeft = (clickPoint.right - clickPoint.left - clickPoint.textWidth) / 2
             for (index in 0 until clickIndex) {
                 mTitleMap[index]?.let {
-                    toLeft += it.measureWidth
+                    toLeft += it.itemWidth
                 }
             }
 
@@ -197,7 +294,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                     addUpdateListener {
                         val left = it.animatedValue as Int
                         val top = clickPoint.height - mTabIndicatorHeight
-                        val right = left + clickPoint.width
+                        val right = left + clickPoint.textWidth
                         val bottom = clickPoint.height
                         mTabIndicator.layout(left, top.toInt(), right, bottom)
                     }
@@ -209,5 +306,41 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         }
     }
 
-    data class Point(var measureWidth: Int, var width: Int, var height: Int, var left: Int, var right: Int)
+    private fun scrollPosition(percent: Float, currentPosition: Point, scrollPosition: Point, itemWidthDifferenceValue: Int) {
+
+        // 滑动的时候，计算当前选中的item 和 点击 item 之间的距离，计算出百分比，然后每次滑动就滑动等比的距离
+        // 此处要计算出偏移值，偏移值 = 当前item 和下个 item中间的间距
+        /**
+         * 1: 下一个item的文字左侧位置 - 当前item文字的左侧位置
+         * 2：拿到差值，然后乘以 百分比，得到具体的偏移值
+         * 3：偏移值 + 当前的文字左侧的位置
+         *
+         * 1: 滑动文字开始的位置：scroll.left + (scroll.width - scroll.measureWidth) / 2
+         * 2：当前文字开始的位置：current.left + (current.width - current.measureWidth) / 2
+         * 3: 滑动的具体便宜值 =  滑动的位置 - 当前的位置  = 中间的差值 * 当前的百分比
+         *   = (② -①)* percent
+         * 4: 开始的位置 = 当前文字的位置 + 偏移的具体位置
+         */
+        val scrollTextStart = scrollPosition.left + (scrollPosition.itemWidth - scrollPosition.textWidth) / 2
+        val currentTextStart = currentPosition.left + (currentPosition.itemWidth - currentPosition.textWidth) / 2
+        val offsetX = (scrollTextStart - currentTextStart) * percent
+        LogUtil.e("开始的position:$currentTextStart 滑动的position: $scrollTextStart 偏移值：$offsetX")
+        val left = (offsetX + currentTextStart).toInt()
+
+        val top = (currentPosition.height - mTabIndicatorHeight).toInt()
+
+        /**
+         * 1: 计算出current 和 scroll 宽度的差值
+         * 2：差值 * 百分比 = 具体需要放大的值
+         * 3：current的宽度 + 需要放大的值
+         */
+
+        val rightOffsetX = itemWidthDifferenceValue * percent
+        val right = (left + currentPosition.textWidth + rightOffsetX).toInt()
+        val bottom = currentPosition.height
+        LogUtil.e("left: $left top :$top right: $right bottom: $bottom")
+        mTabIndicator.layout(left, top, right, bottom)
+    }
+
+    data class Point(var itemWidth: Int, var textWidth: Int, var height: Int, var left: Int, var right: Int)
 }
