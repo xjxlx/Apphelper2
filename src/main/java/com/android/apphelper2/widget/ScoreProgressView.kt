@@ -16,14 +16,14 @@ import kotlin.math.min
 class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
     private val mMaxWidth: Float by lazy {
-        return@lazy ResourcesUtil.toPx(322F)
+        return@lazy ResourcesUtil.px(322F)
     }
     private val mMaxHeight: Float by lazy {
-        return@lazy ResourcesUtil.toPx(322F)
+        return@lazy ResourcesUtil.px(322F)
     }
 
     private val mArcStrokeWidth: Float by lazy {
-        return@lazy ResourcesUtil.toPx(20F)
+        return@lazy ResourcesUtil.px(20F)
     }
     private val mArcRadius: Float = mArcStrokeWidth / 2
     private val mArcRectF: RectF by lazy {
@@ -74,7 +74,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     private val mTitlePaint: Paint by lazy {
         return@lazy Paint().apply {
             color = Color.WHITE
-            textSize = ResourcesUtil.toPx(36F)
+            textSize = ResourcesUtil.px(36F)
             style = Paint.Style.FILL
             typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
@@ -86,7 +86,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         return@lazy (mMaxWidth - mTitleSize[0]) / 2
     }
     private val mTitleTop: Float by lazy {
-        return@lazy ResourcesUtil.toPx(60F)
+        return@lazy ResourcesUtil.px(60F)
     }
     private val mTitleBaseLine: Float by lazy {
         return@lazy CustomViewUtil.getBaseLine(mTitlePaint, mTitleContent)
@@ -97,23 +97,23 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     private val mTotalSorePaint: Paint by lazy {
         return@lazy Paint().apply {
             color = Color.WHITE
-            textSize = ResourcesUtil.toPx(108F)
+            textSize = ResourcesUtil.px(108F)
             style = Paint.Style.FILL
             typeface = Typeface.createFromAsset(context.assets, "Niramit-SemiBold.ttf")
         }
     }
     private val mTotalScoreInterval: Float by lazy {
-        return@lazy ResourcesUtil.toPx(119.5F)
+        return@lazy ResourcesUtil.px(119.5F)
     }
 
     private val mUpValueInterval: Float by lazy {
-        return@lazy ResourcesUtil.toPx(229F)
+        return@lazy ResourcesUtil.px(229F)
     }
     private val mTotalUpTextContent = "总提升"
     private val mTotalUpTextAlpha = (255 * 0.8F).toInt()
     private val mTotalUpTextPaint: Paint by lazy {
         return@lazy Paint().apply {
-            textSize = ResourcesUtil.toPx(24F)
+            textSize = ResourcesUtil.px(24F)
             color = Color.WHITE
             alpha = mTotalUpTextAlpha
             style = Paint.Style.FILL
@@ -128,7 +128,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
     }
 
     private val mUpTextToValueInterval: Float by lazy {
-        return@lazy ResourcesUtil.toPx(5F)
+        return@lazy ResourcesUtil.px(5F)
     }
 
     private var mUpScoreValue: String = ""
@@ -136,7 +136,7 @@ class ScoreProgressView(context: Context, attributeSet: AttributeSet) : View(con
         return@lazy Paint().apply {
             color = Color.WHITE
             alpha = mTotalUpTextAlpha
-            textSize = ResourcesUtil.toPx(32F)
+            textSize = ResourcesUtil.px(32F)
             style = Paint.Style.FILL
             typeface = Typeface.createFromAsset(context.assets, "Inter-SemiBoldItalic.otf")
         }

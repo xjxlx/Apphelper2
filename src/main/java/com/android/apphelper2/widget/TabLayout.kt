@@ -44,7 +44,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         it.setBackgroundColor(Color.RED)
         it.tag = mTabIndicatorTag
     }
-    private var mTabIndicatorHeight = ResourcesUtil.toDp(2F)
+    private var mTabIndicatorHeight = ResourcesUtil.dp(2F)
     private val mTitleMap = mutableMapOf<Int, Point>()
     private var mDefaultItem = 0
     private val mAnimationMaxDuration = 1000

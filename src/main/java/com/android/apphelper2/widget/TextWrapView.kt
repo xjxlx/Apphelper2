@@ -15,20 +15,20 @@ import com.android.common.utils.ResourcesUtil
 class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
 
     private val mMaxWidth: Float by lazy {
-        return@lazy ResourcesUtil.toPx(500F)
+        return@lazy ResourcesUtil.px(500F)
     }
     private val mMaxHeight: Float by lazy {
-        return@lazy ResourcesUtil.toPx(322F)
+        return@lazy ResourcesUtil.px(322F)
     }
     private val mPadding: Float by lazy {
-        return@lazy ResourcesUtil.toPx(24F)
+        return@lazy ResourcesUtil.px(24F)
     }
 
     private val mBackgroundRectF: RectF by lazy {
         return@lazy RectF(0F, 0F, mMaxWidth, mMaxHeight)
     }
     private val mBackgroundRadius: Float by lazy {
-        return@lazy ResourcesUtil.toPx(20F)
+        return@lazy ResourcesUtil.px(20F)
     }
     private val mBackgroundPaint: Paint by lazy {
         return@lazy Paint().apply {
@@ -41,12 +41,12 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         return@lazy Paint().apply {
             color = Color.parseColor("#57AB64")
             style = Paint.Style.FILL
-            textSize = ResourcesUtil.toPx(40F)
+            textSize = ResourcesUtil.px(40F)
             typeface = Typeface.create(Typeface.createFromAsset(context.assets, "DroidSans.ttf"), Typeface.BOLD)
         }
     }
     private val mTitleTop: Float by lazy {
-        return@lazy ResourcesUtil.toPx(40F)
+        return@lazy ResourcesUtil.px(40F)
     }
 
     private var mSubheadContent = ""
@@ -56,19 +56,19 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
             color = Color.WHITE
             alpha = mSubheadPaintAlpha
             style = Paint.Style.FILL
-            textSize = ResourcesUtil.toPx(28F)
+            textSize = ResourcesUtil.px(28F)
             typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
     }
     private val mSubheadTop: Float by lazy {
-        return@lazy ResourcesUtil.toPx(108.45F)
+        return@lazy ResourcesUtil.px(108.45F)
     }
 
     private var mWrapTextContent = ""
     private var mWrapTextPaintAlpha = (0.5 * 255).toInt()
     private val mWrapTextPaint: TextPaint by lazy {
         return@lazy TextPaint().apply {
-            textSize = ResourcesUtil.toPx(24F)
+            textSize = ResourcesUtil.px(24F)
             style = Paint.Style.FILL
             color = Color.WHITE
             alpha = mWrapTextPaintAlpha
@@ -76,7 +76,7 @@ class TextWrapView(context: Context, attributeSet: AttributeSet) : View(context,
         }
     }
     private val mWrapTextTop: Float by lazy {
-        return@lazy ResourcesUtil.toPx(156F)
+        return@lazy ResourcesUtil.px(156F)
     }
 
     private val mStaticLayout: StaticLayout by lazy {

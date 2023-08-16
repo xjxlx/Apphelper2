@@ -36,20 +36,20 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
     private var mLeftContent: String = "搜索"
     private var mLeftSize: Float = 17F
     private var mLeftColor: Int = ResourcesUtil.getColor(context, R.color.search_hint_color)
-    private var mLeftStart = ResourcesUtil.toDp(17F)
+    private var mLeftStart = ResourcesUtil.dp(17F)
 
     private var mSearch: EditText? = null
     private var mSearchContent: String = ""
     private var mSearchSize: Float = 17F
-    private var mSearchLeft: Float = ResourcesUtil.toDp(12F)
-    private var mSearchMarginVertical: Float = ResourcesUtil.toPx(12F)
+    private var mSearchLeft: Float = ResourcesUtil.dp(12F)
+    private var mSearchMarginVertical: Float = ResourcesUtil.px(12F)
 
     private var mRightImage: ImageView? = null
     private var mSearchButton: Int = R.drawable.icon_search_button
-    private var mSearchButtonWidth: Float = ResourcesUtil.toDp(20F)
-    private var mSearchButtonHeight: Float = ResourcesUtil.toDp(20F)
-    private var mSearchButtonLeft: Float = ResourcesUtil.toDp(10F)
-    private var mSearchButtonRight: Float = ResourcesUtil.toDp(18F)
+    private var mSearchButtonWidth: Float = ResourcesUtil.dp(20F)
+    private var mSearchButtonHeight: Float = ResourcesUtil.dp(20F)
+    private var mSearchButtonLeft: Float = ResourcesUtil.dp(10F)
+    private var mSearchButtonRight: Float = ResourcesUtil.dp(18F)
     private var mSearchListener: SearchListener? = null
 
     private val mKeyBoardUtil: KeyBoardUtil? by lazy {
@@ -131,7 +131,7 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
      */
     fun setLeftStart(left: Float = 0F): SearchView {
         if (left != 0F) {
-            this.mLeftStart = ResourcesUtil.toDp(left)
+            this.mLeftStart = ResourcesUtil.dp(left)
             this.mLeftText?.setPadding(mLeftStart.toInt(), 0, 0, 0)
         }
         return this
@@ -142,7 +142,7 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
      */
     fun setSearchMarginVertical(marginVertical: Float = 0F): SearchView {
         if (marginVertical != 0F) {
-            this.mSearchMarginVertical = ResourcesUtil.toPx(marginVertical)
+            this.mSearchMarginVertical = ResourcesUtil.px(marginVertical)
         }
         return this
     }
@@ -170,7 +170,7 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
      */
     fun setSearchLeft(left: Float = 0F): SearchView {
         if (left != 0F) {
-            this.mSearchLeft = ResourcesUtil.toDp(left)
+            this.mSearchLeft = ResourcesUtil.dp(left)
             this.mSearch?.setPadding(mSearchLeft.toInt(), mSearchMarginVertical.toInt(), 0, mSearchMarginVertical.toInt())
         }
         return this
@@ -181,7 +181,7 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
      */
     fun setRightEnd(right: Float = 0F): SearchView {
         if (right != 0F) {
-            this.mSearchButtonRight = ResourcesUtil.toDp(right)
+            this.mSearchButtonRight = ResourcesUtil.dp(right)
             this.mRightImage?.layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also {
                 it.rightMargin = this.mSearchButtonRight.toInt()
             }
@@ -194,7 +194,7 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
      */
     fun setRightStart(left: Float = 0F): SearchView {
         if (left != 0F) {
-            this.mSearchButtonLeft = ResourcesUtil.toDp(left)
+            this.mSearchButtonLeft = ResourcesUtil.dp(left)
             this.mRightImage?.layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also {
                 it.leftMargin = this.mSearchButtonLeft.toInt()
             }
@@ -207,7 +207,7 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
      */
     fun setRightHeight(height: Float = 0F): SearchView {
         if (height != 0F) {
-            this.mSearchButtonHeight = ResourcesUtil.toDp(height)
+            this.mSearchButtonHeight = ResourcesUtil.dp(height)
             this.mRightImage?.layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also {
                 it.height = this.mSearchButtonHeight.toInt()
             }
@@ -221,7 +221,7 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
      */
     fun setRightWidth(width: Float = 0F): SearchView {
         if (width != 0F) {
-            this.mSearchButtonWidth = ResourcesUtil.toDp(width)
+            this.mSearchButtonWidth = ResourcesUtil.dp(width)
             this.mRightImage?.layoutParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also {
                 it.width = this.mSearchButtonWidth.toInt()
             }

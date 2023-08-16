@@ -22,22 +22,22 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy MainScope()
     }
     private val mMaxWidth: Int by lazy {
-        return@lazy ResourcesUtil.toPx(500F)
+        return@lazy ResourcesUtil.px(500F)
             .toInt()
     }
     private val mMaxHeight: Int by lazy {
-        return@lazy ResourcesUtil.toPx(322F)
+        return@lazy ResourcesUtil.px(322F)
             .toInt()
     }
     private val mPadding: Float by lazy {
-        return@lazy ResourcesUtil.toPx(24F)
+        return@lazy ResourcesUtil.px(24F)
     }
     private val mRectWith: Float by lazy {
-        return@lazy ResourcesUtil.toPx(12F)
+        return@lazy ResourcesUtil.px(12F)
     }
 
     private val mBackgroundAngle: Float by lazy {
-        return@lazy ResourcesUtil.toPx(20F)
+        return@lazy ResourcesUtil.px(20F)
     }
     private val mBackgroundRectF: RectF by lazy {
         return@lazy RectF(0F, 0f, mMaxWidth.toFloat(), mMaxHeight.toFloat())
@@ -54,13 +54,13 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy Paint().apply {
             color = Color.WHITE
             style = Paint.Style.FILL
-            textSize = ResourcesUtil.toPx(24F)
+            textSize = ResourcesUtil.px(24F)
             typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
     }
 
     private val mLineBottomInterval: Float by lazy {
-        return@lazy ResourcesUtil.toPx(55F)
+        return@lazy ResourcesUtil.px(55F)
     }
     private val mLineBottomY: Float by lazy {
         return@lazy mMaxHeight - mLineBottomInterval
@@ -81,18 +81,18 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy Paint().apply {
             style = Paint.Style.FILL
             color = Color.WHITE
-            strokeWidth = ResourcesUtil.toPx(1F)
+            strokeWidth = ResourcesUtil.px(1F)
             strokeCap = Paint.Cap.ROUND
             strokeJoin = Paint.Join.ROUND
         }
     }
     private val mLinePathEffect: PathEffect by lazy {
-        val f5 = ResourcesUtil.toPx(6F)
-        val f2 = ResourcesUtil.toPx(6F)
+        val f5 = ResourcesUtil.px(6F)
+        val f2 = ResourcesUtil.px(6F)
         return@lazy DashPathEffect(floatArrayOf(f5, f2), -1F)
     }
     private val mLinesEveryInterval: Float by lazy {
-        return@lazy ResourcesUtil.toPx(60f)
+        return@lazy ResourcesUtil.px(60f)
     }
     private var mLineMaxSpace: Float = 0F
 
@@ -102,12 +102,12 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
             color = Color.WHITE
             alpha = (0.5F * 255).toInt()
             style = Paint.Style.FILL
-            textSize = ResourcesUtil.toPx(14F)
+            textSize = ResourcesUtil.px(14F)
             typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
     }
     private val mScoreInterval: Float by lazy {
-        return@lazy ResourcesUtil.toPx(6f)
+        return@lazy ResourcesUtil.px(6f)
     }
     private val mScoreLeft: Float by lazy {
         val scoreWidth = getTextWidth(mScorePaint, mScoreText)
@@ -119,12 +119,12 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy Paint().apply {
             color = Color.WHITE
             alpha = (0.7F * 255).toInt()
-            textSize = ResourcesUtil.toPx(22f)
+            textSize = ResourcesUtil.px(22f)
             typeface = Typeface.createFromAsset(context.assets, "DroidSans.ttf")
         }
     }
     private val mBottomTextPadding: Float by lazy {
-        return@lazy ResourcesUtil.toPx(84F)
+        return@lazy ResourcesUtil.px(84F)
     }
     private var mBottomTextMaxBaseLine: Float = 0F
     private val mBottomTextWithSize: FloatArray by lazy {
@@ -148,7 +148,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
         return@lazy (mMaxWidth - (mBottomTextPadding * 2) - with) / (mBottomTextWithSize.size - 1)
     }
     private val mBottomTextTop: Float by lazy {
-        return@lazy ResourcesUtil.toPx(10F)
+        return@lazy ResourcesUtil.px(10F)
     }
     private val mBottomLeftArray: FloatArray by lazy {
         return@lazy FloatArray(mBottomTextArray.size)
@@ -172,7 +172,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
 
     private val mRectEveryInterval: Float by lazy {
-        return@lazy ResourcesUtil.toPx(3F)
+        return@lazy ResourcesUtil.px(3F)
     }
 
     private var mTopRectStartFlag: Boolean = false
@@ -199,7 +199,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
 
     private val mTopRectTextPaint: Paint by lazy {
         return@lazy Paint().apply {
-            textSize = ResourcesUtil.toPx(20F)
+            textSize = ResourcesUtil.px(20F)
             color = Color.parseColor("#0094FF")
             style = Paint.Style.FILL
             typeface = Typeface.createFromAsset(context.assets, "Inter-SemiBoldItalic.otf")
@@ -207,7 +207,7 @@ class ChartView(context: Context, attributeSet: AttributeSet) : View(context, at
     }
     private var mTopRectTextFlag = false
     private val mTopRectTextEveryInterval: Float by lazy {
-        return@lazy ResourcesUtil.toPx(6f)
+        return@lazy ResourcesUtil.px(6f)
     }
     private var mTopRectTextAnimationEndCount = 0
     private val mTopRectArray: Array<RectF> by lazy {
