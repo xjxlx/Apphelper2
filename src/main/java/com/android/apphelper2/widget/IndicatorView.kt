@@ -6,11 +6,13 @@ import android.content.Context
 import android.graphics.Color
 import android.text.TextUtils
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.annotation.ColorInt
 import androidx.core.animation.addListener
 import androidx.core.view.size
 import androidx.fragment.app.FragmentActivity
@@ -18,23 +20,27 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.viewpager2.widget.ViewPager2
-import com.android.apphelper2.R
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.common.utils.LogUtil
 import com.android.common.utils.ResourcesUtil
+import com.google.android.material.tabs.TabLayout
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.random.Random
 
 /**
  * 1：小于等于4个，就占据全部的区域
  * 2：大于4，就加上间隔，然后自动延伸
+ * 使用说明
+ *      1：这个指示器文件，适用于ViewPager、ViewPager2、TabLayout等View
+ *      2：使用这个view的好处是，可以的随意修改下划线的颜色、宽度、高度等，避免了原生view版本不同，修改起来的困扰
+ *      3：使用的时候，需要去绑定，用withPager2()就可以一键绑定
+ *      4：如果item的个数小于等于4，则会评分整行的宽度，如果大于4，则需要去手动设置每个item之间的间距，默认的间距是30
  */
-class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(context, attributeSet) {
+class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayout(context, attributeSet) {
 
-    private val mItemTitleArray: Array<String> = arrayOf("线索", "需求", "商场111111", "我的")
-    private val mInterval = 30
-    private val mTabIndicatorTag = "indicator"
+    //<editor-fold desc=" variable  ">
+    private lateinit var mItemTitleArray: Array<String>
+
     private val mRootView = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
         tag = "root"
@@ -43,27 +49,40 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         orientation = LinearLayout.HORIZONTAL
         tag = "title-array"
     }
-
-    private val mMaxItemCount = 4
-    private val mTabIndicator = View(context).also {
-        it.setBackgroundColor(Color.RED)
-        it.tag = mTabIndicatorTag
+    private val mTabIndicatorTag = "indicator"
+    private val mTabIndicator by lazy {
+        return@lazy View(context).also {
+            it.setBackgroundColor(mTabIndicatorColor)
+            it.tag = mTabIndicatorTag
+        }
     }
-    private var mTabIndicatorHeight = ResourcesUtil.dp(2F)
+
+    private var mItemMaxCount = 4
+    private var mItemSpaceInterval = ResourcesUtil.dp(30F)
+    private var mItemAnimationMaxDuration = 1000
+    private val mItemAnimationSpeed: Long by lazy {
+        return@lazy (mItemAnimationMaxDuration / mItemTitleArray.size).toLong()
+    }
+    private var mItemTextSize = 14F
+    @ColorInt
+    private var mItemColor: Int = Color.BLACK
+    @ColorInt
+    private var mItemBackgroundColor: Int = Color.WHITE
+
+    private var mTabIndicatorInterval = ResourcesUtil.dp(10F)
+    @ColorInt
+    private var mTabIndicatorColor = mItemColor
+    private var mTabIndicatorHeight = ResourcesUtil.dp(2.5F)
+    private var mTabIndicatorWidthOffset = 0F
+
     private val mTitleMap = mutableMapOf<Int, Point>()
     private var mDefaultItem = 0
-    private val mAnimationMaxDuration = 1000
-    private val mAnimationSpeed: Long by lazy {
-        return@lazy (mAnimationMaxDuration / mItemTitleArray.size).toLong()
-    }
-    private val mItemTextSize = 15F
 
     private val mPageChangeListener = object : ViewPager2.OnPageChangeCallback() {
         private var mCurrentPoint: Point? = null
         private var mScrollPoint: Point? = null
         private var mOldPercent = 0F
         private var mItemWidthDifferenceValue = -1
-
         override fun onPageScrollStateChanged(state: Int) {
             super.onPageScrollStateChanged(state)
             when (state) {
@@ -133,72 +152,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             clickItem(position)
         }
     }
-
-    fun initData() {
-        removeAllViews()
-
-        // add root
-        addView(mRootView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
-
-        // add title array
-        mRootView.addView(mTitleArrayView,
-            LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
-
-        // add item
-        mItemTitleArray.forEachIndexed { index, s ->
-            addItem(index, s)
-        }
-
-        // add tabIndicator
-        addView(mTabIndicator, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
-        requestLayout()
-    }
-
-    fun withViewPager2(viewPager2: ViewPager2) {
-        viewPager2.registerOnPageChangeCallback(mPageChangeListener)
-        val context = viewPager2.context
-        if (context != null && context is FragmentActivity) {
-            context.lifecycle.addObserver(object : LifecycleEventObserver {
-                override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-                    if (event == Lifecycle.Event.ON_DESTROY) {
-                        viewPager2.unregisterOnPageChangeCallback(mPageChangeListener)
-                    }
-                }
-            })
-        }
-    }
-
-    private fun addItem(index: Int, title: String) {
-        val textView = TextView(context)
-        textView.textSize = mItemTextSize
-        textView.setTextColor(ResourcesUtil.getColor(context, R.color.black))
-        textView.text = title
-        textView.tag = "title - index: $index title:$title"
-        val r = Random.nextInt(0, 255)
-        val g = Random.nextInt(0, 255)
-        val b = Random.nextInt(0, 255)
-        // textView.setBackgroundColor(Color.rgb(r, g, b))
-
-        textView.gravity = Gravity.CENTER
-
-        val layoutParams: LinearLayout.LayoutParams =
-            LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                .also {
-                    if (mItemTitleArray.size <= mMaxItemCount) {
-                        it.width = 0
-                        it.weight = 1F
-                    } else {
-                        it.marginEnd = mInterval
-                    }
-                }
-        mTitleArrayView.addView(textView, layoutParams)
-        textView.setOnClickListener {
-            it as TextView
-            LogUtil.e("item:" + it.text)
-            clickItem(index)
-        }
-    }
-
+    //</editor-fold>
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -218,15 +172,19 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                                 mTotalWidth += (itemView.measuredWidth)
                                 mTotalHeight = max(mTotalHeight, itemView.measuredHeight)
                             }
-                            mTotalWidth += (mInterval * (titleArray.childCount - 1))
+                            mTotalWidth += (mItemSpaceInterval * (titleArray.childCount - 1))
                         }
                     }
             }
         }
 
-        if (mItemTitleArray.size <= mMaxItemCount) {
+        if (mItemTitleArray.size <= mItemMaxCount) {
             mTotalWidth = measuredWidth.toFloat()
         }
+
+        // 总高度 = 文字高度 + 指示器间距 + 指示器高度
+        mTotalHeight += (mTabIndicatorInterval + mTabIndicatorHeight).toInt()
+
         setMeasuredDimension(mTotalWidth.toInt(), mTotalHeight)
     }
 
@@ -258,13 +216,196 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                         // tabIndicator layout
                         mTitleMap[mDefaultItem]?.let { item ->
                             val left = (((item.right - item.left) - item.textWidth) / 2)
-                            val top = (item.height - mTabIndicatorHeight).toInt()
+                            val top = (item.height + mTabIndicatorInterval).toInt()
                             val right = (left + item.textWidth)
-                            indicator.layout(left, top, right, item.height)
+                            val bottom = (top + mTabIndicatorInterval + mTabIndicatorHeight).toInt()
+                            indicator.layout(left, top, right, bottom)
                         }
                     }
                 }
             }
+        }
+    }
+
+    //<editor-fold desc=" control method">
+
+    /**
+     * 设置item固定的个数，如果小于等于这个count，则会评分整个屏幕的宽度，否则就会一个个的从左到右的排列
+     * 默认是一行4个
+     */
+    fun setItemMaxCount(count: Int): IndicatorView {
+        this.mItemMaxCount = count
+        return this
+    }
+
+    /**
+     * 设置item之间的间距，适用于item个数大于指定个数的时候
+     * 默认是30dp
+     */
+    fun setItemInterval(interval: Float): IndicatorView {
+        this.mItemSpaceInterval = interval
+        return this
+    }
+
+    /**
+     * 设置点击item时候，动画的最大持续时长
+     * 默认是最大持续1s
+     */
+    fun setItemAnimationMaxDuration(duration: Int): IndicatorView {
+        this.mItemAnimationMaxDuration = duration
+        return this
+    }
+
+    /**
+     * 单个Item的TextSize,设置的时候，因为已经指定了单位是sp，所以只能使用具体的数字，不能使用通过资源获取的dimenRes资源，否则会高度异常
+     * 默认是14sp
+     */
+    fun setItemSize(size: Float): IndicatorView {
+        this.mItemTextSize = size
+        return this
+    }
+
+    /**
+     * 单个Item的文字color
+     * 默认是黑色
+     */
+    fun setItemColor(@ColorInt color: Int): IndicatorView {
+        this.mItemColor = color
+        return this
+    }
+
+    /**
+     * 单个Item的背景color
+     * 默认是白色
+     */
+    fun setItemBackgroundColor(@ColorInt color: Int): IndicatorView {
+        this.mItemBackgroundColor = color
+        return this
+    }
+
+    /**
+     * 设置item和指示器之间的间距
+     * 默认是10dp
+     */
+    fun setItemIndicatorInterval(interval: Float): IndicatorView {
+        this.mTabIndicatorInterval = interval
+        return this
+    }
+
+    /**
+     * 指示器的color
+     * 默认是和文档颜色相同的颜色
+     */
+    fun setTabIndicatorColor(@ColorInt color: Int): IndicatorView {
+        this.mTabIndicatorColor = color
+        return this
+    }
+
+    /**
+     * 指示器的高度
+     * 默认是2.5dp
+     */
+    fun setTabIndicatorHeight(size: Float): IndicatorView {
+        this.mTabIndicatorHeight = size
+        return this
+    }
+
+    /**
+     * 1：指示器的宽度偏移值,默认的情况下，指示器的宽度是和文字的宽度相同的，但是有时候，指示器需要指定宽度，这个时候可以通过设置偏移值去设置宽度
+     * 2：默认的指示器宽度和文字宽度相同
+     * 3：如果偏移值为正数，则会向两边扩大指定的偏移值，如果偏移值为负数，则会向中心缩小指定的偏移值，则指示器会变小
+     * 默认是0dp
+     */
+    fun setTabIndicatorWidth(offset: Float): IndicatorView {
+        this.mTabIndicatorWidthOffset = offset
+        return this
+    }
+
+    /**
+     * @param viewPager2 对象
+     * @param titleArray title的数组
+     */
+    fun withViewPager2(viewPager2: ViewPager2, titleArray: Array<String>) {
+        // 1：绑定滑动监听
+        viewPager2.registerOnPageChangeCallback(mPageChangeListener)
+        val context = viewPager2.context
+        if (context != null && context is FragmentActivity) {
+            context.lifecycle.addObserver(object : LifecycleEventObserver {
+                override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+                    if (event == Lifecycle.Event.ON_DESTROY) {
+                        viewPager2.unregisterOnPageChangeCallback(mPageChangeListener)
+                    }
+                }
+            })
+        }
+
+        this.mItemTitleArray = titleArray
+        // 2：设置布局
+        initView()
+    }
+
+    /**
+     * @param viewPager2 viewPager2的对象
+     * @param tabLayout TabLayout的对象，这个对象必须是已经设置过Tab的，否则在取值tab的text的时候，会那不到具体的值
+     */
+    fun withViewPager2(viewPager2: ViewPager2, tabLayout: TabLayout) {
+        val tabCount = tabLayout.tabCount
+        val titleArray: Array<String> = Array(tabCount) { "" }
+        for (index in 0 until tabCount) {
+            tabLayout.getTabAt(index)?.text?.let {
+                titleArray[index] = it.toString()
+            }
+        }
+        withViewPager2(viewPager2, titleArray)
+    }
+    //</editor-fold>
+
+    //<editor-fold desc=" private method ">
+    private fun initView() {
+        removeAllViews()
+
+        // add root
+        addView(mRootView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT))
+
+        // add title array
+        mRootView.addView(mTitleArrayView,
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+
+        // add item
+        mItemTitleArray.forEachIndexed { index, s ->
+            addTabItem(index, s)
+        }
+
+        // add tabIndicator
+        addView(mTabIndicator, LayoutParams(LayoutParams.WRAP_CONTENT, mTabIndicatorHeight.toInt()))
+        requestLayout()
+    }
+
+    private fun addTabItem(index: Int, title: String) {
+        val textView = TextView(context)
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, mItemTextSize)
+        textView.setTextColor(mItemColor)
+        textView.text = title
+        textView.setBackgroundColor(mItemBackgroundColor)
+        textView.tag = "title - index: $index title:$title"
+
+        textView.gravity = Gravity.CENTER
+
+        val layoutParams: LinearLayout.LayoutParams =
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                .also {
+                    if (mItemTitleArray.size <= mItemMaxCount) {
+                        it.width = 0
+                        it.weight = 1F
+                    } else {
+                        it.marginEnd = mItemSpaceInterval.toInt()
+                    }
+                }
+        mTitleArrayView.addView(textView, layoutParams)
+        textView.setOnClickListener {
+            it as TextView
+            LogUtil.e("item:" + it.text)
+            clickItem(index)
         }
     }
 
@@ -290,13 +431,13 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                 "mDefaultItem: $mDefaultItem clickIndex:  $clickIndex default:$defaultPoint click: $clickPoint from: $fromLeft to: $toLeft")
             ValueAnimator.ofInt(fromLeft, toLeft)
                 .apply {
-                    duration = abs((mAnimationSpeed * (clickIndex - mDefaultItem)))
+                    duration = abs((mItemAnimationSpeed * (clickIndex - mDefaultItem)))
                     addUpdateListener {
                         val left = it.animatedValue as Int
-                        val top = clickPoint.height - mTabIndicatorHeight
+                        val top = (clickPoint.height + mTabIndicatorInterval).toInt()
                         val right = left + clickPoint.textWidth
-                        val bottom = clickPoint.height
-                        mTabIndicator.layout(left, top.toInt(), right, bottom)
+                        val bottom = (top + mTabIndicatorInterval + mTabIndicatorHeight).toInt()
+                        mTabIndicator.layout(left, top, right, bottom)
                     }
                     addListener(onEnd = {
                         mDefaultItem = clickIndex
@@ -326,8 +467,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         val offsetX = (scrollTextStart - currentTextStart) * percent
         LogUtil.e("开始的position:$currentTextStart 滑动的position: $scrollTextStart 偏移值：$offsetX")
         val left = (offsetX + currentTextStart).toInt()
-
-        val top = (currentPosition.height - mTabIndicatorHeight).toInt()
+        val top = (currentPosition.height + mTabIndicatorInterval).toInt()
 
         /**
          * 1: 计算出current 和 scroll 宽度的差值
@@ -337,10 +477,11 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
 
         val rightOffsetX = itemWidthDifferenceValue * percent
         val right = (left + currentPosition.textWidth + rightOffsetX).toInt()
-        val bottom = currentPosition.height
+        val bottom = (top + mTabIndicatorInterval + mTabIndicatorHeight).toInt()
         LogUtil.e("left: $left top :$top right: $right bottom: $bottom")
+
         mTabIndicator.layout(left, top, right, bottom)
     }
-
+    //</editor-fold>
     data class Point(var itemWidth: Int, var textWidth: Int, var height: Int, var left: Int, var right: Int)
 }
