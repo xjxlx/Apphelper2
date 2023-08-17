@@ -186,7 +186,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
         // 总高度 = 文字高度 + 指示器间距 + 指示器高度
         mTotalHeight += (mTabIndicatorInterval + mTabIndicatorHeight).toInt()
 
-        setMeasuredDimension(mTotalWidth.toInt(), mTotalHeight)
+        setMeasuredDimension(ceil(mTotalWidth).toInt(), mTotalHeight)
     }
 
     @SuppressLint("DrawAllocation")
@@ -199,7 +199,6 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
                         root.getChildAt(0)
                             ?.let { titleArray ->
                                 if (titleArray is LinearLayout) {
-                                    // mTitleWidthMap[index] = Point(itemWidth.toInt(), itemHeight, itemView)
                                     for (index in 0..titleArray.size) {
                                         titleArray.getChildAt(index)
                                             ?.let { item ->
@@ -464,7 +463,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
         val currentTextStart = currentPosition.left + (currentPosition.itemWidth - currentPosition.textWidth) / 2
         val offsetX = (scrollTextStart - currentTextStart) * percent
         LogUtil.e("开始的position:$currentTextStart 滑动的position: $scrollTextStart 偏移值：$offsetX")
-        val left = (offsetX + currentTextStart).toInt()
+        val left = ceil(offsetX + currentTextStart).toInt()
         val top = (currentPosition.ItemHeight + mTabIndicatorInterval).toInt()
 
         /**
@@ -472,9 +471,8 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
          * 2：差值 * 百分比 = 具体需要放大的值
          * 3：current的宽度 + 需要放大的值
          */
-
         val rightOffsetX = itemWidthDifferenceValue * percent
-        val right = (left + currentPosition.textWidth + rightOffsetX).toInt()
+        val right = ceil(left + currentPosition.textWidth + rightOffsetX).toInt()
         val bottom = (top + mTabIndicatorInterval + mTabIndicatorHeight).toInt()
         LogUtil.e("left: $left top :$top right: $right bottom: $bottom")
 
