@@ -58,7 +58,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
 
     private var mItemMaxCount = 4
     private var mItemSpaceInterval = ResourcesUtil.dp(30F)
-    private var mItemAnimationMaxDuration = 100
+    private var mItemAnimationMaxDuration = 300
     private var mItemTextSize = 14F
     @ColorInt
     private var mItemColor: Int = Color.BLACK
