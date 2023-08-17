@@ -38,7 +38,7 @@ import kotlin.math.max
  *      3：使用的时候，需要去绑定，用withPager2()就可以一键绑定
  *      4：如果item的个数小于等于4，则会评分整行的宽度，如果大于4，则需要去手动设置每个item之间的间距，默认的间距是30
  */
-class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayout(context, attributeSet) {
+class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(context, attributeSet) {
 
     //<editor-fold desc=" variable  ">
     private var mItemTitleArray: Array<String> = arrayOf()
@@ -239,7 +239,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
      * 设置item固定的个数，如果小于等于这个count，则会评分整个屏幕的宽度，否则就会一个个的从左到右的排列
      * 默认是一行4个
      */
-    fun setItemMaxCount(count: Int): IndicatorView {
+    fun setItemMaxCount(count: Int): com.android.apphelper2.widget.TabLayout {
         this.mItemMaxCount = count
         return this
     }
@@ -248,7 +248,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
      * 设置item之间的间距，适用于item个数大于指定个数的时候
      * 默认是30dp
      */
-    fun setItemInterval(interval: Float): IndicatorView {
+    fun setItemInterval(interval: Float): com.android.apphelper2.widget.TabLayout {
         this.mItemSpaceInterval = interval
         return this
     }
@@ -257,7 +257,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
      * 设置点击item时候，动画的最大持续时长
      * 默认是最大持续1s
      */
-    fun setItemAnimationMaxDuration(duration: Int): IndicatorView {
+    fun setItemAnimationMaxDuration(duration: Int): com.android.apphelper2.widget.TabLayout {
         this.mItemAnimationMaxDuration = duration
         return this
     }
@@ -266,7 +266,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
      * 单个Item的TextSize,设置的时候，因为已经指定了单位是sp，所以只能使用具体的数字，不能使用通过资源获取的dimenRes资源，否则会高度异常
      * 默认是14sp
      */
-    fun setItemSize(size: Float): IndicatorView {
+    fun setItemSize(size: Float): com.android.apphelper2.widget.TabLayout {
         this.mItemTextSize = size
         return this
     }
@@ -275,7 +275,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
      * 单个Item的文字color
      * 默认是黑色
      */
-    fun setItemColor(@ColorInt color: Int): IndicatorView {
+    fun setItemColor(@ColorInt color: Int): com.android.apphelper2.widget.TabLayout {
         this.mItemColor = color
         return this
     }
@@ -284,7 +284,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
      * 单个Item的背景color
      * 默认是白色
      */
-    fun setItemBackgroundColor(@ColorInt color: Int): IndicatorView {
+    fun setItemBackgroundColor(@ColorInt color: Int): com.android.apphelper2.widget.TabLayout {
         this.mItemBackgroundColor = color
         return this
     }
@@ -293,7 +293,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
      * 设置item和指示器之间的间距
      * 默认是10dp
      */
-    fun setItemIndicatorInterval(interval: Float): IndicatorView {
+    fun setItemIndicatorInterval(interval: Float): com.android.apphelper2.widget.TabLayout {
         this.mTabIndicatorInterval = interval
         return this
     }
@@ -302,7 +302,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
      * 指示器的color
      * 默认是和文档颜色相同的颜色
      */
-    fun setTabIndicatorColor(@ColorInt color: Int): IndicatorView {
+    fun setTabIndicatorColor(@ColorInt color: Int): com.android.apphelper2.widget.TabLayout {
         this.mTabIndicatorColor = color
         return this
     }
@@ -311,7 +311,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
      * 指示器的高度
      * 默认是2.5dp
      */
-    fun setTabIndicatorHeight(size: Float): IndicatorView {
+    fun setTabIndicatorHeight(size: Float): com.android.apphelper2.widget.TabLayout {
         this.mTabIndicatorHeight = size
         return this
     }
@@ -322,7 +322,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
      * 3：如果偏移值为正数，则会向两边扩大指定的偏移值，如果偏移值为负数，则会向中心缩小指定的偏移值，则指示器会变小
      * 默认是2dp
      */
-    fun setTabIndicatorOffsetWidth(offset: Float): IndicatorView {
+    fun setTabIndicatorOffsetWidth(offset: Float): com.android.apphelper2.widget.TabLayout {
         this.mTabIndicatorWidthOffset = offset
         return this
     }
@@ -338,7 +338,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
      * 最大限制为10，正常情况下不可能那么大
      */
 
-    fun setTabIndicatorRatioWidth(@FloatRange(from = -0.5, to = 10.0) ratio: Float): IndicatorView {
+    fun setTabIndicatorRatioWidth(@FloatRange(from = -0.5, to = 10.0) ratio: Float): com.android.apphelper2.widget.TabLayout {
         this.mTabIndicatorWidthRatioOffset = ratio
         return this
     }
