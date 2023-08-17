@@ -39,7 +39,7 @@ import kotlin.math.max
 class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayout(context, attributeSet) {
 
     //<editor-fold desc=" variable  ">
-    private lateinit var mItemTitleArray: Array<String>
+    private var mItemTitleArray: Array<String> = arrayOf()
 
     private val mRootView = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
