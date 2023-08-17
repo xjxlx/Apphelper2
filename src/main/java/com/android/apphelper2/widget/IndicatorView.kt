@@ -14,6 +14,7 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.annotation.ColorInt
+import androidx.annotation.FloatRange
 import androidx.core.animation.addListener
 import androidx.core.view.size
 import androidx.fragment.app.FragmentActivity
@@ -76,7 +77,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
     private var mTabIndicatorColor = mItemColor
     private var mTabIndicatorHeight = ResourcesUtil.dp(2.5F)
     private var mTabIndicatorWidthOffset = ResourcesUtil.dp(2F)
-    private var mTabIndicatorWidthRatioOffset = 1F
+    private var mTabIndicatorWidthRatioOffset = 0F
 
     private val mTitleMap = mutableMapOf<Int, Point>()
     private var mDefaultItem = 0
@@ -215,11 +216,23 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
 
                         // tabIndicator layout
                         mTitleMap[mDefaultItem]?.let { item ->
-                            val left = ceil(((item.right - item.left - item.textWidth) / 2) - mTabIndicatorWidthOffset).toInt()
+                            var left = ceil(((item.right - item.left - item.textWidth) / 2) - mTabIndicatorWidthOffset)
                             val top = (item.ItemHeight + mTabIndicatorInterval).toInt()
-                            val right = ceil(left + item.textWidth + mTabIndicatorWidthOffset * 2).toInt()
+                            var right = ceil(left + item.textWidth + mTabIndicatorWidthOffset * 2)
                             val bottom = (top + mTabIndicatorInterval + mTabIndicatorHeight).toInt()
-                            indicator.layout(left, top, right, bottom)
+
+                            if (mTabIndicatorWidthRatioOffset != 0F) {
+                                val ratioWidth = mTabIndicatorWidthRatioOffset * (right - left)
+                                left -= ratioWidth
+                                right += ratioWidth
+                            }
+                            if (left < item.left) {
+                                left = item.left.toFloat()
+                            }
+                            if (right > item.right) {
+                                right = item.right.toFloat()
+                            }
+                            indicator.layout(left.toInt(), top, right.toInt(), bottom)
                         }
                     }
                 }
@@ -322,10 +335,17 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
     }
 
     /**
-     * 设置文字宽度的偏移比例，这个比例是文字本身宽度的比例
-     * 默认比例是1，也就是不做任何放大，如果小于1，则会缩小，如果大于1，则会放大
+     * 1:设置文字宽度的偏移比例，这个比例是文字本身宽度的比例
+     * 2：增加的时候，是左右两侧都增加文字宽度的倍数，例如：value =0.5,则左右都会增加0.5倍，整体就是增加了一倍
+     * 4：减小的时候，是左右两边都开始减小的，例如：减小0.5倍，就是左右两边都会减小0.5倍，则整个item平分的左右两侧都被减掉了，
+     *    这个时候就是不可见的状态，所以，最小的值就是-0.5
+     *
+     * 默认比例是0，也就是不做任何放大，如果为负数，则会缩小，如果是正数，则会放大
+     * 最小是-0.5，则完全不可见
+     * 最大限制为10，正常情况下不可能那么大
      */
-    fun setTabIndicatorRatioWidth(ratio: Float): IndicatorView {
+
+    fun setTabIndicatorRatioWidth(@FloatRange(from = -0.5, to = 10.0) ratio: Float): IndicatorView {
         this.mTabIndicatorWidthRatioOffset = ratio
         return this
     }
@@ -442,11 +462,23 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
                 .apply {
                     duration = abs((mItemAnimationSpeed * (clickIndex - mDefaultItem)))
                     addUpdateListener {
-                        val left = ceil(it.animatedValue as Float - mTabIndicatorWidthOffset).toInt()
+                        var left = ceil(it.animatedValue as Float - mTabIndicatorWidthOffset)
                         val top = (clickPoint.ItemHeight + mTabIndicatorInterval).toInt()
-                        val right = ceil(left + clickPoint.textWidth + mTabIndicatorWidthOffset * 2).toInt()
+                        var right = ceil(left + clickPoint.textWidth + mTabIndicatorWidthOffset * 2)
                         val bottom = (top + mTabIndicatorInterval + mTabIndicatorHeight).toInt()
-                        mTabIndicator.layout(left, top, right, bottom)
+
+                        if (mTabIndicatorWidthRatioOffset != 0F) {
+                            val ratioWidth = mTabIndicatorWidthRatioOffset * (right - left)
+                            left -= ratioWidth
+                            right += ratioWidth
+                        }
+                        if (left < clickPoint.left) {
+                            left = clickPoint.left.toFloat()
+                        }
+                        if (right > clickPoint.right) {
+                            right = clickPoint.right.toFloat()
+                        }
+                        mTabIndicator.layout(left.toInt(), top, right.toInt(), bottom)
                     }
                     addListener(onEnd = {
                         mDefaultItem = clickIndex
@@ -474,7 +506,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
         val currentTextStart = currentPosition.left + (currentPosition.itemWidth - currentPosition.textWidth) / 2
         val offsetX = (scrollTextStart - currentTextStart) * percent
         LogUtil.e("开始的position:$currentTextStart 滑动的position: $scrollTextStart 偏移值：$offsetX")
-        val left = ceil(offsetX + currentTextStart - mTabIndicatorWidthOffset).toInt()
+        var left = ceil(offsetX + currentTextStart - mTabIndicatorWidthOffset)
         val top = (currentPosition.ItemHeight + mTabIndicatorInterval).toInt()
 
         /**
@@ -483,11 +515,16 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
          * 3：current的宽度 + 需要放大的值
          */
         val rightOffsetX = itemWidthDifferenceValue * percent
-        val right = ceil(left + currentPosition.textWidth + rightOffsetX + mTabIndicatorWidthOffset * 2).toInt()
+        var right = ceil(left + currentPosition.textWidth + rightOffsetX + mTabIndicatorWidthOffset * 2)
         val bottom = (top + mTabIndicatorInterval + mTabIndicatorHeight).toInt()
         LogUtil.e("left: $left top :$top right: $right bottom: $bottom")
 
-        mTabIndicator.layout(left, top, right, bottom)
+        if (mTabIndicatorWidthRatioOffset != 0F) {
+            val ratioWidth = mTabIndicatorWidthRatioOffset * (right - left)
+            left -= ratioWidth
+            right += ratioWidth
+        }
+        mTabIndicator.layout(left.toInt(), top, right.toInt(), bottom)
     }
     //</editor-fold>
     data class Point(var itemWidth: Int, var textWidth: Float, var ItemHeight: Int, var left: Int, var right: Int)
