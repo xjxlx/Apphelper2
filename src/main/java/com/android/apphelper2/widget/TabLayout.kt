@@ -153,15 +153,15 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
             mDefaultItem = position
-            clickItem(position)
+           // clickItem(position)
         }
     }
     //</editor-fold>
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        var mTotalWidth = 0F
-        var mTotalHeight = 0
+        var mTotalWidth = measuredWidth
+        var mTotalHeight = 120
         // 遍历求出最大的宽和高
 
         // 第一层view = root
@@ -170,26 +170,28 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                 // title view
                 root.getChildAt(0)
                     ?.let { titleArray ->
+                        mTotalWidth = 0
+                        mTotalHeight = 0
                         if (titleArray is LinearLayout) {
                             for (index in 0 until titleArray.childCount) {
                                 val itemView = titleArray.getChildAt(index)
                                 mTotalWidth += (itemView.measuredWidth)
                                 mTotalHeight = max(mTotalHeight, itemView.measuredHeight)
                             }
-                            mTotalWidth += (mItemSpaceInterval * (titleArray.childCount - 1))
+                            mTotalWidth += (mItemSpaceInterval * (titleArray.childCount - 1)).toInt()
                         }
+
+                        if (mItemTitleArray.size <= mItemMaxCount) {
+                            mTotalWidth = measuredWidth
+                        }
+
+                        // 总高度 = 文字高度 + 指示器间距 + 指示器高度 + padding 高度
+                        mTotalHeight += (mTabIndicatorInterval + mTabIndicatorHeight).toInt()
                     }
             }
         }
 
-        if (mItemTitleArray.size <= mItemMaxCount) {
-            mTotalWidth = measuredWidth.toFloat()
-        }
-
-        // 总高度 = 文字高度 + 指示器间距 + 指示器高度 + padding 高度
-        mTotalHeight += (mTabIndicatorInterval + mTabIndicatorHeight).toInt()
-
-        setMeasuredDimension(ceil(mTotalWidth).toInt(), mTotalHeight)
+        setMeasuredDimension(mTotalWidth, mTotalHeight)
     }
 
     @SuppressLint("DrawAllocation")
