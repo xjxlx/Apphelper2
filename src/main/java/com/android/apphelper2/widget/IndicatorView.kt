@@ -74,7 +74,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
     @ColorInt
     private var mTabIndicatorColor = mItemColor
     private var mTabIndicatorHeight = ResourcesUtil.dp(2.5F)
-    private var mTabIndicatorWidthOffset = 0F
+    private var mTabIndicatorWidthOffset = ResourcesUtil.dp(2F)
 
     private val mTitleMap = mutableMapOf<Int, Point>()
     private var mDefaultItem = 0
@@ -213,9 +213,9 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
 
                         // tabIndicator layout
                         mTitleMap[mDefaultItem]?.let { item ->
-                            val left = ceil((item.right - item.left - item.textWidth) / 2).toInt()
+                            val left = ceil(((item.right - item.left - item.textWidth) / 2) - mTabIndicatorWidthOffset).toInt()
                             val top = (item.ItemHeight + mTabIndicatorInterval).toInt()
-                            val right = ceil(left + item.textWidth).toInt()
+                            val right = ceil(left + item.textWidth + mTabIndicatorWidthOffset * 2).toInt()
                             val bottom = (top + mTabIndicatorInterval + mTabIndicatorHeight).toInt()
                             indicator.layout(left, top, right, bottom)
                         }
@@ -312,7 +312,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
      * 1：指示器的宽度偏移值,默认的情况下，指示器的宽度是和文字的宽度相同的，但是有时候，指示器需要指定宽度，这个时候可以通过设置偏移值去设置宽度
      * 2：默认的指示器宽度和文字宽度相同
      * 3：如果偏移值为正数，则会向两边扩大指定的偏移值，如果偏移值为负数，则会向中心缩小指定的偏移值，则指示器会变小
-     * 默认是0dp
+     * 默认是2dp
      */
     fun setTabIndicatorWidth(offset: Float): IndicatorView {
         this.mTabIndicatorWidthOffset = offset
@@ -431,9 +431,9 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
                 .apply {
                     duration = abs((mItemAnimationSpeed * (clickIndex - mDefaultItem)))
                     addUpdateListener {
-                        val left = ceil(it.animatedValue as Float).toInt()
+                        val left = ceil(it.animatedValue as Float - mTabIndicatorWidthOffset).toInt()
                         val top = (clickPoint.ItemHeight + mTabIndicatorInterval).toInt()
-                        val right = ceil(left + clickPoint.textWidth).toInt()
+                        val right = ceil(left + clickPoint.textWidth + mTabIndicatorWidthOffset * 2).toInt()
                         val bottom = (top + mTabIndicatorInterval + mTabIndicatorHeight).toInt()
                         mTabIndicator.layout(left, top, right, bottom)
                     }
@@ -463,7 +463,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
         val currentTextStart = currentPosition.left + (currentPosition.itemWidth - currentPosition.textWidth) / 2
         val offsetX = (scrollTextStart - currentTextStart) * percent
         LogUtil.e("开始的position:$currentTextStart 滑动的position: $scrollTextStart 偏移值：$offsetX")
-        val left = ceil(offsetX + currentTextStart).toInt()
+        val left = ceil(offsetX + currentTextStart - mTabIndicatorWidthOffset).toInt()
         val top = (currentPosition.ItemHeight + mTabIndicatorInterval).toInt()
 
         /**
@@ -472,7 +472,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
          * 3：current的宽度 + 需要放大的值
          */
         val rightOffsetX = itemWidthDifferenceValue * percent
-        val right = ceil(left + currentPosition.textWidth + rightOffsetX).toInt()
+        val right = ceil(left + currentPosition.textWidth + rightOffsetX + mTabIndicatorWidthOffset * 2).toInt()
         val bottom = (top + mTabIndicatorInterval + mTabIndicatorHeight).toInt()
         LogUtil.e("left: $left top :$top right: $right bottom: $bottom")
 
