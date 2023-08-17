@@ -4,7 +4,6 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
-import android.graphics.Point
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -226,12 +225,6 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
                                 left -= ratioWidth
                                 right += ratioWidth
                             }
-                            if (left < item.left) {
-                                left = item.left.toFloat()
-                            }
-                            if (right > item.right) {
-                                right = item.right.toFloat()
-                            }
                             indicator.layout(left.toInt(), top, right.toInt(), bottom)
                         }
                     }
@@ -415,9 +408,14 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
         textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, mItemTextSize)
         textView.setTextColor(mItemColor)
         textView.text = title
+
+        //  val r = Random.nextInt(0, 255)
+        //  val g = Random.nextInt(0, 255)
+        //  val b = Random.nextInt(0, 255)
+        //  textView.setBackgroundColor(Color.rgb(r, g, b))
+
         textView.setBackgroundColor(mItemBackgroundColor)
         textView.tag = "title - index: $index title:$title"
-
         textView.gravity = Gravity.CENTER
 
         val layoutParams: LinearLayout.LayoutParams =
@@ -471,12 +469,6 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
                             val ratioWidth = mTabIndicatorWidthRatioOffset * (right - left)
                             left -= ratioWidth
                             right += ratioWidth
-                        }
-                        if (left < clickPoint.left) {
-                            left = clickPoint.left.toFloat()
-                        }
-                        if (right > clickPoint.right) {
-                            right = clickPoint.right.toFloat()
                         }
                         mTabIndicator.layout(left.toInt(), top, right.toInt(), bottom)
                     }
