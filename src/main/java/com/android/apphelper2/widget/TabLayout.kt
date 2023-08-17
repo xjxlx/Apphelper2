@@ -176,7 +176,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                             mTotalWidth += (mItemSpaceInterval * (titleArray.childCount - 1)).toInt()
                         }
 
-                        if (mItemTitleArray.size <= mItemMaxCount) {
+                        if (mItemTitleArray.size > mItemMaxCount) {
                             mTotalWidth = measuredWidth
                         }
 
