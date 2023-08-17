@@ -25,6 +25,7 @@ import com.android.common.utils.LogUtil
 import com.android.common.utils.ResourcesUtil
 import com.google.android.material.tabs.TabLayout
 import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.max
 
 /**
@@ -82,7 +83,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
         private var mCurrentPoint: Point? = null
         private var mScrollPoint: Point? = null
         private var mOldPercent = 0F
-        private var mItemWidthDifferenceValue = -1
+        private var mItemWidthDifferenceValue = -1F
         override fun onPageScrollStateChanged(state: Int) {
             super.onPageScrollStateChanged(state)
             when (state) {
@@ -91,7 +92,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
                     mCurrentPoint = null
                     mScrollPoint = null
                     mOldPercent = 0F
-                    mItemWidthDifferenceValue = -1
+                    mItemWidthDifferenceValue = -1F
                 }
                 ViewPager2.SCROLL_STATE_DRAGGING -> {
                     LogUtil.e("scroll", "正在拖动 ！")
@@ -141,7 +142,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
                 }
             }
 
-            if ((mCurrentPoint != null) && (mScrollPoint != null) && (mItemWidthDifferenceValue != -1)) {
+            if ((mCurrentPoint != null) && (mScrollPoint != null) && (mItemWidthDifferenceValue != -1F)) {
                 scrollPosition(positionOffset, mCurrentPoint!!, mScrollPoint!!, mItemWidthDifferenceValue)
             }
         }
@@ -204,9 +205,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
                                             ?.let { item ->
                                                 if (item is TextView) {
                                                     val itemWidth = CustomViewUtil.getTextWidth(item.paint!!, item.text.toString())
-                                                    val itemHeight = item.height
-                                                    mTitleMap[index] =
-                                                        Point(item.width, itemWidth.toInt(), itemHeight, item.left, item.right)
+                                                    mTitleMap[index] = Point(item.width, itemWidth, item.height, item.left, item.right)
                                                 }
                                             }
                                     }
@@ -215,9 +214,9 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
 
                         // tabIndicator layout
                         mTitleMap[mDefaultItem]?.let { item ->
-                            val left = (((item.right - item.left) - item.textWidth) / 2)
-                            val top = (item.height + mTabIndicatorInterval).toInt()
-                            val right = (left + item.textWidth)
+                            val left = ceil((item.right - item.left - item.textWidth) / 2).toInt()
+                            val top = (item.ItemHeight + mTabIndicatorInterval).toInt()
+                            val right = ceil(left + item.textWidth).toInt()
                             val bottom = (top + mTabIndicatorInterval + mTabIndicatorHeight).toInt()
                             indicator.layout(left, top, right, bottom)
                         }
@@ -429,13 +428,13 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
 
             LogUtil.e(
                 "mDefaultItem: $mDefaultItem clickIndex:  $clickIndex default:$defaultPoint click: $clickPoint from: $fromLeft to: $toLeft")
-            ValueAnimator.ofInt(fromLeft, toLeft)
+            ValueAnimator.ofFloat(fromLeft, toLeft)
                 .apply {
                     duration = abs((mItemAnimationSpeed * (clickIndex - mDefaultItem)))
                     addUpdateListener {
-                        val left = it.animatedValue as Int
-                        val top = (clickPoint.height + mTabIndicatorInterval).toInt()
-                        val right = left + clickPoint.textWidth
+                        val left = ceil(it.animatedValue as Float).toInt()
+                        val top = (clickPoint.ItemHeight + mTabIndicatorInterval).toInt()
+                        val right = ceil(left + clickPoint.textWidth).toInt()
                         val bottom = (top + mTabIndicatorInterval + mTabIndicatorHeight).toInt()
                         mTabIndicator.layout(left, top, right, bottom)
                     }
@@ -447,8 +446,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
         }
     }
 
-    private fun scrollPosition(percent: Float, currentPosition: Point, scrollPosition: Point, itemWidthDifferenceValue: Int) {
-
+    private fun scrollPosition(percent: Float, currentPosition: Point, scrollPosition: Point, itemWidthDifferenceValue: Float) {
         // 滑动的时候，计算当前选中的item 和 点击 item 之间的距离，计算出百分比，然后每次滑动就滑动等比的距离
         // 此处要计算出偏移值，偏移值 = 当前item 和下个 item中间的间距
         /**
@@ -467,7 +465,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
         val offsetX = (scrollTextStart - currentTextStart) * percent
         LogUtil.e("开始的position:$currentTextStart 滑动的position: $scrollTextStart 偏移值：$offsetX")
         val left = (offsetX + currentTextStart).toInt()
-        val top = (currentPosition.height + mTabIndicatorInterval).toInt()
+        val top = (currentPosition.ItemHeight + mTabIndicatorInterval).toInt()
 
         /**
          * 1: 计算出current 和 scroll 宽度的差值
@@ -483,5 +481,5 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
         mTabIndicator.layout(left, top, right, bottom)
     }
     //</editor-fold>
-    data class Point(var itemWidth: Int, var textWidth: Int, var height: Int, var left: Int, var right: Int)
+    data class Point(var itemWidth: Int, var textWidth: Float, var ItemHeight: Int, var left: Int, var right: Int)
 }
