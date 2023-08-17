@@ -25,6 +25,9 @@ open abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterfa
             mActivity = it
         }
         mArguments = arguments
+        // mArguments?.let {
+        //    val content = it.getString(KEY)
+        // }
         LogUtil.e("当前页面是：Fragment: " + javaClass.name)
     }
 
@@ -80,4 +83,13 @@ open abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterfa
         return mBinding.root
     }
 
+    // companion object {
+    //     private const val KEY = "content"
+    //     @JvmStatic
+    //     fun newInstance(content: String) = ClueNeedFragment().apply {
+    //         arguments = Bundle().apply {
+    //             putString(KEY, content)
+    //         }
+    //     }
+    // }
 }

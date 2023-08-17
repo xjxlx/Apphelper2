@@ -22,6 +22,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.viewpager2.widget.ViewPager2
 import com.android.apphelper2.utils.CustomViewUtil
+import com.android.common.utils.LogUtil
 import com.android.common.utils.ResourcesUtil
 import kotlin.math.ceil
 import kotlin.math.max
@@ -64,7 +65,8 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     private var mItemColor: Int = Color.BLACK
     @ColorInt
     private var mItemBackgroundColor: Int = Color.WHITE
-    private var mItemPadding = ResourcesUtil.dp(15F)
+    private var mItemPaddingVertical = ResourcesUtil.dp(15F)
+    private var mItemPaddingHorizontal = ResourcesUtil.dp(20F)
 
     private var mTabIndicatorInterval = ResourcesUtil.dp(0F)
     @ColorInt
@@ -149,6 +151,8 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             super.onPageSelected(position)
             mDefaultItem = position
             mSelectorListener?.onSelector(position)
+            LogUtil.e("onPageSelected：$position")
+            clickItem(position)
         }
     }
     //</editor-fold>
@@ -291,8 +295,8 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
      * 设置padding
      * 默认是：15dp
      */
-    fun setItemPadding(padding: Float): TabLayout {
-        this.mItemPadding = padding
+    fun setItemPaddingVertical(padding: Float): TabLayout {
+        this.mItemPaddingVertical = padding
         return this
     }
 
@@ -432,7 +436,12 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         textView.setBackgroundColor(mItemBackgroundColor)
         textView.tag = "title - index: $index title:$title"
         textView.gravity = Gravity.CENTER
-        textView.setPadding(0, mItemPadding.toInt(), 0, mItemPadding.toInt())
+        if (mItemTitleArray.size > mItemMaxCount) {
+            textView.setPadding(mItemPaddingHorizontal.toInt(), mItemPaddingVertical.toInt(), mItemPaddingHorizontal.toInt(),
+                mItemPaddingVertical.toInt())
+        } else {
+            textView.setPadding(0, mItemPaddingVertical.toInt(), 0, mItemPaddingVertical.toInt())
+        }
 
         val layoutParams: LinearLayout.LayoutParams =
             LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -452,6 +461,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     }
 
     private fun clickItem(clickIndex: Int) {
+        LogUtil.e(" onPageSelected ---> clickItem: " + clickIndex + "default: " + mDefaultItem)
         val defaultPoint = mTitleMap[mDefaultItem]
         val clickPoint = mTitleMap[clickIndex]
         if (defaultPoint != null && clickPoint != null) {
