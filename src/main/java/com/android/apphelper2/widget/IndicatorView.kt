@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Point
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -75,6 +76,7 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
     private var mTabIndicatorColor = mItemColor
     private var mTabIndicatorHeight = ResourcesUtil.dp(2.5F)
     private var mTabIndicatorWidthOffset = ResourcesUtil.dp(2F)
+    private var mTabIndicatorWidthRatioOffset = 1F
 
     private val mTitleMap = mutableMapOf<Int, Point>()
     private var mDefaultItem = 0
@@ -314,8 +316,17 @@ class IndicatorView(context: Context, attributeSet: AttributeSet) : RelativeLayo
      * 3：如果偏移值为正数，则会向两边扩大指定的偏移值，如果偏移值为负数，则会向中心缩小指定的偏移值，则指示器会变小
      * 默认是2dp
      */
-    fun setTabIndicatorWidth(offset: Float): IndicatorView {
+    fun setTabIndicatorOffsetWidth(offset: Float): IndicatorView {
         this.mTabIndicatorWidthOffset = offset
+        return this
+    }
+
+    /**
+     * 设置文字宽度的偏移比例，这个比例是文字本身宽度的比例
+     * 默认比例是1，也就是不做任何放大，如果小于1，则会缩小，如果大于1，则会放大
+     */
+    fun setTabIndicatorRatioWidth(ratio: Float): IndicatorView {
+        this.mTabIndicatorWidthRatioOffset = ratio
         return this
     }
 
