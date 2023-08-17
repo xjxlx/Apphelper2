@@ -22,10 +22,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.viewpager2.widget.ViewPager2
 import com.android.apphelper2.utils.CustomViewUtil
-import com.android.common.utils.LogUtil
 import com.android.common.utils.ResourcesUtil
-import com.google.android.material.tabs.TabLayout
-import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.max
 
@@ -61,10 +58,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
 
     private var mItemMaxCount = 4
     private var mItemSpaceInterval = ResourcesUtil.dp(30F)
-    private var mItemAnimationMaxDuration = 1000
-    private val mItemAnimationSpeed: Long by lazy {
-        return@lazy (mItemAnimationMaxDuration / mItemTitleArray.size).toLong()
-    }
+    private var mItemAnimationMaxDuration = 100
     private var mItemTextSize = 14F
     @ColorInt
     private var mItemColor: Int = Color.BLACK
@@ -81,6 +75,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
 
     private val mTitleMap = mutableMapOf<Int, Point>()
     private var mDefaultItem = 0
+    private var mSelectorListener: SelectorListener? = null
 
     private val mPageChangeListener = object : ViewPager2.OnPageChangeCallback() {
         private var mCurrentPoint: Point? = null
@@ -98,7 +93,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                     mItemWidthDifferenceValue = -1F
                 }
                 ViewPager2.SCROLL_STATE_DRAGGING -> {
-                    LogUtil.e("scroll", "正在拖动 ！")
+                    // LogUtil.e("scroll", "正在拖动 ！")
                 }
                 ViewPager2.SCROLL_STATE_SETTLING -> {
                     // LogUtil.e("scroll", "快到结束了！")
@@ -126,11 +121,11 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                  * 3: 真正判断方向的时候，需要取反反向
                  */
                 val isLeft = mOldPercent < positionOffset
-                LogUtil.e("isLeft", isLeft)
+                // LogUtil.e("isLeft", isLeft)
                 mOldPercent = positionOffset
-                LogUtil.e("position: $position positionOffset: $positionOffset positionOffsetPixels: $positionOffsetPixels")
+                // LogUtil.e("position: $position positionOffset: $positionOffset positionOffsetPixels: $positionOffsetPixels")
 
-                LogUtil.e("重新获取方向，当前方向是：$isLeft")
+                // LogUtil.e("重新获取方向，当前方向是：$isLeft")
                 mCurrentPoint = mTitleMap[position]
                 // 需要计算是向左还是向右，向左 计算下一个，向右计算上一个
                 mScrollPoint = if (isLeft) {
@@ -153,7 +148,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
             mDefaultItem = position
-           // clickItem(position)
+            mSelectorListener?.onSelector(position)
         }
     }
     //</editor-fold>
@@ -242,7 +237,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
      * 设置item固定的个数，如果小于等于这个count，则会评分整个屏幕的宽度，否则就会一个个的从左到右的排列
      * 默认是一行4个
      */
-    fun setItemMaxCount(count: Int): com.android.apphelper2.widget.TabLayout {
+    fun setItemMaxCount(count: Int): TabLayout {
         this.mItemMaxCount = count
         return this
     }
@@ -251,16 +246,16 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
      * 设置item之间的间距，适用于item个数大于指定个数的时候
      * 默认是30dp
      */
-    fun setItemInterval(interval: Float): com.android.apphelper2.widget.TabLayout {
+    fun setItemInterval(interval: Float): TabLayout {
         this.mItemSpaceInterval = interval
         return this
     }
 
     /**
      * 设置点击item时候，动画的最大持续时长
-     * 默认是最大持续1s
+     * 默认是最大持续100毫秒
      */
-    fun setItemAnimationMaxDuration(duration: Int): com.android.apphelper2.widget.TabLayout {
+    fun setItemAnimationMaxDuration(duration: Int): TabLayout {
         this.mItemAnimationMaxDuration = duration
         return this
     }
@@ -269,7 +264,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
      * 单个Item的TextSize,设置的时候，因为已经指定了单位是sp，所以只能使用具体的数字，不能使用通过资源获取的dimenRes资源，否则会高度异常
      * 默认是14sp
      */
-    fun setItemSize(size: Float): com.android.apphelper2.widget.TabLayout {
+    fun setItemSize(size: Float): TabLayout {
         this.mItemTextSize = size
         return this
     }
@@ -278,7 +273,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
      * 单个Item的文字color
      * 默认是黑色
      */
-    fun setItemColor(@ColorInt color: Int): com.android.apphelper2.widget.TabLayout {
+    fun setItemColor(@ColorInt color: Int): TabLayout {
         this.mItemColor = color
         return this
     }
@@ -287,7 +282,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
      * 单个Item的背景color
      * 默认是白色
      */
-    fun setItemBackgroundColor(@ColorInt color: Int): com.android.apphelper2.widget.TabLayout {
+    fun setItemBackgroundColor(@ColorInt color: Int): TabLayout {
         this.mItemBackgroundColor = color
         return this
     }
@@ -296,7 +291,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
      * 设置padding
      * 默认是：15dp
      */
-    fun setItemPadding(padding: Float): com.android.apphelper2.widget.TabLayout {
+    fun setItemPadding(padding: Float): TabLayout {
         this.mItemPadding = padding
         return this
     }
@@ -305,7 +300,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
      * 设置item和指示器之间的间距
      * 默认是0dp
      */
-    fun setItemIndicatorInterval(interval: Float): com.android.apphelper2.widget.TabLayout {
+    fun setItemIndicatorInterval(interval: Float): TabLayout {
         this.mTabIndicatorInterval = interval
         return this
     }
@@ -314,7 +309,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
      * 指示器的color
      * 默认是和文档颜色相同的颜色
      */
-    fun setTabIndicatorColor(@ColorInt color: Int): com.android.apphelper2.widget.TabLayout {
+    fun setTabIndicatorColor(@ColorInt color: Int): TabLayout {
         this.mTabIndicatorColor = color
         return this
     }
@@ -323,7 +318,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
      * 指示器的高度
      * 默认是2.5dp
      */
-    fun setTabIndicatorHeight(size: Float): com.android.apphelper2.widget.TabLayout {
+    fun setTabIndicatorHeight(size: Float): TabLayout {
         this.mTabIndicatorHeight = size
         return this
     }
@@ -334,7 +329,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
      * 3：如果偏移值为正数，则会向两边扩大指定的偏移值，如果偏移值为负数，则会向中心缩小指定的偏移值，则指示器会变小
      * 默认是2dp
      */
-    fun setTabIndicatorOffsetWidth(offset: Float): com.android.apphelper2.widget.TabLayout {
+    fun setTabIndicatorOffsetWidth(offset: Float): TabLayout {
         this.mTabIndicatorWidthOffset = offset
         return this
     }
@@ -350,7 +345,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
      * 最大限制为10，正常情况下不可能那么大
      */
 
-    fun setTabIndicatorRatioWidth(@FloatRange(from = -0.5, to = 10.0) ratio: Float): com.android.apphelper2.widget.TabLayout {
+    fun setTabIndicatorRatioWidth(@FloatRange(from = -0.5, to = 10.0) ratio: Float): TabLayout {
         this.mTabIndicatorWidthRatioOffset = ratio
         return this
     }
@@ -359,7 +354,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
      * @param viewPager2 对象
      * @param titleArray title的数组
      */
-    fun withViewPager2(viewPager2: ViewPager2, titleArray: Array<String>) {
+    fun withViewPager2(viewPager2: ViewPager2, titleArray: Array<String>): TabLayout {
         // 1：绑定滑动监听
         viewPager2.registerOnPageChangeCallback(mPageChangeListener)
         val context = viewPager2.context
@@ -376,13 +371,14 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         this.mItemTitleArray = titleArray
         // 2：设置布局
         initView()
+        return this
     }
 
     /**
      * @param viewPager2 viewPager2的对象
      * @param tabLayout TabLayout的对象，这个对象必须是已经设置过Tab的，否则在取值tab的text的时候，会那不到具体的值
      */
-    fun withViewPager2(viewPager2: ViewPager2, tabLayout: TabLayout) {
+    fun withViewPager2(viewPager2: ViewPager2, tabLayout: com.google.android.material.tabs.TabLayout): TabLayout {
         val tabCount = tabLayout.tabCount
         val titleArray: Array<String> = Array(tabCount) { "" }
         for (index in 0 until tabCount) {
@@ -391,7 +387,14 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             }
         }
         withViewPager2(viewPager2, titleArray)
+        return this
     }
+
+    fun setSelectorListener(listener: SelectorListener): TabLayout {
+        this.mSelectorListener = listener
+        return this
+    }
+
     //</editor-fold>
 
     //<editor-fold desc=" private method ">
@@ -443,9 +446,8 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                 }
         mTitleArrayView.addView(textView, layoutParams)
         textView.setOnClickListener {
-            it as TextView
-            LogUtil.e("item:" + it.text)
             clickItem(index)
+            mSelectorListener?.onSelector(index)
         }
     }
 
@@ -467,11 +469,12 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                 }
             }
 
-            LogUtil.e(
-                "mDefaultItem: $mDefaultItem clickIndex:  $clickIndex default:$defaultPoint click: $clickPoint from: $fromLeft to: $toLeft")
+            // LogUtil.e(
+            //     "mDefaultItem: $mDefaultItem clickIndex:  $clickIndex default:$defaultPoint click: $clickPoint from: $fromLeft to: $toLeft")
             ValueAnimator.ofFloat(fromLeft, toLeft)
                 .apply {
-                    duration = abs((mItemAnimationSpeed * (clickIndex - mDefaultItem)))
+                    // duration = abs((mItemAnimationSpeed * (clickIndex - mDefaultItem)))
+                    duration = mItemAnimationMaxDuration.toLong()
                     addUpdateListener {
                         var left = ceil(it.animatedValue as Float - mTabIndicatorWidthOffset)
                         val top = (clickPoint.ItemHeight + mTabIndicatorInterval).toInt()
@@ -510,7 +513,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         val scrollTextStart = scrollPosition.left + (scrollPosition.itemWidth - scrollPosition.textWidth) / 2
         val currentTextStart = currentPosition.left + (currentPosition.itemWidth - currentPosition.textWidth) / 2
         val offsetX = (scrollTextStart - currentTextStart) * percent
-        LogUtil.e("开始的position:$currentTextStart 滑动的position: $scrollTextStart 偏移值：$offsetX")
+        // LogUtil.e("开始的position:$currentTextStart 滑动的position: $scrollTextStart 偏移值：$offsetX")
         var left = ceil(offsetX + currentTextStart - mTabIndicatorWidthOffset)
         val top = (currentPosition.ItemHeight + mTabIndicatorInterval).toInt()
 
@@ -522,7 +525,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         val rightOffsetX = itemWidthDifferenceValue * percent
         var right = ceil(left + currentPosition.textWidth + rightOffsetX + mTabIndicatorWidthOffset * 2)
         val bottom = (top + mTabIndicatorInterval + mTabIndicatorHeight).toInt()
-        LogUtil.e("left: $left top :$top right: $right bottom: $bottom")
+        // LogUtil.e("left: $left top :$top right: $right bottom: $bottom")
 
         if (mTabIndicatorWidthRatioOffset != 0F) {
             val ratioWidth = mTabIndicatorWidthRatioOffset * (right - left)
@@ -533,4 +536,8 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     }
     //</editor-fold>
     data class Point(var itemWidth: Int, var textWidth: Float, var ItemHeight: Int, var left: Int, var right: Int)
+
+    interface SelectorListener {
+        fun onSelector(position: Int)
+    }
 }
