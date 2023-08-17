@@ -70,8 +70,9 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     private var mItemColor: Int = Color.BLACK
     @ColorInt
     private var mItemBackgroundColor: Int = Color.WHITE
+    private var mItemPadding = ResourcesUtil.dp(15F)
 
-    private var mTabIndicatorInterval = ResourcesUtil.dp(10F)
+    private var mTabIndicatorInterval = ResourcesUtil.dp(0F)
     @ColorInt
     private var mTabIndicatorColor = mItemColor
     private var mTabIndicatorHeight = ResourcesUtil.dp(2.5F)
@@ -185,7 +186,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             mTotalWidth = measuredWidth.toFloat()
         }
 
-        // 总高度 = 文字高度 + 指示器间距 + 指示器高度
+        // 总高度 = 文字高度 + 指示器间距 + 指示器高度 + padding 高度
         mTotalHeight += (mTabIndicatorInterval + mTabIndicatorHeight).toInt()
 
         setMeasuredDimension(ceil(mTotalWidth).toInt(), mTotalHeight)
@@ -290,8 +291,17 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     }
 
     /**
+     * 设置padding
+     * 默认是：15dp
+     */
+    fun setItemPadding(padding: Float): com.android.apphelper2.widget.TabLayout {
+        this.mItemPadding = padding
+        return this
+    }
+
+    /**
      * 设置item和指示器之间的间距
-     * 默认是10dp
+     * 默认是0dp
      */
     fun setItemIndicatorInterval(interval: Float): com.android.apphelper2.widget.TabLayout {
         this.mTabIndicatorInterval = interval
@@ -417,6 +427,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
         textView.setBackgroundColor(mItemBackgroundColor)
         textView.tag = "title - index: $index title:$title"
         textView.gravity = Gravity.CENTER
+        textView.setPadding(0, mItemPadding.toInt(), 0, mItemPadding.toInt())
 
         val layoutParams: LinearLayout.LayoutParams =
             LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
