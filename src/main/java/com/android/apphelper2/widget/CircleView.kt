@@ -35,10 +35,10 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
         val typedArray: TypedArray = context.obtainStyledAttributes(attributeSet, R.styleable.CircleView)
 
         // 描边
-        typedArray.getDimension(R.styleable.CircleView_stroke_width, 0F)
+        typedArray.getDimension(R.styleable.CircleView_circle_stroke_width, 0F)
             .also {
                 if (it != 0F) {
-                    val strokeColor = typedArray.getColor(R.styleable.CircleView_stroke_color, 0)
+                    val strokeColor = typedArray.getColor(R.styleable.CircleView_circle_stroke_color, 0)
                     if (strokeColor != 0) {
                         mPaintStroke = Paint().also { paint ->
                             paint.style = Paint.Style.STROKE
@@ -51,10 +51,10 @@ class CircleView(context: Context, attributeSet: AttributeSet) : androidx.appcom
             }
 
         // 模糊
-        typedArray.getDimension(R.styleable.CircleView_blur_width, 0F)
+        typedArray.getDimension(R.styleable.CircleView_circle_blur_width, 0F)
             .also {
                 if (it != 0F) {
-                    val blurColor = typedArray.getColor(R.styleable.CircleView_blur_color, 0)
+                    val blurColor = typedArray.getColor(R.styleable.CircleView_circle_blur_color, 0)
                     if (blurColor != 0) {
                         mPaintBlur = Paint().also { paint ->
                             paint.style = Paint.Style.FILL

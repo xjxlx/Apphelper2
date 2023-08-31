@@ -22,14 +22,14 @@
 
     <declare-styleable name="CircleView">
         <!--【描边的颜色】-->
-        <attr name="stroke_color" format="color" />
+        <attr name="circle_stroke_color" format="color" />
         <!--【描边的宽度】：注意，这个值会根据屏幕去自动转换，这里不能使用dimen/xxx类型的数据，否则数据会异常-->
-        <attr name="stroke_width" format="dimension" />
+        <attr name="circle_stroke_width" format="dimension" />
 
         <!--【最外层模糊的颜色】-->
-        <attr name="blur_color" format="color" />
+        <attr name="circle_blur_color" format="color" />
         <!--【最外层模糊的宽度】：注意，这个值会根据屏幕去自动转换，这里不能使用dimen/xxx类型的数据，否则数据会异常-->
-        <attr name="blur_width" format="dimension" />
+        <attr name="circle_blur_width" format="dimension" />
     </declare-styleable>
 
 </resources>
