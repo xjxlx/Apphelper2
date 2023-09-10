@@ -14,7 +14,6 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
-import androidx.core.animation.addListener
 import androidx.core.view.size
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
@@ -40,6 +39,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
 
     //<editor-fold desc=" variable  ">
     private var mItemTitleArray: Array<String> = arrayOf()
+    private var mViewPager2: ViewPager2? = null
 
     private val mRootView = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
@@ -59,7 +59,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
 
     private var mItemMaxCount = 4
     private var mItemSpaceInterval = ResourcesUtil.dp(30F)
-    private var mItemAnimationMaxDuration = 300
+    private var mItemAnimationMaxDuration = 500
     private var mItemTextSize = 14F
     @ColorInt
     private var mItemColor: Int = Color.BLACK
@@ -78,6 +78,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     private val mTitleMap = mutableMapOf<Int, Point>()
     private var mDefaultItem = 0
     private var mSelectorListener: SelectorListener? = null
+    private var mAnimator: ValueAnimator? = null
 
     private val mPageChangeListener = object : ViewPager2.OnPageChangeCallback() {
         private var mCurrentPoint: Point? = null
@@ -152,7 +153,6 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
             mDefaultItem = position
             mSelectorListener?.onSelector(position)
             LogUtil.e("onPageSelected：$position")
-            clickItem(position)
         }
     }
     //</editor-fold>
@@ -361,6 +361,7 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     fun withViewPager2(viewPager2: ViewPager2, titleArray: Array<String>): TabLayout {
         // 1：绑定滑动监听
         viewPager2.registerOnPageChangeCallback(mPageChangeListener)
+        mViewPager2 = viewPager2
         val context = viewPager2.context
         if (context != null && context is FragmentActivity) {
             context.lifecycle.addObserver(object : LifecycleEventObserver {
@@ -423,45 +424,50 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
     }
 
     private fun addTabItem(index: Int, title: String) {
-        val textView = TextView(context)
-        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, mItemTextSize)
-        textView.setTextColor(mItemColor)
-        textView.text = title
+        mTitleArrayView.addView(TextView(context).also {
+            it.setTextSize(TypedValue.COMPLEX_UNIT_SP, mItemTextSize)
+            it.setTextColor(mItemColor)
+            it.text = title
 
-        //  val r = Random.nextInt(0, 255)
-        //  val g = Random.nextInt(0, 255)
-        //  val b = Random.nextInt(0, 255)
-        //  textView.setBackgroundColor(Color.rgb(r, g, b))
+            //  val r = Random.nextInt(0, 255)
+            //  val g = Random.nextInt(0, 255)
+            //  val b = Random.nextInt(0, 255)
+            //  textView.setBackgroundColor(Color.rgb(r, g, b))
 
-        textView.setBackgroundColor(mItemBackgroundColor)
-        textView.tag = "title - index: $index title:$title"
-        textView.gravity = Gravity.CENTER
-        if (mItemTitleArray.size > mItemMaxCount) {
-            textView.setPadding(mItemPaddingHorizontal.toInt(), mItemPaddingVertical.toInt(), mItemPaddingHorizontal.toInt(),
-                mItemPaddingVertical.toInt())
-        } else {
-            textView.setPadding(0, mItemPaddingVertical.toInt(), 0, mItemPaddingVertical.toInt())
-        }
+            it.setBackgroundColor(mItemBackgroundColor)
+            it.tag = "title - index: $index title:$title"
+            it.gravity = Gravity.CENTER
 
-        val layoutParams: LinearLayout.LayoutParams =
-            LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                .also {
-                    if (mItemTitleArray.size <= mItemMaxCount) {
-                        it.width = 0
-                        it.weight = 1F
-                    } else {
-                        it.marginEnd = mItemSpaceInterval.toInt()
+            if (mItemTitleArray.size > mItemMaxCount) {
+                it.setPadding(mItemPaddingHorizontal.toInt(), mItemPaddingVertical.toInt(), mItemPaddingHorizontal.toInt(),
+                    mItemPaddingVertical.toInt())
+            } else {
+                it.setPadding(0, mItemPaddingVertical.toInt(), 0, mItemPaddingVertical.toInt())
+            }
+
+            // item click listener
+            it.setOnClickListener {
+                if (mAnimator != null) {
+                    if (!mAnimator!!.isRunning) {
+                        clickItem(index)
                     }
+                } else {
+                    clickItem(index)
                 }
-        mTitleArrayView.addView(textView, layoutParams)
-        textView.setOnClickListener {
-            clickItem(index)
-            mSelectorListener?.onSelector(index)
-        }
+            }
+        }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            .also {
+                if (mItemTitleArray.size <= mItemMaxCount) {
+                    it.width = 0
+                    it.weight = 1F
+                } else {
+                    it.marginEnd = mItemSpaceInterval.toInt()
+                }
+            })
     }
 
     private fun clickItem(clickIndex: Int) {
-        LogUtil.e(" onPageSelected ---> clickItem: " + clickIndex + "default: " + mDefaultItem)
+        LogUtil.e(" onPageSelected ---> clickItem: $clickIndex default: $mDefaultItem")
         val defaultPoint = mTitleMap[mDefaultItem]
         val clickPoint = mTitleMap[clickIndex]
         if (defaultPoint != null && clickPoint != null) {
@@ -479,9 +485,12 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                 }
             }
 
+            mAnimator?.cancel()
+            mViewPager2?.currentItem = clickIndex
+
             // LogUtil.e(
             //     "mDefaultItem: $mDefaultItem clickIndex:  $clickIndex default:$defaultPoint click: $clickPoint from: $fromLeft to: $toLeft")
-            ValueAnimator.ofFloat(fromLeft, toLeft)
+            mAnimator = ValueAnimator.ofFloat(fromLeft, toLeft)
                 .apply {
                     // duration = abs((mItemAnimationSpeed * (clickIndex - mDefaultItem)))
                     duration = mItemAnimationMaxDuration.toLong()
@@ -498,9 +507,6 @@ class TabLayout(context: Context, attributeSet: AttributeSet) : RelativeLayout(c
                         }
                         mTabIndicator.layout(left.toInt(), top, right.toInt(), bottom)
                     }
-                    addListener(onEnd = {
-                        mDefaultItem = clickIndex
-                    })
                     start()
                 }
         }
