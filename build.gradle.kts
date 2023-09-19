@@ -1,6 +1,6 @@
-plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+@Suppress("DSL_SCOPE_VIOLATION") plugins {
+    alias(libs.plugins.org.jetbrains.kotlin.android)
+    alias(libs.plugins.com.android.library)
 }
 
 android {
