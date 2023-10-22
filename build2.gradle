@@ -4,9 +4,7 @@ plugins {
 }
 
 android {
-    compileSdk = Config.compileSdk
     defaultConfig {
-        minSdk = Config.minSdk
         consumerProguardFiles "consumer-rules.pro"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
