@@ -1,7 +1,6 @@
 @Suppress("DSL_SCOPE_VIOLATION") plugins {
     alias(libs.plugins.org.jetbrains.kotlin.android)
     alias(libs.plugins.com.android.library)
-    id("io.github.xjxlx.catalog")
 }
 
 android {
@@ -35,9 +34,9 @@ android {
 }
 
 dependencies {
-    implementation(libs.appcompat)
+    implementation(libs.androidx.appcompat)
     implementation(libs.core.ktx)
-    implementation(libs.constraintlayout)
+    implementation(libs.androidx.constraintlayout)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.recyclerview)

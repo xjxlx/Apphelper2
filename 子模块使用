@@ -7,3 +7,24 @@
 
 3：更新
     git submodule update
+
+
+
+    git submodule add -b master git@github.com:xjxlx/pluginConfig.git common
+
+    git submodule add -b master git@github.com:xjxlx/pluginUtils.git utils
+
+
+// 1：初始化 拉取
+git submodule update  --init  --remote --recursive
+    update :更新
+    --init :初始化
+    --remote :从远端更新
+    --recursive ：循环更新
+
+
+// 3：切换到master 分支
+    git submodule foreach --recursive "git checkout master"
+
+// 2: 更新
+    git submodule foreach "git pull origin master"
