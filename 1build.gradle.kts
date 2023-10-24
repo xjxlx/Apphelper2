@@ -1,3 +1,6 @@
+import Config.compileSdk
+import Config.minSdk
+
 @Suppress("DSL_SCOPE_VIOLATION") plugins {
     alias(libs.plugins.org.jetbrains.kotlin.android)
     alias(libs.plugins.com.android.library)
