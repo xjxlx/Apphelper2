@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.TypedArray
+import android.os.Build
 import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -13,6 +14,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.view.forEach
 import androidx.core.view.get
@@ -30,13 +32,13 @@ class BottomNavigationView constructor(private val mContext: Context, attSet: At
     private var mItemBackgroundColor = 0
     private var mShowLineFlag = false
 
-    private val mLineHeight = ResourcesUtil.getDimension(mContext, com.apphelper.demens.R.dimen.dp_1)
+    private val mLineHeight = ResourcesUtil.getDimension(mContext, R.dimen.dp_1)
 
     private var mIconColor: ColorStateList? = null
-    private var mIconSize = ResourcesUtil.getDimension(mContext, com.apphelper.demens.R.dimen.dp_10)
+    private var mIconSize = ResourcesUtil.getDimension(mContext, R.dimen.dp_10)
 
     private var mTextColor: ColorStateList? = null
-    private var mTextSize = ResourcesUtil.getDimension(mContext, com.apphelper.demens.R.dimen.dp_5)
+    private var mTextSize = ResourcesUtil.getDimension(mContext, R.dimen.dp_5)
 
     private var mPaddingTop: Float = 0F
     private var mInterval: Float = 0F
@@ -114,6 +116,7 @@ class BottomNavigationView constructor(private val mContext: Context, attSet: At
         typedArray.recycle()
     }
 
+    @RequiresApi(Build.VERSION_CODES.CUPCAKE)
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
 
@@ -211,6 +214,7 @@ class BottomNavigationView constructor(private val mContext: Context, attSet: At
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun addItemView(index: Int, menu: MenuBuilder) {
         val itemId = menu[index].itemId
         val title = menu[index].title
