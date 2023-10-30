@@ -33,9 +33,9 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.appcompat)
+    implementation(libs.appcompat)
     implementation(libs.core.ktx)
-    implementation(libs.androidx.constraintlayout)
+    implementation(libs.constraintlayout)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.recyclerview)
