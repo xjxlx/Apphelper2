@@ -6,7 +6,6 @@ plugins {
 }
 
 android {
-    namespace = "com.android.apphelper2"
     compileSdk = libs.versions.compileSdks.get().toInt()
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()
