@@ -11,7 +11,7 @@ import androidx.viewbinding.ViewBinding
 import com.android.apphelper2.interfaces.UiInterface
 import com.android.common.utils.LogUtil
 
-open abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterface<T> {
+abstract class BaseBindingFragment<T : ViewBinding> : Fragment(), UiInterface<T> {
 
     lateinit var mFragment: Fragment
     lateinit var mActivity: FragmentActivity

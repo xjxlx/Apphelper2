@@ -128,7 +128,7 @@ abstract class BaseRecycleViewFramework<T, E : BaseVH> : RecyclerView.Adapter<Ba
         }
     }
 
-    fun <R : Throwable> setList(error: R) {
+    fun setList() {
         mViewType = ViewType.TYPE_ERROR
         notifyDataSetChanged()
     }

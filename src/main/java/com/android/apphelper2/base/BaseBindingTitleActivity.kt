@@ -6,7 +6,7 @@ import androidx.viewbinding.ViewBinding
 import com.android.apphelper2.databinding.BaseTitlePageBinding
 import com.android.apphelper2.interfaces.TitleInterface
 
-open abstract class BaseBindingTitleActivity<T : ViewBinding> : BaseBindingActivity<T>(), TitleInterface {
+abstract class BaseBindingTitleActivity<T : ViewBinding> : BaseBindingActivity<T>(), TitleInterface {
 
     private var mBaseTitlePageBinding: BaseTitlePageBinding? = null
     var autoFinish = true
@@ -40,7 +40,7 @@ open abstract class BaseBindingTitleActivity<T : ViewBinding> : BaseBindingActiv
 
     private fun initTitle(binding: BaseTitlePageBinding) {
         val titleContent = getTitleContent()
-        binding.baseTitle.tvBaseTitle.text = titleContent ?: ""
+        binding.baseTitle.tvBaseTitle.text = titleContent
     }
 
     fun goBack(listener: View.OnClickListener? = null) {

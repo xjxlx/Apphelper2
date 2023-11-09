@@ -13,7 +13,7 @@ import com.android.common.utils.ActivityManager
 import com.android.common.utils.LogUtil
 import com.android.common.utils.statusBar.StatusBarUtil
 
-open abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), UiInterface<T> {
+abstract class BaseBindingActivity<T : ViewBinding> : AppCompatActivity(), UiInterface<T> {
 
     lateinit var mBinding: T
     lateinit var mActivity: FragmentActivity
