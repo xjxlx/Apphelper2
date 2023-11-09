@@ -6,7 +6,9 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
+import android.os.Build
 import android.text.TextUtils
+import androidx.annotation.RequiresApi
 import com.android.apphelper2.app.AppHelper2
 import com.android.common.utils.LogUtil
 import kotlinx.coroutines.CoroutineScope
@@ -62,6 +64,7 @@ class NetworkUtil private constructor() {
         }
 
         // called the method when the network changes
+        @RequiresApi(Build.VERSION_CODES.Q)
         override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
             super.onCapabilitiesChanged(network, networkCapabilities)
 

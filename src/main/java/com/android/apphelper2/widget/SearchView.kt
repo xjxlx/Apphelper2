@@ -283,7 +283,7 @@ class SearchView(private val context: Context, private val attributeSet: Attribu
             })
 
             // 监听按键
-            it.setOnKeyListener { v, keyCode, event ->
+            it.setOnKeyListener { _, keyCode, event ->
                 if (event.action == KeyEvent.ACTION_DOWN) {
                     if (keyCode == KeyEvent.KEYCODE_SEARCH || keyCode == KeyEvent.KEYCODE_ENTER) {
                         mSearchListener?.search(mSearchContent)
