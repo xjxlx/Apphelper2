@@ -3,7 +3,7 @@ package com.android.apphelper2.app
 import android.app.Application
 import com.android.apphelper2.BuildConfig
 import com.android.apphelper2.R
-import com.android.common.app.CommonManager
+import com.android.common.app.ApplicationManager
 
 object AppHelper2 {
 
@@ -25,7 +25,7 @@ object AppHelper2 {
         }
 
         // init common
-        CommonManager.init(app, isDebug, mPackageName)
+        ApplicationManager.init(app, isDebug, mPackageName)
     }
 
     fun checkRegister() {
