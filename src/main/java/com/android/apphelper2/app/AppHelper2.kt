@@ -25,7 +25,7 @@ object AppHelper2 {
         }
 
         // init common
-        ApplicationManager.init(app, isDebug, mPackageName)
+        ApplicationManager.init(app)
     }
 
     fun checkRegister() {
