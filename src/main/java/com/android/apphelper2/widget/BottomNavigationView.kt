@@ -237,7 +237,7 @@ class BottomNavigationView constructor(private val mContext: Context, attSet: At
             // add title
             if (!TextUtils.isEmpty(title)) {
                 root.addView(TextView(mContext).also { text ->
-                    text.text = title.trim()
+                    text.text = title?.trim()
                     text.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTextSize)
                     mTextColor?.let {
                         text.setTextColor(it)
