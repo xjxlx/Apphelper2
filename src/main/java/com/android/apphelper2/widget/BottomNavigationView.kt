@@ -49,9 +49,7 @@ class BottomNavigationView constructor(private val mContext: Context, attSet: At
 
     init {
         this.orientation = VERTICAL
-
-        val typedArray: TypedArray = context.obtainStyledAttributes(attSet, R.styleable.BottomNavigationView)
-
+         val typedArray: TypedArray = context.obtainStyledAttributes(attSet, R.styleable.BottomNavigationView)
         // item background color
         mItemBackgroundColor = typedArray.getColor(R.styleable.BottomNavigationView_navigation_itemBackgroundColor, 0)
 
