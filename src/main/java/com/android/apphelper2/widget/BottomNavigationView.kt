@@ -32,13 +32,13 @@ class BottomNavigationView constructor(private val mContext: Context, attSet: At
     private var mItemBackgroundColor = 0
     private var mShowLineFlag = false
 
-    private val mLineHeight = ResourcesUtil.getDimension(mContext, com.apphelper.dimens.R.dimen.dp_1)
+    private val mLineHeight = ResourcesUtil.getDimension(mContext, com.android.dimens.R.dimen.dp_1)
 
     private var mIconColor: ColorStateList? = null
-    private var mIconSize = ResourcesUtil.getDimension(mContext, com.apphelper.dimens.R.dimen.dp_10)
+    private var mIconSize = ResourcesUtil.getDimension(mContext, com.android.dimens.R.dimen.dp_10)
 
     private var mTextColor: ColorStateList? = null
-    private var mTextSize = ResourcesUtil.getDimension(mContext, com.apphelper.dimens.R.dimen.dp_5)
+    private var mTextSize = ResourcesUtil.getDimension(mContext, com.android.dimens.R.dimen.dp_5)
 
     private var mPaddingTop: Float = 0F
     private var mInterval: Float = 0F
@@ -48,6 +48,7 @@ class BottomNavigationView constructor(private val mContext: Context, attSet: At
     private var currentPosition = 0
 
     init {
+
         this.orientation = VERTICAL
          val typedArray: TypedArray = context.obtainStyledAttributes(attSet, R.styleable.BottomNavigationView)
         // item background color
