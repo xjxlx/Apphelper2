@@ -6,7 +6,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.animation.addListener
-import com.android.apphelper2.interfaces.AnimationListener
+import com.android.common.interfaces.AnimationListener
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.common.utils.LogUtil
 import com.android.common.utils.ResourcesUtil

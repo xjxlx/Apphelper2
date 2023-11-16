@@ -8,7 +8,7 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.core.animation.addListener
 import androidx.core.graphics.ColorUtils
-import com.android.apphelper2.interfaces.AnimationListener
+import com.android.common.interfaces.AnimationListener
 import com.android.apphelper2.utils.CustomViewUtil
 import com.android.apphelper2.utils.CustomViewUtil.getBaseLine
 import com.android.apphelper2.utils.CustomViewUtil.getTextWidth
